@@ -38,6 +38,7 @@ export function useInscricao(edital) {
   const [cpf, setCpf] = useState('')
   const [inscricao, setInscricao] = useState(null)
   const [candidato, setCandidato] = useState(null)
+  const [inscricaoHistorico, setInscricaoHistorico] = useState(null)
   const [dadosPessoais, setDadosPessoais] = useState(initialDadosPessoais)
   const [dadosComplementares, setDadosComplementares] = useState(initialDadosComplementares)
   const [projetoPesquisa, setProjetoPesquisa] = useState(initialProjetoPesquisa)
@@ -91,13 +92,19 @@ export function useInscricao(edital) {
       if (!edital) throw new Error('Nenhum edital vigente encontrado.')
       setCpf(cpfInformado)
 
-      const inscricaoExistente = await inscricaoService.findByCpfEdital(cpfInformado, edital.id)
-      const candidatoExistente = await candidatoService.findByCpf(cpfInformado)
+      const [inscricaoExistente, candidatoExistente] = await Promise.all([
+        inscricaoService.findByCpfEdital(cpfInformado, edital.id),
+        candidatoService.findByCpf(cpfInformado),
+      ])
 
       if (inscricaoExistente) {
         setInscricao(inscricaoExistente)
         carregarDadosExistentes(inscricaoExistente, candidatoExistente)
+      } else if (candidatoExistente) {
+        const maisRecente = await inscricaoService.findMaisRecentePorCpf(cpfInformado).catch(() => null)
+        setInscricaoHistorico(maisRecente)
       }
+
       if (candidatoExistente) {
         setCandidato(candidatoExistente)
       }
@@ -162,12 +169,12 @@ export function useInscricao(edital) {
         setCandidato(candExistente)
       }
 
-      if (inscricaoAnterior?.dadosComplementares) {
-        const dc = inscricaoAnterior.dadosComplementares
+      const fonteDc = inscricaoAnterior?.dadosComplementares ?? inscricaoHistorico?.dadosComplementares
+      if (fonteDc) {
         setDadosComplementares({
-          graduacao1: dc.graduacao1 ?? { curso: '', instituicao: '', anoConclusao: '' },
-          graduacao2: dc.graduacao2 ?? { curso: '', instituicao: '', anoConclusao: '' },
-          ocupacaoProfissional: dc.ocupacaoProfissional ?? { instituicao: '', cargo: '', telefone: '' },
+          graduacao1: fonteDc.graduacao1 ?? { curso: '', instituicao: '', anoConclusao: '' },
+          graduacao2: fonteDc.graduacao2 ?? { curso: '', instituicao: '', anoConclusao: '' },
+          ocupacaoProfissional: fonteDc.ocupacaoProfissional ?? { instituicao: '', cargo: '', telefone: '' },
         })
       } else {
         setDadosComplementares(initialDadosComplementares)
@@ -177,7 +184,7 @@ export function useInscricao(edital) {
       setInscricao(null)
       setActiveStep(1)
     },
-    [edital],
+    [edital, inscricaoHistorico],
   )
 
   const salvarEtapa2 = useCallback(async () => {
@@ -277,6 +284,7 @@ export function useInscricao(edital) {
     setCpf('')
     setInscricao(null)
     setCandidato(null)
+    setInscricaoHistorico(null)
     setDadosPessoais(initialDadosPessoais)
     setDadosComplementares(initialDadosComplementares)
     setProjetoPesquisa(initialProjetoPesquisa)

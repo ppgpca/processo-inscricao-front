@@ -7,6 +7,7 @@ import {
   CircularProgress,
   Divider,
   LinearProgress,
+  Link,
   Paper,
   Snackbar,
   Step,
@@ -215,7 +216,9 @@ export default function InscricaoStepper() {
           </Typography>
           <Alert severity="info" sx={{ textAlign: 'left', mb: 3 }}>
             Guarde o número da sua inscrição. Você pode acompanhar o resultado pelo{' '}
-            <strong>edital nº {edital?.numero}</strong>.
+            <Link href={edital?.urlEditalPdf} target="_blank" rel="noopener noreferrer" fontWeight={700} sx={{ color: '#f5c842', '&:hover': { color: '#ffe680' } }}>
+              edital nº {edital?.numero}
+            </Link>.
           </Alert>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button
@@ -236,7 +239,11 @@ export default function InscricaoStepper() {
     <Box sx={{ width: '100%' }}>
       {edital && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          <strong>{edital.titulo}</strong> — Edital nº {edital.numero} ({edital.ano}) | Inscrições
+          <strong>{edital.titulo}</strong> —{' '}
+          <Link href={edital.urlEditalPdf} target="_blank" rel="noopener noreferrer" fontWeight={700} sx={{ color: '#f5c842', '&:hover': { color: '#ffe680' } }}>
+            Edital nº {edital.numero} ({edital.ano})
+          </Link>{' '}
+          | Inscrições
           até{' '}
           {new Date(edital.dataFimInscricao).toLocaleDateString('pt-BR', {
             day: '2-digit',

@@ -32,6 +32,7 @@ export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarIn
   const [erro, setErro] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [confirmNovaOpen, setConfirmNovaOpen] = useState(false)
+  const [confirmNumeroInscricao, setConfirmNumeroInscricao] = useState('')
   const [inscricaoEncontrada, setInscricaoEncontrada] = useState(null)
   const [candidatoEncontrado, setCandidatoEncontrado] = useState(null)
 
@@ -92,13 +93,23 @@ export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarIn
 
   const handleSolicitarNovaInscricao = () => {
     setModalOpen(false)
+    setConfirmNumeroInscricao('')
     setConfirmNovaOpen(true)
+  }
+
+  const handleCancelarNovaInscricao = () => {
+    setConfirmNovaOpen(false)
+    setConfirmNumeroInscricao('')
   }
 
   const handleConfirmarNovaInscricao = () => {
     setConfirmNovaOpen(false)
+    setConfirmNumeroInscricao('')
     onIniciarNova(inscricaoEncontrada, candidatoEncontrado)
   }
+
+  const numeroInscricaoConfirmadoCorreto =
+    confirmNumeroInscricao.trim() === String(inscricaoEncontrada?.id ?? '')
 
   const finalizada = inscricaoEncontrada ? isInscricaoFinalizada(inscricaoEncontrada) : false
 
@@ -118,7 +129,7 @@ export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarIn
           value={cpf}
           onChange={(e) => setCpf(formatarCpf(e.target.value))}
           placeholder="000.000.000-00"
-          inputProps={{ maxLength: 14 }}
+          slotProps={{ htmlInput: { maxLength: 14 } }}
           error={!!erro}
           helperText={erro}
           sx={{ mb: 3 }}
@@ -207,19 +218,43 @@ export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarIn
       </Dialog>
 
       {/* Confirmação para nova inscrição */}
-      <Dialog open={confirmNovaOpen} onClose={() => setConfirmNovaOpen(false)} maxWidth="xs" fullWidth>
+      <Dialog open={confirmNovaOpen} onClose={handleCancelarNovaInscricao} maxWidth="xs" fullWidth>
         <DialogTitle>Confirmar nova inscrição</DialogTitle>
         <DialogContent>
-          <Alert severity="warning">
-            A inscrição atual será <strong>desativada</strong> e você precisará preencher os
-            dados novamente. Esta ação não pode ser desfeita.
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            A inscrição <strong>nº {inscricaoEncontrada?.id}</strong> será{' '}
+            <strong>desativada</strong> e você precisará preencher os dados novamente.
+            Esta ação não pode ser desfeita.
           </Alert>
+          <DialogContentText sx={{ mb: 2 }}>
+            Para confirmar, digite o <strong>número da sua inscrição atual</strong> no campo abaixo:
+          </DialogContentText>
+          <TextField
+            fullWidth
+            label="Número da inscrição atual"
+            placeholder={String(inscricaoEncontrada?.id ?? '')}
+            value={confirmNumeroInscricao}
+            onChange={(e) => setConfirmNumeroInscricao(e.target.value)}
+            error={confirmNumeroInscricao.trim() !== '' && !numeroInscricaoConfirmadoCorreto}
+            helperText={
+              confirmNumeroInscricao.trim() !== '' && !numeroInscricaoConfirmadoCorreto
+                ? 'Número de inscrição incorreto'
+                : ' '
+            }
+            autoFocus
+            inputProps={{ inputMode: 'numeric' }}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmNovaOpen(false)} color="inherit">
+          <Button onClick={handleCancelarNovaInscricao} color="inherit">
             Cancelar
           </Button>
-          <Button onClick={handleConfirmarNovaInscricao} variant="contained" color="warning">
+          <Button
+            onClick={handleConfirmarNovaInscricao}
+            variant="contained"
+            color="warning"
+            disabled={!numeroInscricaoConfirmadoCorreto}
+          >
             Confirmar nova inscrição
           </Button>
         </DialogActions>

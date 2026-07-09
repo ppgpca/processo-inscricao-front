@@ -183,6 +183,7 @@ export default function EtapaDocumentos({ idInscricao, tiposDocumento, onDocumen
                   }
                 >
                   <ListItemText
+                    slotProps={{ primary: { component: 'div' }, secondary: { component: 'div' } }}
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                         <Typography variant="body1">

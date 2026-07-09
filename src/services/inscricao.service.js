@@ -18,6 +18,16 @@ export const inscricaoService = {
     return res.data
   },
 
+  async findMaisRecentePorCpf(cpf) {
+    try {
+      const res = await axiosInstance.get('/inscricoes/mais-recente', { params: { cpf } })
+      return res.data
+    } catch (err) {
+      if (err?.response?.status === 404) return null
+      throw err
+    }
+  },
+
   async desativar(id) {
     await axiosInstance.put(`/inscricoes/${id}/desativar`)
   },

@@ -31,10 +31,10 @@ function formatCep(valor) {
 
 export default function EtapaDadosPessoais({ dados, onChange, onConfirmValidChange }) {
   const [emailTouched, setEmailTouched] = useState(false)
-  const [emailConfirm, setEmailConfirm] = useState('')
+  const [emailConfirm, setEmailConfirm] = useState(dados.email ?? '')
   const [emailConfirmTouched, setEmailConfirmTouched] = useState(false)
   const [email2Touched, setEmail2Touched] = useState(false)
-  const [email2Confirm, setEmail2Confirm] = useState('')
+  const [email2Confirm, setEmail2Confirm] = useState(dados.email2 ?? '')
   const [email2ConfirmTouched, setEmail2ConfirmTouched] = useState(false)
 
   const handleChange = (field) => (e) => {

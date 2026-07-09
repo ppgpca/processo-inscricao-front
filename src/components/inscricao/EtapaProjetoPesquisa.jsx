@@ -86,7 +86,7 @@ export default function EtapaProjetoPesquisa({ dados, onChange }) {
 
         <Grid size={12}>
           <Alert severity="info" sx={{ mb: 2 }}>
-            Marque abaixo caso deseje concorrer a vagas reservadas. A comprovação deverá ser
+            Marque abaixo caso deseje concorrer a vagas reservadas conforme o Edital. A comprovação deverá ser
             apresentada mediante documentação.
           </Alert>
           <FormControl component="fieldset">
