@@ -137,7 +137,9 @@ export interface InscritoPorLinhaPesquisa {
 export interface InscritoDashboard {
 	cpf: string;
 	linhaPesquisa: string;
+	siglaLinhaPesquisa: string;
 	anteprojeto: string;
+	palavrasChave: string[];
 }
 
 export interface DadosDashboard {

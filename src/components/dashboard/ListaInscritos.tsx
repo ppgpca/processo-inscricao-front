@@ -1,20 +1,8 @@
 import { useTheme } from "@mui/material/styles";
-import {
-	Box,
-	Card,
-	CardContent,
-	Chip,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TablePagination,
-	TableRow,
-	Typography,
-} from "@mui/material";
-import { useState } from "react";
+import { Box, Card, CardContent, Chip, Typography } from "@mui/material";
+import type { GridColDef } from "@mui/x-data-grid";
 import type { InscritoDashboard } from "../../types";
+import CustomDataGrid from "../customs/CustomDataGrid";
 
 interface Props {
 	dados: InscritoDashboard[];
@@ -27,15 +15,81 @@ function mascaraCpf(cpf: string): string {
 	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 9)}-**`;
 }
 
+const colunas: GridColDef[] = [
+	{
+		field: "cpf",
+		headerName: "CPF",
+		width: 160,
+		renderCell: (params) => (
+			<span style={{ fontFamily: "monospace", fontSize: 13, whiteSpace: "nowrap" }}>
+				{mascaraCpf(params.value as string)}
+			</span>
+		),
+	},
+	{
+		field: "siglaLinhaPesquisa",
+		headerName: "Linha de pesquisa",
+		width: 160,
+		renderCell: (params) =>
+			params.value || (
+				<Typography variant="body2" color="text.disabled" sx={{ fontStyle: "italic" }}>
+					Não informada
+				</Typography>
+			),
+	},
+	{
+		field: "anteprojeto",
+		headerName: "Título do anteprojeto",
+		flex: 2,
+		minWidth: 200,
+		renderCell: (params) =>
+			params.value || (
+				<Typography variant="body2" color="text.disabled" sx={{ fontStyle: "italic" }}>
+					Não informado
+				</Typography>
+			),
+	},
+	{
+		field: "palavrasChave",
+		headerName: "Palavras-chave",
+		flex: 2,
+		minWidth: 200,
+		sortable: false,
+		renderCell: (params) => {
+			const palavras: string[] = params.value ?? [];
+			if (palavras.length === 0) {
+				return (
+					<Typography variant="body2" color="text.disabled" sx={{ fontStyle: "italic" }}>
+						Nenhuma
+					</Typography>
+				);
+			}
+			return (
+				<Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, py: 0.5 }}>
+					{palavras.map((palavra) => (
+						<Chip key={palavra} label={palavra} size="small" />
+					))}
+				</Box>
+			);
+		},
+	},
+];
+
+const dataGridBgSx = (bgColor: string) => ({
+	backgroundColor: bgColor,
+	"& .MuiDataGrid-columnHeaders": { backgroundColor: bgColor },
+	"& .MuiDataGrid-columnHeader": { backgroundColor: bgColor },
+	"& .MuiDataGrid-columnHeadersInner": { backgroundColor: bgColor },
+	"& .MuiDataGrid-scrollbarFiller": { backgroundColor: bgColor },
+	"& .MuiDataGrid-footerContainer": { backgroundColor: bgColor },
+	"& .MuiDataGrid-row": { backgroundColor: bgColor },
+	"& .MuiDataGrid-filler": { backgroundColor: bgColor },
+});
+
 export default function ListaInscritos({ dados }: Props) {
 	const theme = useTheme();
-	const [pagina, setPagina] = useState(0);
-	const [linhasPorPagina, setLinhasPorPagina] = useState(10);
 
-	const paginados = dados.slice(
-		pagina * linhasPorPagina,
-		pagina * linhasPorPagina + linhasPorPagina,
-	);
+	const rows = dados.map((inscrito, index) => ({ id: index, ...inscrito }));
 
 	return (
 		<Card
@@ -75,114 +129,19 @@ export default function ListaInscritos({ dados }: Props) {
 						Nenhum inscrito encontrado
 					</Typography>
 				) : (
-					<>
-						<TableContainer>
-							<Table size="small">
-								<TableHead>
-									<TableRow>
-										<TableCell
-											sx={{
-												fontWeight: 600,
-												color: theme.palette.text.secondary,
-												fontSize: 12,
-											}}
-										>
-											CPF
-										</TableCell>
-										<TableCell
-											sx={{
-												fontWeight: 600,
-												color: theme.palette.text.secondary,
-												fontSize: 12,
-											}}
-										>
-											Linha de pesquisa
-										</TableCell>
-										<TableCell
-											sx={{
-												fontWeight: 600,
-												color: theme.palette.text.secondary,
-												fontSize: 12,
-											}}
-										>
-											Título do anteprojeto
-										</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{paginados.map((inscrito, index) => (
-										<TableRow
-											key={index}
-											sx={{
-												"&:hover": {
-													backgroundColor: theme.palette.action.hover,
-												},
-											}}
-										>
-											<TableCell
-												sx={{
-													fontFamily: "monospace",
-													fontSize: 13,
-													whiteSpace: "nowrap",
-												}}
-											>
-												{mascaraCpf(inscrito.cpf)}
-											</TableCell>
-											<TableCell sx={{ fontSize: 13 }}>
-												{inscrito.linhaPesquisa || (
-													<Typography
-														component="span"
-														variant="body2"
-														color="text.disabled"
-														fontStyle="italic"
-													>
-														Não informada
-													</Typography>
-												)}
-											</TableCell>
-											<TableCell
-												sx={{
-													fontSize: 13,
-													maxWidth: 400,
-													overflow: "hidden",
-													textOverflow: "ellipsis",
-													whiteSpace: "nowrap",
-												}}
-											>
-												{inscrito.anteprojeto || (
-													<Typography
-														component="span"
-														variant="body2"
-														color="text.disabled"
-														fontStyle="italic"
-													>
-														Não informado
-													</Typography>
-												)}
-											</TableCell>
-										</TableRow>
-									))}
-								</TableBody>
-							</Table>
-						</TableContainer>
-						<TablePagination
-							component="div"
-							count={dados.length}
-							page={pagina}
-							onPageChange={(_, novaPagina) => setPagina(novaPagina)}
-							rowsPerPage={linhasPorPagina}
-							onRowsPerPageChange={(e) => {
-								setLinhasPorPagina(Number(e.target.value));
-								setPagina(0);
+					<Box sx={{ flex: 1, minHeight: 300 }}>
+						<CustomDataGrid
+							rows={rows}
+							columns={colunas}
+							pageSize={10}
+							getRowId={(row) => row.id}
+							getRowHeight={() => "auto"}
+							sx={{
+								...dataGridBgSx(theme.palette.background.default),
+								"& .MuiDataGrid-cell": { alignItems: "flex-start", py: 1 },
 							}}
-							rowsPerPageOptions={[5, 10, 25]}
-							labelRowsPerPage="Linhas por página:"
-							labelDisplayedRows={({ from, to, count }) =>
-								`${from}–${to} de ${count}`
-							}
-							sx={{ borderTop: `1px solid ${theme.palette.divider}`, mt: 1 }}
 						/>
-					</>
+					</Box>
 				)}
 			</CardContent>
 		</Card>
