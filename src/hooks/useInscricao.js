@@ -2,36 +2,17 @@ import { useCallback, useState } from 'react'
 
 import { candidatoService } from '../services/candidato.service.js'
 import { inscricaoService } from '../services/inscricao.service.js'
-
-const initialDadosPessoais = {
-  nome: '',
-  dataNascimento: '',
-  rg: '',
-  telefone: '',
-  celular: '',
-  email: '',
-  email2: '',
-  enderecoRua: '',
-  enderecoNum: '',
-  enderecoBairro: '',
-  enderecoCidade: '',
-  enderecoEstado: '',
-  enderecoCep: '',
-}
-
-const initialDadosComplementares = {
-  graduacao1: { curso: '', instituicao: '', anoConclusao: '' },
-  graduacao2: { curso: '', instituicao: '', anoConclusao: '' },
-  ocupacaoProfissional: { instituicao: '', cargo: '', telefone: '' },
-}
-
-const initialProjetoPesquisa = {
-  idLinhaPesquisa: '',
-  projetoPesquisa: '',
-  deficiente: false,
-  indigena: false,
-  pretoPardo: false,
-}
+import { carregarDadosPessoaisExistentes, getInitialDadosPessoais } from '../controllers/dados-pessoais-controller.js'
+import { carregarDadosComplementares, getInitialDadosComplementares } from '../controllers/formacao-controller.js'
+import { carregarProjetoPesquisaExistente, getInitialProjetoPesquisa } from '../controllers/projeto-pesquisa-controller.js'
+import {
+	obterStepParaContinuar,
+	prepararPayloadEtapa2,
+	prepararPayloadEtapa3,
+	prepararPayloadFinalizacao,
+	obterFonteDadosComplementares,
+} from '../controllers/inscricao-controller.js'
+import { prepararPayloadCandidato } from '../controllers/dados-pessoais-controller.js'
 
 export function useInscricao(edital) {
   const [activeStep, setActiveStep] = useState(0)
@@ -39,9 +20,9 @@ export function useInscricao(edital) {
   const [inscricao, setInscricao] = useState(null)
   const [candidato, setCandidato] = useState(null)
   const [inscricaoHistorico, setInscricaoHistorico] = useState(null)
-  const [dadosPessoais, setDadosPessoais] = useState(initialDadosPessoais)
-  const [dadosComplementares, setDadosComplementares] = useState(initialDadosComplementares)
-  const [projetoPesquisa, setProjetoPesquisa] = useState(initialProjetoPesquisa)
+  const [dadosPessoais, setDadosPessoais] = useState(getInitialDadosPessoais)
+  const [dadosComplementares, setDadosComplementares] = useState(getInitialDadosComplementares)
+  const [projetoPesquisa, setProjetoPesquisa] = useState(getInitialProjetoPesquisa)
   const [saving, setSaving] = useState(false)
   const [inscricaoEnviada, setInscricaoEnviada] = useState(false)
   const [message, setMessage] = useState(null)
@@ -52,39 +33,14 @@ export function useInscricao(edital) {
 
   const carregarDadosExistentes = useCallback((insc, cand) => {
     if (cand) {
-      setDadosPessoais({
-        nome: cand.nome ?? '',
-        dataNascimento: cand.dataNascimento ?? '',
-        rg: cand.rg ?? '',
-        telefone: cand.telefone ?? '',
-        celular: cand.celular ?? '',
-        email: cand.email ?? '',
-        email2: cand.email2 ?? '',
-        enderecoRua: cand.enderecoRua ?? '',
-        enderecoNum: cand.enderecoNum ?? '',
-        enderecoBairro: cand.enderecoBairro ?? '',
-        enderecoCidade: cand.enderecoCidade ?? '',
-        enderecoEstado: cand.enderecoEstado ?? '',
-        enderecoCep: cand.enderecoCep ?? '',
-      })
+      setDadosPessoais(carregarDadosPessoaisExistentes(cand))
     }
 
     if (insc.dadosComplementares) {
-      const dc = insc.dadosComplementares
-      setDadosComplementares({
-        graduacao1: dc.graduacao1 ?? { curso: '', instituicao: '', anoConclusao: '' },
-        graduacao2: dc.graduacao2 ?? { curso: '', instituicao: '', anoConclusao: '' },
-        ocupacaoProfissional: dc.ocupacaoProfissional ?? { instituicao: '', cargo: '', telefone: '' },
-      })
+      setDadosComplementares(carregarDadosComplementares(insc.dadosComplementares))
     }
 
-    setProjetoPesquisa({
-      idLinhaPesquisa: insc.idLinhaPesquisa ?? '',
-      projetoPesquisa: insc.projetoPesquisa ?? '',
-      deficiente: insc.deficiente ?? false,
-      indigena: insc.indigena ?? false,
-      pretoPardo: insc.pretoPardo ?? false,
-    })
+    setProjetoPesquisa(carregarProjetoPesquisaExistente(insc))
   }, [])
 
   const handleCpfSubmit = useCallback(
@@ -125,9 +81,7 @@ export function useInscricao(edital) {
         return
       }
 
-      const etapaParaStep = { 1: 1, 2: 3, 3: 4, 4: 4 }
-      const etapaUi = etapaParaStep[insc.etapa ?? 1] ?? 1
-      setActiveStep(etapaUi)
+      setActiveStep(obterStepParaContinuar(insc.etapa))
     },
     [carregarDadosExistentes],
   )
@@ -151,39 +105,14 @@ export function useInscricao(edital) {
       }
 
       if (candExistente) {
-        setDadosPessoais({
-          nome: candExistente.nome ?? '',
-          dataNascimento: candExistente.dataNascimento ?? '',
-          rg: candExistente.rg ?? '',
-          telefone: candExistente.telefone ?? '',
-          celular: candExistente.celular ?? '',
-          email: candExistente.email ?? '',
-          email2: candExistente.email2 ?? '',
-          enderecoRua: candExistente.enderecoRua ?? '',
-          enderecoNum: candExistente.enderecoNum ?? '',
-          enderecoBairro: candExistente.enderecoBairro ?? '',
-          enderecoCidade: candExistente.enderecoCidade ?? '',
-          enderecoEstado: candExistente.enderecoEstado ?? '',
-          enderecoCep: candExistente.enderecoCep ?? '',
-        })
+        setDadosPessoais(carregarDadosPessoaisExistentes(candExistente))
         setCandidato(candExistente)
       }
 
-      const fonteDc =
-        inscricaoAnterior?.dadosComplementares ??
-        inscricaoHistoricoParam?.dadosComplementares ??
-        inscricaoHistorico?.dadosComplementares
-      if (fonteDc) {
-        setDadosComplementares({
-          graduacao1: fonteDc.graduacao1 ?? { curso: '', instituicao: '', anoConclusao: '' },
-          graduacao2: fonteDc.graduacao2 ?? { curso: '', instituicao: '', anoConclusao: '' },
-          ocupacaoProfissional: fonteDc.ocupacaoProfissional ?? { instituicao: '', cargo: '', telefone: '' },
-        })
-      } else {
-        setDadosComplementares(initialDadosComplementares)
-      }
+      const fonteDc = obterFonteDadosComplementares(inscricaoAnterior, inscricaoHistoricoParam ?? inscricaoHistorico)
+      setDadosComplementares(carregarDadosComplementares(fonteDc))
 
-      setProjetoPesquisa(initialProjetoPesquisa)
+      setProjetoPesquisa(getInitialProjetoPesquisa())
       setInscricao(null)
       setActiveStep(1)
     },
@@ -194,42 +123,15 @@ export function useInscricao(edital) {
     if (!edital) return
     setSaving(true)
     try {
-      const candSalvo = await candidatoService.upsert({
-        cpf,
-        nome: dadosPessoais.nome,
-        dataNascimento: dadosPessoais.dataNascimento,
-        rg: dadosPessoais.rg || undefined,
-        telefone: dadosPessoais.telefone || undefined,
-        celular: dadosPessoais.celular || undefined,
-        email: dadosPessoais.email,
-        email2: dadosPessoais.email2 || undefined,
-        enderecoRua: dadosPessoais.enderecoRua || undefined,
-        enderecoNum: dadosPessoais.enderecoNum || undefined,
-        enderecoBairro: dadosPessoais.enderecoBairro || undefined,
-        enderecoCidade: dadosPessoais.enderecoCidade || undefined,
-        enderecoEstado: dadosPessoais.enderecoEstado || undefined,
-        enderecoCep: dadosPessoais.enderecoCep || undefined,
-      })
+      const candSalvo = await candidatoService.upsert(prepararPayloadCandidato(cpf, dadosPessoais))
       setCandidato(candSalvo)
 
-      const dadosLinha = {
-        idLinhaPesquisa: projetoPesquisa.idLinhaPesquisa ? Number(projetoPesquisa.idLinhaPesquisa) : undefined,
-        projetoPesquisa: projetoPesquisa.projetoPesquisa || undefined,
-        deficiente: projetoPesquisa.deficiente,
-        indigena: projetoPesquisa.indigena,
-        pretoPardo: projetoPesquisa.pretoPardo,
-      }
-
+      const payload = prepararPayloadEtapa2(cpf, edital.id, projetoPesquisa, inscricao)
       let inscricaoAtualizada
-      if (inscricao) {
-        inscricaoAtualizada = await inscricaoService.update(inscricao.id, { etapa: 2, ...dadosLinha })
+      if (payload.update) {
+        inscricaoAtualizada = await inscricaoService.update(payload.id, payload.dados)
       } else {
-        inscricaoAtualizada = await inscricaoService.create({
-          cpf,
-          idEdital: edital.id,
-          etapa: 2,
-          ...dadosLinha,
-        })
+        inscricaoAtualizada = await inscricaoService.create(payload.dados)
       }
       setInscricao(inscricaoAtualizada)
       setActiveStep(3)
@@ -245,10 +147,7 @@ export function useInscricao(edital) {
     if (!inscricao) return
     setSaving(true)
     try {
-      const atualizada = await inscricaoService.update(inscricao.id, {
-        etapa: 3,
-        dadosComplementares,
-      })
+      const atualizada = await inscricaoService.update(inscricao.id, prepararPayloadEtapa3(dadosComplementares))
       setInscricao(atualizada)
       setActiveStep(4)
       showMessage('Dados de formação salvos com sucesso!', 'success')
@@ -263,10 +162,7 @@ export function useInscricao(edital) {
     if (!inscricao) return false
     setSaving(true)
     try {
-      const atualizada = await inscricaoService.update(inscricao.id, {
-        etapa: 5,
-        dataEnvio: new Date().toISOString(),
-      })
+      const atualizada = await inscricaoService.update(inscricao.id, prepararPayloadFinalizacao())
       setInscricao(atualizada)
       setInscricaoEnviada(true)
       return true
@@ -288,9 +184,9 @@ export function useInscricao(edital) {
     setInscricao(null)
     setCandidato(null)
     setInscricaoHistorico(null)
-    setDadosPessoais(initialDadosPessoais)
-    setDadosComplementares(initialDadosComplementares)
-    setProjetoPesquisa(initialProjetoPesquisa)
+    setDadosPessoais(getInitialDadosPessoais())
+    setDadosComplementares(getInitialDadosComplementares())
+    setProjetoPesquisa(getInitialProjetoPesquisa())
     setInscricaoEnviada(false)
     setMessage(null)
   }, [])

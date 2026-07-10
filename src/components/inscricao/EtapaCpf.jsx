@@ -15,16 +15,14 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 
-const ETAPA_LABELS = {
-  1: 'Linha de Pesquisa',
-  2: 'Dados Pessoais',
-  3: 'Formação',
-  4: 'Documentos',
-}
-
-function isInscricaoFinalizada(insc) {
-  return insc.status === 'enviada' || !!insc.dataEnvio || (insc.etapa ?? 0) >= 5
-}
+import {
+  formatarCpf,
+  limparCpf,
+  validarCpfDigitos,
+  isInscricaoFinalizada,
+  obterLabelEtapa,
+  validarConfirmacaoNumeroInscricao,
+} from '../../controllers/cpf-controller.js'
 
 export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarInscricao, onIniciarNova }) {
   const [cpf, setCpf] = useState('')
@@ -37,20 +35,13 @@ export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarIn
   const [candidatoEncontrado, setCandidatoEncontrado] = useState(null)
   const [inscricaoHistoricoEncontrada, setInscricaoHistoricoEncontrada] = useState(null)
 
-  const formatarCpf = (valor) => {
-    const digits = valor.replace(/\D/g, '').slice(0, 11)
-    return digits
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
-      .replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4')
-  }
-
-  const cpfLimpo = cpf.replace(/\D/g, '')
+  const cpfLimpo = limparCpf(cpf)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (cpfLimpo.length !== 11) {
-      setErro('Informe um CPF válido com 11 dígitos.')
+    const validacao = validarCpfDigitos(cpfLimpo)
+    if (!validacao.valido) {
+      setErro(validacao.erro)
       return
     }
     setErro('')
@@ -110,8 +101,10 @@ export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarIn
     onIniciarNova(inscricaoEncontrada, candidatoEncontrado, inscricaoHistoricoEncontrada)
   }
 
-  const numeroInscricaoConfirmadoCorreto =
-    confirmNumeroInscricao.trim() === String(inscricaoEncontrada?.id ?? '')
+  const numeroInscricaoConfirmadoCorreto = validarConfirmacaoNumeroInscricao(
+    confirmNumeroInscricao,
+    inscricaoEncontrada?.id,
+  )
 
   const finalizada = inscricaoEncontrada ? isInscricaoFinalizada(inscricaoEncontrada) : false
 
@@ -200,7 +193,7 @@ export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarIn
             <Alert severity="info" sx={{ mt: 2 }}>
               Você retornará para:{' '}
               <strong>
-                {ETAPA_LABELS[(inscricaoEncontrada.etapa ?? 0) + 1] ?? `Etapa ${(inscricaoEncontrada.etapa ?? 0) + 1}`}
+                {obterLabelEtapa((inscricaoEncontrada.etapa ?? 0) + 1)}
               </strong>
             </Alert>
           )}

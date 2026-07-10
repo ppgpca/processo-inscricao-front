@@ -1,33 +1,13 @@
 import { Box, Divider, Grid, TextField, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-function sanitizeEmail(valor) {
-  return valor.replace(/[\s;,<>'"\\]/g, '')
-}
-
-function formatTelefone(valor) {
-  const d = valor.replace(/\D/g, '').slice(0, 10)
-  if (d.length === 0) return ''
-  if (d.length <= 2) return `(${d}`
-  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`
-  return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
-}
-
-function formatCelular(valor) {
-  const d = valor.replace(/\D/g, '').slice(0, 11)
-  if (d.length === 0) return ''
-  if (d.length <= 2) return `(${d}`
-  if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`
-  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
-}
-
-function formatCep(valor) {
-  const digits = valor.replace(/\D/g, '').slice(0, 8)
-  if (digits.length <= 5) return digits
-  return digits.replace(/^(\d{5})(\d{0,3})/, '$1-$2')
-}
+import {
+  formatTelefone,
+  formatCelular,
+  formatCep,
+  sanitizeEmail,
+  validarFormatoEmail,
+} from '../../controllers/dados-pessoais-controller.js'
 
 export default function EtapaDadosPessoais({ dados, onChange, onConfirmValidChange }) {
   const [emailTouched, setEmailTouched] = useState(false)
@@ -45,10 +25,10 @@ export default function EtapaDadosPessoais({ dados, onChange, onConfirmValidChan
     onChange({ ...dados, [field]: formatter(e.target.value) })
   }
 
-  const emailInvalido = emailTouched && !!dados.email && !EMAIL_REGEX.test(dados.email)
+  const emailInvalido = emailTouched && !!dados.email && !validarFormatoEmail(dados.email)
   const emailDivergente = emailConfirmTouched && !!emailConfirm && dados.email !== emailConfirm
 
-  const email2Invalido = email2Touched && !!dados.email2 && !EMAIL_REGEX.test(dados.email2)
+  const email2Invalido = email2Touched && !!dados.email2 && !validarFormatoEmail(dados.email2)
   const email2Divergente = email2ConfirmTouched && !!email2Confirm && dados.email2 !== email2Confirm
 
   const confirmValido =

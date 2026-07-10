@@ -19,19 +19,14 @@ import { useEffect, useState } from 'react'
 
 import { useInscricao } from '../hooks/useInscricao.js'
 import { editalService } from '../services/edital.service.js'
+import { STEPS, validarEtapaAtual, obterTextoBotaoProximo } from '../controllers/inscricao-controller.js'
+import { formatarData } from '../controllers/edital-controller.js'
+import { todosObrigatoriosEnviados as calcTodosObrigatoriosEnviados } from '../controllers/documentos-controller.js'
 import EtapaCpf from './inscricao/EtapaCpf.jsx'
 import EtapaDadosPessoais from './inscricao/EtapaDadosPessoais.jsx'
 import EtapaDocumentos from './inscricao/EtapaDocumentos.jsx'
 import EtapaFormacao from './inscricao/EtapaFormacao.jsx'
 import EtapaProjetoPesquisa from './inscricao/EtapaProjetoPesquisa.jsx'
-
-const STEPS = [
-  'Identificação',
-  'Linha de Pesquisa',
-  'Dados Pessoais',
-  'Formação',
-  'Documentos',
-]
 
 export default function InscricaoStepper() {
   const [edital, setEdital] = useState(null)
@@ -84,34 +79,16 @@ export default function InscricaoStepper() {
       .finally(() => setLoadingEdital(false))
   }, [])
 
-  const todosObrigatoriosEnviados =
-    tiposDocumento
-      .filter((t) => t.obrigatorio && t.ativo)
-      .every((t) => documentos.some((d) => d.idTipoDocumentoEdital === t.id && d.atual))
+  const todosObrigatoriosEnviados = calcTodosObrigatoriosEnviados(tiposDocumento, documentos)
 
-  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-  const validarEtapaAtual = () => {
-    switch (activeStep) {
-      case 1:
-        return !!(projetoPesquisa.idLinhaPesquisa && projetoPesquisa.projetoPesquisa)
-      case 2: {
-        const emailValido = !!dadosPessoais.email && EMAIL_REGEX.test(dadosPessoais.email)
-        const email2Valido = !dadosPessoais.email2 || EMAIL_REGEX.test(dadosPessoais.email2)
-        return !!(dadosPessoais.nome && dadosPessoais.dataNascimento && emailValido && email2Valido && emailConfirmValido)
-      }
-      case 3:
-        return !!(
-          dadosComplementares.graduacao1?.curso &&
-          dadosComplementares.graduacao1?.instituicao &&
-          dadosComplementares.graduacao1?.anoConclusao
-        )
-      case 4:
-        return todosObrigatoriosEnviados
-      default:
-        return true
-    }
-  }
+  const isEtapaValida = () =>
+    validarEtapaAtual(activeStep, {
+      projetoPesquisa,
+      dadosPessoais,
+      dadosComplementares,
+      emailConfirmValido,
+      todosObrigatoriosEnviados,
+    })
 
   const handleNext = async () => {
     switch (activeStep) {
@@ -184,11 +161,7 @@ export default function InscricaoStepper() {
                 Inscrições iniciam em
               </Typography>
               <Typography variant="h5" fontWeight={700}>
-                {new Date(editalProximo.dataInicioInscricao).toLocaleDateString('pt-BR', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                })}
+                {formatarData(editalProximo.dataInicioInscricao)}
               </Typography>
             </>
           )}
@@ -245,11 +218,7 @@ export default function InscricaoStepper() {
           </Link>{' '}
           | Inscrições
           até{' '}
-          {new Date(edital.dataFimInscricao).toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          })}
+          {formatarData(edital.dataFimInscricao)}
         </Alert>
       )}
 
@@ -278,14 +247,10 @@ export default function InscricaoStepper() {
               color="primary"
               size="small"
               onClick={handleNext}
-              disabled={saving || !validarEtapaAtual()}
+              disabled={saving || !isEtapaValida()}
               startIcon={saving ? <CircularProgress size={16} /> : undefined}
             >
-              {saving
-                ? 'Salvando...'
-                : activeStep === STEPS.length - 1
-                  ? 'Finalizar Inscrição'
-                  : 'Próximo'}
+              {obterTextoBotaoProximo(saving, activeStep)}
             </Button>
           </Box>
         )}
@@ -341,14 +306,10 @@ export default function InscricaoStepper() {
               color="primary"
               size="small"
               onClick={handleNext}
-              disabled={saving || !validarEtapaAtual()}
+              disabled={saving || !isEtapaValida()}
               startIcon={saving ? <CircularProgress size={16} /> : undefined}
             >
-              {saving
-                ? 'Salvando...'
-                : activeStep === STEPS.length - 1
-                  ? 'Finalizar Inscrição'
-                  : 'Próximo'}
+              {obterTextoBotaoProximo(saving, activeStep)}
             </Button>
           </Box>
         )}

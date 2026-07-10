@@ -1,29 +1,6 @@
 import { Box, Divider, Grid, TextField, Typography } from '@mui/material'
 
-function aplicarMascaraTelefone(valor) {
-  const digits = valor.replace(/\D/g, '').slice(0, 11)
-  if (digits.length <= 10) {
-    return digits
-      .replace(/^(\d{0,2})/, '($1')
-      .replace(/^(\(\d{2})(\d)/, '$1) $2')
-      .replace(/(\d{4})(\d{1,4})$/, '$1-$2')
-  }
-  return digits
-    .replace(/^(\d{0,2})/, '($1')
-    .replace(/^(\(\d{2})(\d)/, '$1) $2')
-    .replace(/(\d{5})(\d{1,4})$/, '$1-$2')
-}
-
-const ANO_MIN = 1950
-const ANO_MAX = new Date().getFullYear() + 1
-
-function validarAno(valor) {
-  if (!valor) return null
-  const ano = Number(valor)
-  if (ano < ANO_MIN) return `Ano não pode ser anterior a ${ANO_MIN}`
-  if (ano > ANO_MAX) return `Ano não pode ser posterior a ${ANO_MAX}`
-  return null
-}
+import { aplicarMascaraTelefone, validarAno, ANO_MIN, ANO_MAX } from '../../controllers/formacao-controller.js'
 
 export default function EtapaFormacao({ dados, onChange }) {
   const g1 = dados.graduacao1 ?? { curso: '', instituicao: '', anoConclusao: '' }

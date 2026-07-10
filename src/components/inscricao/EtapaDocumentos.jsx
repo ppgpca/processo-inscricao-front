@@ -21,10 +21,15 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { documentoService } from '../../services/documento.service.js'
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024
-
-const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp']
+import {
+  validarArquivo,
+  obterDocumentoAtual,
+  todosObrigatoriosEnviados,
+  ordenarTiposDocumentoAtivos,
+  extrairNomeArquivoDownload,
+  obterMensagemErroUpload,
+  formatarTamanhoArquivo,
+} from '../../controllers/documentos-controller.js'
 
 export default function EtapaDocumentos({ idInscricao, tiposDocumento, onDocumentosAtualizados }) {
   const [documentos, setDocumentos] = useState([])
@@ -47,8 +52,7 @@ export default function EtapaDocumentos({ idInscricao, tiposDocumento, onDocumen
     carregarDocumentos().finally(() => setLoadingInit(false))
   }, [carregarDocumentos])
 
-  const documentoAtual = (idTipo) =>
-    documentos.find((d) => d.idTipoDocumentoEdital === idTipo && d.atual)
+  const documentoAtual = (idTipo) => obterDocumentoAtual(documentos, idTipo)
 
   const baixarDocumento = useCallback(async (idTipo, nomeOriginal) => {
     try {
@@ -56,8 +60,7 @@ export default function EtapaDocumentos({ idInscricao, tiposDocumento, onDocumen
       const response = await fetch(url)
       if (!response.ok) throw new Error('Falha ao baixar arquivo')
       const disposition = response.headers.get('Content-Disposition') ?? ''
-      const match = disposition.match(/filename\*?=(?:UTF-8'')?["']?([^"';\r\n]+)["']?/i)
-      const nomeArquivo = match ? decodeURIComponent(match[1]) : nomeOriginal
+      const nomeArquivo = extrairNomeArquivoDownload(disposition, nomeOriginal)
       const blob = await response.blob()
       const objectUrl = URL.createObjectURL(blob)
       const link = document.createElement('a')
@@ -73,12 +76,9 @@ export default function EtapaDocumentos({ idInscricao, tiposDocumento, onDocumen
   }, [idInscricao])
 
   const handleUpload = async (idTipo, file) => {
-    if (file.size > MAX_FILE_SIZE) {
-      setErro('O arquivo excede o tamanho máximo de 10 MB.')
-      return
-    }
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      setErro(`Tipo de arquivo não permitido: ${file.type}. Envie PDF, JPG, PNG ou WEBP.`)
+    const erroArquivo = validarArquivo(file)
+    if (erroArquivo) {
+      setErro(erroArquivo)
       return
     }
 
@@ -87,10 +87,7 @@ export default function EtapaDocumentos({ idInscricao, tiposDocumento, onDocumen
       await documentoService.upload(idInscricao, idTipo, file)
       await carregarDocumentos()
     } catch (e) {
-      const msg =
-        e?.response?.data?.message ??
-        'Erro ao enviar o arquivo. Tente novamente.'
-      setErro(msg)
+      setErro(obterMensagemErroUpload(e))
     } finally {
       setUploading(null)
       if (inputRefs.current[idTipo]) {
@@ -108,9 +105,7 @@ export default function EtapaDocumentos({ idInscricao, tiposDocumento, onDocumen
     }
   }
 
-  const todosObrigatoriosEnviados = tiposDocumento
-    .filter((t) => t.obrigatorio && t.ativo)
-    .every((t) => !!documentoAtual(t.id))
+  const allObrigatoriosEnviados = todosObrigatoriosEnviados(tiposDocumento, documentos)
 
   if (loadingInit) {
     return (
@@ -130,16 +125,14 @@ export default function EtapaDocumentos({ idInscricao, tiposDocumento, onDocumen
         Formatos aceitos: PDF, JPG, PNG (máx. 10 MB).
       </Typography>
 
-      {todosObrigatoriosEnviados && (
+      {allObrigatoriosEnviados && (
         <Alert severity="success" sx={{ mb: 2 }} icon={<CheckCircleOutlinedIcon />}>
           Todos os documentos obrigatórios foram enviados. Você pode finalizar a inscrição.
         </Alert>
       )}
 
       <List disablePadding>
-        {tiposDocumento
-          .filter((t) => t.ativo)
-          .sort((a, b) => a.ordem - b.ordem)
+        {ordenarTiposDocumentoAtivos(tiposDocumento)
           .map((tipo, idx) => {
             const doc = documentoAtual(tipo.id)
             const isUploading = uploading === tipo.id
@@ -216,7 +209,7 @@ export default function EtapaDocumentos({ idInscricao, tiposDocumento, onDocumen
                         {doc && (
                           <Typography variant="caption" color="text.secondary" display="block">
                             Arquivo: {doc.nomeArquivoOriginal} —{' '}
-                            {(doc.tamanhoBytes / 1024).toFixed(0)} KB
+                            {formatarTamanhoArquivo(doc.tamanhoBytes)}
                           </Typography>
                         )}
                       </Box>
