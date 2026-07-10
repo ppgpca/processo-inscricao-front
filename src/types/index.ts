@@ -111,6 +111,28 @@ export interface Inscricao {
 	dataEnvio?: string;
 }
 
+export interface InscricaoPorDia {
+	data: string;
+	quantidade: number;
+}
+
+export interface InscritoPorLinhaPesquisa {
+	linhaPesquisa: string;
+	quantidade: number;
+}
+
+export interface InscritoDashboard {
+	cpf: string;
+	linhaPesquisa: string;
+	anteprojeto: string;
+}
+
+export interface DadosDashboard {
+	inscricoesPorDia: InscricaoPorDia[];
+	inscritosPorLinhaPesquisa: InscritoPorLinhaPesquisa[];
+	inscritos: InscritoDashboard[];
+}
+
 export type ThemeMode = "light" | "dark";
 
 export interface AppMessage {

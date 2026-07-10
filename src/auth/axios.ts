@@ -34,6 +34,13 @@ function onFulfilledResponse(response: AxiosResponse): unknown {
 	return response.data;
 }
 
+function redirecionarParaLogin() {
+	authService.removeToken();
+	if (window.location.pathname !== "/login") {
+		window.location.href = "/login";
+	}
+}
+
 async function handleResponseError(error: unknown): Promise<never> {
 	const err = error as {
 		config?: RetryableConfig;
@@ -55,15 +62,13 @@ async function handleResponseError(error: unknown): Promise<never> {
 				originalRequest.headers.Authorization = `Bearer ${newToken}`;
 				return axiosInstance(originalRequest) as Promise<never>;
 			} catch {
-				authService.removeToken();
-				window.location.href = "/login";
+				redirecionarParaLogin();
 				return Promise.reject(
 					new Error("Sessão expirada. Faça login novamente."),
 				);
 			}
 		} else {
-			authService.removeToken();
-			window.location.href = "/login";
+			redirecionarParaLogin();
 			return Promise.reject(
 				new Error("Sessão expirada. Faça login novamente."),
 			);

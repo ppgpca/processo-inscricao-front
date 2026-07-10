@@ -2,36 +2,14 @@ import { Route, Routes, Navigate } from "react-router";
 import { AppBar, Box, Container, Toolbar, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./contexts/ProtectedRoute";
-import { Permissoes } from "./enums/permissoes";
 
 import ThemeSwitch from "./components/ThemeSwitch";
+import UserMenu from "./components/UserMenu";
 import InscricaoStepper from "./components/InscricaoStepper";
 import Login from "./components/login/Login";
-
-function GestaoHome() {
-	const { gruposUsuario, usuario } = useAuth();
-
-	const isAdmin = gruposUsuario.some((g) => g.id === Permissoes.GRUPOS.ADMIN);
-	const isDocente = gruposUsuario.some(
-		(g) => g.id === Permissoes.GRUPOS.DOCENTE,
-	);
-
-	return (
-		<Box sx={{ p: 4 }}>
-			<Typography variant="h5" gutterBottom>
-				Bem-vindo, {usuario?.nome ?? "usuário"}
-			</Typography>
-			<Typography variant="body1" color="text.secondary">
-				{isAdmin && "Você está logado como administrador."}
-				{!isAdmin &&
-					isDocente &&
-					"Você está logado como docente orientador."}
-			</Typography>
-		</Box>
-	);
-}
+import Dashboard from "./components/Dashboard";
 
 function PublicLayout({ children }: { children: ReactNode }) {
 	return (
@@ -71,6 +49,44 @@ function PublicLayout({ children }: { children: ReactNode }) {
 	);
 }
 
+function GestaoLayout({ children }: { children: ReactNode }) {
+	return (
+		<Box
+			sx={{
+				minHeight: "100vh",
+				display: "flex",
+				flexDirection: "column",
+			}}
+		>
+			<AppBar position="static" elevation={0}>
+				<Toolbar sx={{ py: 1 }}>
+					<Box sx={{ flex: 1 }} />
+					<Typography
+						variant="h6"
+						component="div"
+						sx={{ flex: 1, textAlign: "center", fontWeight: 600 }}
+					>
+						Gestão — PPGPCA
+					</Typography>
+					<Box
+						sx={{
+							flex: 1,
+							display: "flex",
+							justifyContent: "flex-end",
+						}}
+					>
+						<UserMenu />
+					</Box>
+				</Toolbar>
+			</AppBar>
+
+			<Box component="main" sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
+				{children}
+			</Box>
+		</Box>
+	);
+}
+
 function AppRoutes() {
 	return (
 		<Routes>
@@ -102,7 +118,9 @@ function AppRoutes() {
 				path="/gestao"
 				element={
 					<ProtectedRoute>
-						<GestaoHome />
+						<GestaoLayout>
+							<Dashboard />
+						</GestaoLayout>
 					</ProtectedRoute>
 				}
 			/>
