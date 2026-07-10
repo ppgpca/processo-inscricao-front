@@ -102,6 +102,7 @@ export function prepararPayloadEtapa2(
 		deficiente: projetoPesquisa.deficiente,
 		indigena: projetoPesquisa.indigena,
 		pretoPardo: projetoPesquisa.pretoPardo,
+		idsPalavrasChave: projetoPesquisa.idsPalavrasChave,
 	};
 
 	if (inscricaoExistente) {

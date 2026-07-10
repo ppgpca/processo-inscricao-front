@@ -10,6 +10,7 @@ export function getInitialProjetoPesquisa(): ProjetoPesquisa {
 		deficiente: false,
 		indigena: false,
 		pretoPardo: false,
+		idsPalavrasChave: [],
 	};
 }
 
@@ -17,7 +18,12 @@ export function getInitialProjetoPesquisa(): ProjetoPesquisa {
  * Verifica se os campos obrigatórios do projeto de pesquisa estão preenchidos
  */
 export function isProjetoPesquisaValido(dados: ProjetoPesquisa): boolean {
-	return !!(dados.idLinhaPesquisa && dados.projetoPesquisa);
+	return !!(
+		dados.idLinhaPesquisa &&
+		dados.projetoPesquisa &&
+		dados.idsPalavrasChave.length >= 1 &&
+		dados.idsPalavrasChave.length <= 5
+	);
 }
 
 /**
@@ -31,6 +37,10 @@ export function validarProjetoPesquisa(dados: ProjetoPesquisa): {
 
 	if (!dados.idLinhaPesquisa) errors.push("Linha de pesquisa é obrigatória");
 	if (!dados.projetoPesquisa) errors.push("Título do projeto é obrigatório");
+	if (dados.idsPalavrasChave.length === 0)
+		errors.push("Selecione ao menos uma palavra-chave");
+	if (dados.idsPalavrasChave.length > 5)
+		errors.push("Selecione no máximo 5 palavras-chave");
 
 	if (errors.length > 0) {
 		return { isValid: false, message: errors.join(". ") };
@@ -54,6 +64,7 @@ export function prepararPayloadProjetoPesquisa(
 		deficiente: dados.deficiente,
 		indigena: dados.indigena,
 		pretoPardo: dados.pretoPardo,
+		idsPalavrasChave: dados.idsPalavrasChave,
 	};
 }
 
@@ -70,6 +81,8 @@ export function carregarProjetoPesquisaExistente(
 		deficiente: insc.deficiente ?? false,
 		indigena: insc.indigena ?? false,
 		pretoPardo: insc.pretoPardo ?? false,
+		idsPalavrasChave:
+			insc.inscricoesPalavraChave?.map((ipk) => ipk.idPalavraChave) ?? [],
 	};
 }
 

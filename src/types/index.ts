@@ -22,6 +22,17 @@ export interface LinhaPesquisa {
 	nome: string;
 }
 
+export interface PalavraChave {
+	id: number;
+	palavra: string;
+}
+
+export interface InscricaoPalavraChave {
+	idInscricao: number;
+	idPalavraChave: number;
+	palavraChave?: PalavraChave;
+}
+
 export interface TipoDocumentoEdital {
 	id: number;
 	nome: string;
@@ -94,6 +105,7 @@ export interface ProjetoPesquisa {
 	deficiente: boolean;
 	indigena: boolean;
 	pretoPardo: boolean;
+	idsPalavrasChave: number[];
 }
 
 export interface Inscricao {
@@ -109,6 +121,7 @@ export interface Inscricao {
 	etapa?: number;
 	status?: string;
 	dataEnvio?: string;
+	inscricoesPalavraChave?: InscricaoPalavraChave[];
 }
 
 export interface InscricaoPorDia {
