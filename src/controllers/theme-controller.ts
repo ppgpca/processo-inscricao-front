@@ -1,17 +1,17 @@
-import type { ThemeMode } from '../types'
+import type { ThemeMode } from "../types";
 
 /**
  * Valida se o modo de tema é válido
  */
 export function isValidThemeMode(mode: string): mode is ThemeMode {
-	return mode === 'light' || mode === 'dark'
+	return mode === "light" || mode === "dark";
 }
 
 /**
  * Obtém o modo padrão do tema
  */
 export function getDefaultThemeMode(): ThemeMode {
-	return 'light'
+	return "light";
 }
 
 /**
@@ -19,16 +19,16 @@ export function getDefaultThemeMode(): ThemeMode {
  */
 export function processStoredTheme(storedTheme: string | null): ThemeMode {
 	if (storedTheme && isValidThemeMode(storedTheme)) {
-		return storedTheme
+		return storedTheme;
 	}
-	return getDefaultThemeMode()
+	return getDefaultThemeMode();
 }
 
 /**
  * Alterna entre os modos de tema
  */
 export function getToggledThemeMode(currentMode: ThemeMode): ThemeMode {
-	return currentMode === 'light' ? 'dark' : 'light'
+	return currentMode === "light" ? "dark" : "light";
 }
 
 const themeController = {
@@ -36,6 +36,6 @@ const themeController = {
 	getDefaultThemeMode,
 	processStoredTheme,
 	getToggledThemeMode,
-}
+};
 
-export default themeController
+export default themeController;

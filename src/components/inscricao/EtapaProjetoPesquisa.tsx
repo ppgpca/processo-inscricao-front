@@ -13,35 +13,41 @@ import {
 	Select,
 	TextField,
 	Typography,
-} from '@mui/material'
-import { useEffect, useState } from 'react'
-import type { ChangeEvent } from 'react'
-import type { LinhaPesquisa, ProjetoPesquisa } from '../../types'
-import { linhaPesquisaService } from '../../services/linha-pesquisa.service'
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
+import type { LinhaPesquisa, ProjetoPesquisa } from "../../types";
+import { linhaPesquisaService } from "../../services/linha-pesquisa.service";
 
 interface EtapaProjetoPesquisaProps {
-	dados: ProjetoPesquisa
-	onChange: (dados: ProjetoPesquisa) => void
+	dados: ProjetoPesquisa;
+	onChange: (dados: ProjetoPesquisa) => void;
 }
 
-export default function EtapaProjetoPesquisa({ dados, onChange }: EtapaProjetoPesquisaProps) {
-	const [linhas, setLinhas] = useState<LinhaPesquisa[]>([])
-	const [loadingLinhas, setLoadingLinhas] = useState(true)
+export default function EtapaProjetoPesquisa({
+	dados,
+	onChange,
+}: EtapaProjetoPesquisaProps) {
+	const [linhas, setLinhas] = useState<LinhaPesquisa[]>([]);
+	const [loadingLinhas, setLoadingLinhas] = useState(true);
 
 	useEffect(() => {
 		linhaPesquisaService
 			.findAll()
 			.then(setLinhas)
 			.catch(() => setLinhas([]))
-			.finally(() => setLoadingLinhas(false))
-	}, [])
+			.finally(() => setLoadingLinhas(false));
+	}, []);
 
 	const handleChange =
 		(field: keyof ProjetoPesquisa) =>
 		(e: ChangeEvent<HTMLInputElement>) => {
-			const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
-			onChange({ ...dados, [field]: value })
-		}
+			const value =
+				e.target.type === "checkbox"
+					? e.target.checked
+					: e.target.value;
+			onChange({ ...dados, [field]: value });
+		};
 
 	return (
 		<Box>
@@ -49,18 +55,29 @@ export default function EtapaProjetoPesquisa({ dados, onChange }: EtapaProjetoPe
 				Etapa 2: Linha de Pesquisa e Projeto
 			</Typography>
 			<Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-				Informe a linha de pesquisa, o título do seu projeto e as cotas para as quais deseja
-				concorrer.
+				Informe a linha de pesquisa, o título do seu projeto e as cotas
+				para as quais deseja concorrer.
 			</Typography>
 
 			<Grid container spacing={3}>
 				<Grid size={12}>
 					<FormControl fullWidth required>
-						<InputLabel id="linha-pesquisa-label">Linha de Pesquisa *</InputLabel>
+						<InputLabel id="linha-pesquisa-label">
+							Linha de Pesquisa *
+						</InputLabel>
 						{loadingLinhas ? (
-							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1 }}>
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 1,
+									p: 1,
+								}}
+							>
 								<CircularProgress size={16} />
-								<Typography variant="body2">Carregando linhas de pesquisa...</Typography>
+								<Typography variant="body2">
+									Carregando linhas de pesquisa...
+								</Typography>
 							</Box>
 						) : (
 							<Select
@@ -68,7 +85,10 @@ export default function EtapaProjetoPesquisa({ dados, onChange }: EtapaProjetoPe
 								label="Linha de Pesquisa *"
 								value={dados.idLinhaPesquisa}
 								onChange={(e) =>
-									onChange({ ...dados, idLinhaPesquisa: Number(e.target.value) })
+									onChange({
+										...dados,
+										idLinhaPesquisa: Number(e.target.value),
+									})
 								}
 							>
 								{linhas.map((lp) => (
@@ -86,7 +106,7 @@ export default function EtapaProjetoPesquisa({ dados, onChange }: EtapaProjetoPe
 						fullWidth
 						label="Título do Projeto *"
 						value={dados.projetoPesquisa}
-						onChange={handleChange('projetoPesquisa')}
+						onChange={handleChange("projetoPesquisa")}
 						required
 						multiline
 						rows={2}
@@ -96,24 +116,30 @@ export default function EtapaProjetoPesquisa({ dados, onChange }: EtapaProjetoPe
 
 				<Grid size={12}>
 					<Alert severity="info" sx={{ mb: 2 }}>
-						Marque abaixo caso deseje concorrer a vagas reservadas conforme o Edital. A
-						comprovação deverá ser apresentada mediante documentação.
+						Marque abaixo caso deseje concorrer a vagas reservadas
+						conforme o Edital. A comprovação deverá ser apresentada
+						mediante documentação.
 					</Alert>
 					<FormControl component="fieldset">
-						<FormLabel component="legend">Cotas / Reserva de Vagas</FormLabel>
+						<FormLabel component="legend">
+							Cotas / Reserva de Vagas
+						</FormLabel>
 						<FormGroup>
 							<FormControlLabel
 								control={
 									<Checkbox
 										checked={dados.deficiente}
-										onChange={handleChange('deficiente')}
+										onChange={handleChange("deficiente")}
 									/>
 								}
 								label="Pessoa com deficiência (PcD)"
 							/>
 							<FormControlLabel
 								control={
-									<Checkbox checked={dados.indigena} onChange={handleChange('indigena')} />
+									<Checkbox
+										checked={dados.indigena}
+										onChange={handleChange("indigena")}
+									/>
 								}
 								label="Pessoa indígena"
 							/>
@@ -121,7 +147,7 @@ export default function EtapaProjetoPesquisa({ dados, onChange }: EtapaProjetoPe
 								control={
 									<Checkbox
 										checked={dados.pretoPardo}
-										onChange={handleChange('pretoPardo')}
+										onChange={handleChange("pretoPardo")}
 									/>
 								}
 								label="Pessoa preta ou parda"
@@ -131,5 +157,5 @@ export default function EtapaProjetoPesquisa({ dados, onChange }: EtapaProjetoPe
 				</Grid>
 			</Grid>
 		</Box>
-	)
+	);
 }

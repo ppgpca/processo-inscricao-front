@@ -1,19 +1,19 @@
-import { Box, Divider, Grid, TextField, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
-import type { ChangeEvent } from 'react'
-import type { DadosPessoais } from '../../types'
+import { Box, Divider, Grid, TextField, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
+import type { DadosPessoais } from "../../types";
 import {
 	formatTelefone,
 	formatCelular,
 	formatCep,
 	sanitizeEmail,
 	validarFormatoEmail,
-} from '../../controllers/dados-pessoais-controller'
+} from "../../controllers/dados-pessoais-controller";
 
 interface EtapaDadosPessoaisProps {
-	dados: DadosPessoais
-	onChange: (dados: DadosPessoais) => void
-	onConfirmValidChange?: (valido: boolean) => void
+	dados: DadosPessoais;
+	onChange: (dados: DadosPessoais) => void;
+	onConfirmValidChange?: (valido: boolean) => void;
 }
 
 export default function EtapaDadosPessoais({
@@ -21,40 +21,44 @@ export default function EtapaDadosPessoais({
 	onChange,
 	onConfirmValidChange,
 }: EtapaDadosPessoaisProps) {
-	const [emailTouched, setEmailTouched] = useState(false)
-	const [emailConfirm, setEmailConfirm] = useState(dados.email ?? '')
-	const [emailConfirmTouched, setEmailConfirmTouched] = useState(false)
-	const [email2Touched, setEmail2Touched] = useState(false)
-	const [email2Confirm, setEmail2Confirm] = useState(dados.email2 ?? '')
-	const [email2ConfirmTouched, setEmail2ConfirmTouched] = useState(false)
+	const [emailTouched, setEmailTouched] = useState(false);
+	const [emailConfirm, setEmailConfirm] = useState(dados.email ?? "");
+	const [emailConfirmTouched, setEmailConfirmTouched] = useState(false);
+	const [email2Touched, setEmail2Touched] = useState(false);
+	const [email2Confirm, setEmail2Confirm] = useState(dados.email2 ?? "");
+	const [email2ConfirmTouched, setEmail2ConfirmTouched] = useState(false);
 
 	const handleChange =
 		(field: keyof DadosPessoais) => (e: ChangeEvent<HTMLInputElement>) => {
-			onChange({ ...dados, [field]: e.target.value })
-		}
+			onChange({ ...dados, [field]: e.target.value });
+		};
 
 	const handleMaskedChange =
 		(field: keyof DadosPessoais, formatter: (v: string) => string) =>
 		(e: ChangeEvent<HTMLInputElement>) => {
-			onChange({ ...dados, [field]: formatter(e.target.value) })
-		}
+			onChange({ ...dados, [field]: formatter(e.target.value) });
+		};
 
-	const emailInvalido = emailTouched && !!dados.email && !validarFormatoEmail(dados.email)
+	const emailInvalido =
+		emailTouched && !!dados.email && !validarFormatoEmail(dados.email);
 	const emailDivergente =
-		emailConfirmTouched && !!emailConfirm && dados.email !== emailConfirm
+		emailConfirmTouched && !!emailConfirm && dados.email !== emailConfirm;
 
-	const email2Invalido = email2Touched && !!dados.email2 && !validarFormatoEmail(dados.email2)
+	const email2Invalido =
+		email2Touched && !!dados.email2 && !validarFormatoEmail(dados.email2);
 	const email2Divergente =
-		email2ConfirmTouched && !!email2Confirm && dados.email2 !== email2Confirm
+		email2ConfirmTouched &&
+		!!email2Confirm &&
+		dados.email2 !== email2Confirm;
 
 	const confirmValido =
 		!!emailConfirm &&
 		dados.email === emailConfirm &&
-		(!dados.email2 || dados.email2 === email2Confirm)
+		(!dados.email2 || dados.email2 === email2Confirm);
 
 	useEffect(() => {
-		onConfirmValidChange?.(confirmValido)
-	}, [confirmValido, onConfirmValidChange])
+		onConfirmValidChange?.(confirmValido);
+	}, [confirmValido, onConfirmValidChange]);
 
 	return (
 		<Box>
@@ -62,7 +66,8 @@ export default function EtapaDadosPessoais({
 				Etapa 3: Dados Pessoais
 			</Typography>
 			<Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-				Preencha seus dados pessoais. Os campos marcados com * são obrigatórios.
+				Preencha seus dados pessoais. Os campos marcados com * são
+				obrigatórios.
 			</Typography>
 
 			<Grid container spacing={2}>
@@ -71,7 +76,7 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="Nome completo *"
 						value={dados.nome}
-						onChange={handleChange('nome')}
+						onChange={handleChange("nome")}
 						required
 					/>
 				</Grid>
@@ -82,7 +87,7 @@ export default function EtapaDadosPessoais({
 						label="Data de nascimento *"
 						type="date"
 						value={dados.dataNascimento}
-						onChange={handleChange('dataNascimento')}
+						onChange={handleChange("dataNascimento")}
 						required
 						slotProps={{ inputLabel: { shrink: true } }}
 					/>
@@ -93,7 +98,7 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="RG"
 						value={dados.rg}
-						onChange={handleChange('rg')}
+						onChange={handleChange("rg")}
 					/>
 				</Grid>
 
@@ -102,7 +107,10 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="Telefone"
 						value={dados.telefone}
-						onChange={handleMaskedChange('telefone', formatTelefone)}
+						onChange={handleMaskedChange(
+							"telefone",
+							formatTelefone,
+						)}
 						placeholder="(XX) XXXX-XXXX"
 						slotProps={{ htmlInput: { maxLength: 14 } }}
 					/>
@@ -113,7 +121,7 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="Celular"
 						value={dados.celular}
-						onChange={handleMaskedChange('celular', formatCelular)}
+						onChange={handleMaskedChange("celular", formatCelular)}
 						placeholder="(XX) XXXXX-XXXX"
 						slotProps={{ htmlInput: { maxLength: 15 } }}
 					/>
@@ -125,14 +133,19 @@ export default function EtapaDadosPessoais({
 						label="E-mail *"
 						value={dados.email}
 						onChange={(e) => {
-							onChange({ ...dados, email: sanitizeEmail(e.target.value) })
-							setEmailConfirmTouched(false)
-							setEmailConfirm('')
+							onChange({
+								...dados,
+								email: sanitizeEmail(e.target.value),
+							});
+							setEmailConfirmTouched(false);
+							setEmailConfirm("");
 						}}
 						onBlur={() => setEmailTouched(true)}
 						required
 						error={emailInvalido}
-						helperText={emailInvalido ? 'Informe um e-mail válido.' : ''}
+						helperText={
+							emailInvalido ? "Informe um e-mail válido." : ""
+						}
 					/>
 				</Grid>
 
@@ -141,11 +154,15 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="Confirme o e-mail *"
 						value={emailConfirm}
-						onChange={(e) => setEmailConfirm(sanitizeEmail(e.target.value))}
+						onChange={(e) =>
+							setEmailConfirm(sanitizeEmail(e.target.value))
+						}
 						onBlur={() => setEmailConfirmTouched(true)}
 						required
 						error={emailDivergente}
-						helperText={emailDivergente ? 'Os e-mails não são iguais.' : ''}
+						helperText={
+							emailDivergente ? "Os e-mails não são iguais." : ""
+						}
 						onPaste={(e) => e.preventDefault()}
 					/>
 				</Grid>
@@ -156,13 +173,18 @@ export default function EtapaDadosPessoais({
 						label="E-mail alternativo"
 						value={dados.email2}
 						onChange={(e) => {
-							onChange({ ...dados, email2: sanitizeEmail(e.target.value) })
-							setEmail2ConfirmTouched(false)
-							setEmail2Confirm('')
+							onChange({
+								...dados,
+								email2: sanitizeEmail(e.target.value),
+							});
+							setEmail2ConfirmTouched(false);
+							setEmail2Confirm("");
 						}}
 						onBlur={() => setEmail2Touched(true)}
 						error={email2Invalido}
-						helperText={email2Invalido ? 'Informe um e-mail válido.' : ''}
+						helperText={
+							email2Invalido ? "Informe um e-mail válido." : ""
+						}
 					/>
 				</Grid>
 
@@ -171,11 +193,15 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="Confirme o e-mail alternativo"
 						value={email2Confirm}
-						onChange={(e) => setEmail2Confirm(sanitizeEmail(e.target.value))}
+						onChange={(e) =>
+							setEmail2Confirm(sanitizeEmail(e.target.value))
+						}
 						onBlur={() => setEmail2ConfirmTouched(true)}
 						disabled={!dados.email2}
 						error={email2Divergente}
-						helperText={email2Divergente ? 'Os e-mails não são iguais.' : ''}
+						helperText={
+							email2Divergente ? "Os e-mails não são iguais." : ""
+						}
 						onPaste={(e) => e.preventDefault()}
 					/>
 				</Grid>
@@ -193,7 +219,7 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="Rua / Logradouro"
 						value={dados.enderecoRua}
-						onChange={handleChange('enderecoRua')}
+						onChange={handleChange("enderecoRua")}
 					/>
 				</Grid>
 
@@ -202,7 +228,7 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="Número"
 						value={dados.enderecoNum}
-						onChange={handleChange('enderecoNum')}
+						onChange={handleChange("enderecoNum")}
 					/>
 				</Grid>
 
@@ -211,7 +237,7 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="Bairro"
 						value={dados.enderecoBairro}
-						onChange={handleChange('enderecoBairro')}
+						onChange={handleChange("enderecoBairro")}
 					/>
 				</Grid>
 
@@ -220,7 +246,7 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="Cidade"
 						value={dados.enderecoCidade}
-						onChange={handleChange('enderecoCidade')}
+						onChange={handleChange("enderecoCidade")}
 					/>
 				</Grid>
 
@@ -229,7 +255,7 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="Estado (UF)"
 						value={dados.enderecoEstado}
-						onChange={handleChange('enderecoEstado')}
+						onChange={handleChange("enderecoEstado")}
 						slotProps={{ htmlInput: { maxLength: 2 } }}
 					/>
 				</Grid>
@@ -239,12 +265,12 @@ export default function EtapaDadosPessoais({
 						fullWidth
 						label="CEP"
 						value={dados.enderecoCep}
-						onChange={handleMaskedChange('enderecoCep', formatCep)}
+						onChange={handleMaskedChange("enderecoCep", formatCep)}
 						placeholder="00000-000"
 						slotProps={{ htmlInput: { maxLength: 9 } }}
 					/>
 				</Grid>
 			</Grid>
 		</Box>
-	)
+	);
 }

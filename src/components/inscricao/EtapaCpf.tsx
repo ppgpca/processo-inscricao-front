@@ -1,5 +1,5 @@
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import EditIcon from '@mui/icons-material/Edit'
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import EditIcon from "@mui/icons-material/Edit";
 import {
 	Alert,
 	Box,
@@ -12,9 +12,9 @@ import {
 	DialogTitle,
 	TextField,
 	Typography,
-} from '@mui/material'
-import { useState } from 'react'
-import type { Candidato, Inscricao } from '../../types'
+} from "@mui/material";
+import { useState } from "react";
+import type { Candidato, Inscricao } from "../../types";
 import {
 	formatarCpf,
 	limparCpf,
@@ -22,21 +22,21 @@ import {
 	isInscricaoFinalizada,
 	obterLabelEtapa,
 	validarConfirmacaoNumeroInscricao,
-} from '../../controllers/cpf-controller'
+} from "../../controllers/cpf-controller";
 
 interface EtapaCpfProps {
 	onCpfSubmit: (cpf: string) => Promise<{
-		inscricaoExistente: Inscricao | null
-		candidatoExistente: Candidato | null
-		inscricaoHistorico: Inscricao | null
-	}>
-	onContinuarExistente: (insc: Inscricao, cand: Candidato | null) => void
-	onEditarInscricao: (insc: Inscricao, cand: Candidato | null) => void
+		inscricaoExistente: Inscricao | null;
+		candidatoExistente: Candidato | null;
+		inscricaoHistorico: Inscricao | null;
+	}>;
+	onContinuarExistente: (insc: Inscricao, cand: Candidato | null) => void;
+	onEditarInscricao: (insc: Inscricao, cand: Candidato | null) => void;
 	onIniciarNova: (
 		inscricaoAnterior: Inscricao | null,
 		cand: Candidato | null,
 		inscricaoHistorico: Inscricao | null,
-	) => void
+	) => void;
 }
 
 export default function EtapaCpf({
@@ -45,90 +45,101 @@ export default function EtapaCpf({
 	onEditarInscricao,
 	onIniciarNova,
 }: EtapaCpfProps) {
-	const [cpf, setCpf] = useState('')
-	const [loading, setLoading] = useState(false)
-	const [erro, setErro] = useState('')
-	const [modalOpen, setModalOpen] = useState(false)
-	const [confirmNovaOpen, setConfirmNovaOpen] = useState(false)
-	const [confirmNumeroInscricao, setConfirmNumeroInscricao] = useState('')
-	const [inscricaoEncontrada, setInscricaoEncontrada] = useState<Inscricao | null>(null)
-	const [candidatoEncontrado, setCandidatoEncontrado] = useState<Candidato | null>(null)
+	const [cpf, setCpf] = useState("");
+	const [loading, setLoading] = useState(false);
+	const [erro, setErro] = useState("");
+	const [modalOpen, setModalOpen] = useState(false);
+	const [confirmNovaOpen, setConfirmNovaOpen] = useState(false);
+	const [confirmNumeroInscricao, setConfirmNumeroInscricao] = useState("");
+	const [inscricaoEncontrada, setInscricaoEncontrada] =
+		useState<Inscricao | null>(null);
+	const [candidatoEncontrado, setCandidatoEncontrado] =
+		useState<Candidato | null>(null);
 	const [inscricaoHistoricoEncontrada, setInscricaoHistoricoEncontrada] =
-		useState<Inscricao | null>(null)
+		useState<Inscricao | null>(null);
 
-	const cpfLimpo = limparCpf(cpf)
+	const cpfLimpo = limparCpf(cpf);
 
 	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
-		const validacao = validarCpfDigitos(cpfLimpo)
+		e.preventDefault();
+		const validacao = validarCpfDigitos(cpfLimpo);
 		if (!validacao.valido) {
-			setErro(validacao.erro ?? '')
-			return
+			setErro(validacao.erro ?? "");
+			return;
 		}
-		setErro('')
-		setLoading(true)
+		setErro("");
+		setLoading(true);
 		try {
-			const { inscricaoExistente, candidatoExistente, inscricaoHistorico } =
-				await onCpfSubmit(cpfLimpo)
-			setCandidatoEncontrado(candidatoExistente)
-			setInscricaoHistoricoEncontrada(inscricaoHistorico)
+			const {
+				inscricaoExistente,
+				candidatoExistente,
+				inscricaoHistorico,
+			} = await onCpfSubmit(cpfLimpo);
+			setCandidatoEncontrado(candidatoExistente);
+			setInscricaoHistoricoEncontrada(inscricaoHistorico);
 			if (inscricaoExistente) {
-				setInscricaoEncontrada(inscricaoExistente)
-				setModalOpen(true)
+				setInscricaoEncontrada(inscricaoExistente);
+				setModalOpen(true);
 			} else {
-				onIniciarNova(null, candidatoExistente, inscricaoHistorico)
+				onIniciarNova(null, candidatoExistente, inscricaoHistorico);
 			}
 		} catch {
-			setErro('Erro ao verificar CPF. Tente novamente.')
+			setErro("Erro ao verificar CPF. Tente novamente.");
 		} finally {
-			setLoading(false)
+			setLoading(false);
 		}
-	}
+	};
 
 	const handleVerInscricao = () => {
-		setModalOpen(false)
+		setModalOpen(false);
 		if (inscricaoEncontrada) {
-			onContinuarExistente(inscricaoEncontrada, candidatoEncontrado)
+			onContinuarExistente(inscricaoEncontrada, candidatoEncontrado);
 		}
-	}
+	};
 
 	const handleEditarInscricao = () => {
-		setModalOpen(false)
+		setModalOpen(false);
 		if (inscricaoEncontrada) {
-			onEditarInscricao(inscricaoEncontrada, candidatoEncontrado)
+			onEditarInscricao(inscricaoEncontrada, candidatoEncontrado);
 		}
-	}
+	};
 
 	const handleContinuar = () => {
-		setModalOpen(false)
+		setModalOpen(false);
 		if (inscricaoEncontrada) {
-			onContinuarExistente(inscricaoEncontrada, candidatoEncontrado)
+			onContinuarExistente(inscricaoEncontrada, candidatoEncontrado);
 		}
-	}
+	};
 
 	const handleSolicitarNovaInscricao = () => {
-		setModalOpen(false)
-		setConfirmNumeroInscricao('')
-		setConfirmNovaOpen(true)
-	}
+		setModalOpen(false);
+		setConfirmNumeroInscricao("");
+		setConfirmNovaOpen(true);
+	};
 
 	const handleCancelarNovaInscricao = () => {
-		setConfirmNovaOpen(false)
-		setConfirmNumeroInscricao('')
-	}
+		setConfirmNovaOpen(false);
+		setConfirmNumeroInscricao("");
+	};
 
 	const handleConfirmarNovaInscricao = () => {
-		setConfirmNovaOpen(false)
-		setConfirmNumeroInscricao('')
-		onIniciarNova(inscricaoEncontrada, candidatoEncontrado, inscricaoHistoricoEncontrada)
-	}
+		setConfirmNovaOpen(false);
+		setConfirmNumeroInscricao("");
+		onIniciarNova(
+			inscricaoEncontrada,
+			candidatoEncontrado,
+			inscricaoHistoricoEncontrada,
+		);
+	};
 
 	const numeroInscricaoConfirmadoCorreto = validarConfirmacaoNumeroInscricao(
 		confirmNumeroInscricao,
 		inscricaoEncontrada?.id,
-	)
+	);
 
-	const finalizada = inscricaoEncontrada ? isInscricaoFinalizada(inscricaoEncontrada) : false
+	const finalizada = inscricaoEncontrada
+		? isInscricaoFinalizada(inscricaoEncontrada)
+		: false;
 
 	return (
 		<Box>
@@ -139,7 +150,11 @@ export default function EtapaCpf({
 				Informe seu CPF para iniciar ou continuar a inscrição.
 			</Typography>
 
-			<Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400 }}>
+			<Box
+				component="form"
+				onSubmit={handleSubmit}
+				sx={{ maxWidth: 400 }}
+			>
 				<TextField
 					fullWidth
 					label="CPF"
@@ -158,9 +173,11 @@ export default function EtapaCpf({
 					variant="contained"
 					color="primary"
 					disabled={loading || cpfLimpo.length !== 11}
-					startIcon={loading ? <CircularProgress size={16} /> : undefined}
+					startIcon={
+						loading ? <CircularProgress size={16} /> : undefined
+					}
 				>
-					{loading ? 'Verificando...' : 'Continuar'}
+					{loading ? "Verificando..." : "Continuar"}
 				</Button>
 			</Box>
 
@@ -171,32 +188,53 @@ export default function EtapaCpf({
 				maxWidth="sm"
 				fullWidth
 			>
-				<DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+				<DialogTitle
+					sx={{ display: "flex", alignItems: "center", gap: 1 }}
+				>
 					<CheckCircleIcon color="success" />
 					Inscrição já enviada
 				</DialogTitle>
 				<DialogContent>
 					<DialogContentText>
-						Você já possui uma inscrição <strong>enviada</strong> para o edital vigente.
+						Você já possui uma inscrição <strong>enviada</strong>{" "}
+						para o edital vigente.
 						{inscricaoEncontrada?.id && (
 							<>
-								{' '}
-								Número de inscrição: <strong>{inscricaoEncontrada.id}</strong>.
+								{" "}
+								Número de inscrição:{" "}
+								<strong>{inscricaoEncontrada.id}</strong>.
 							</>
 						)}
 					</DialogContentText>
 					<Alert severity="success" sx={{ mt: 2 }}>
-						Sua inscrição foi registrada com sucesso. Clique em{' '}
-						<strong>&quot;Ver minha inscrição&quot;</strong> para conferir os dados.
+						Sua inscrição foi registrada com sucesso. Clique em{" "}
+						<strong>&quot;Ver minha inscrição&quot;</strong> para
+						conferir os dados.
 					</Alert>
 				</DialogContent>
 				<DialogActions
-					sx={{ px: 3, pb: 2, flexDirection: 'column', alignItems: 'stretch', gap: 1 }}
+					sx={{
+						px: 3,
+						pb: 2,
+						flexDirection: "column",
+						alignItems: "stretch",
+						gap: 1,
+					}}
 				>
-					<Button onClick={handleVerInscricao} variant="contained" color="primary" fullWidth>
+					<Button
+						onClick={handleVerInscricao}
+						variant="contained"
+						color="primary"
+						fullWidth
+					>
 						Ver minha inscrição
 					</Button>
-					<Button onClick={handleEditarInscricao} variant="outlined" color="primary" fullWidth>
+					<Button
+						onClick={handleEditarInscricao}
+						variant="outlined"
+						color="primary"
+						fullWidth
+					>
 						Editar documentos da inscrição
 					</Button>
 					<Button
@@ -204,12 +242,16 @@ export default function EtapaCpf({
 						variant="outlined"
 						fullWidth
 						sx={{
-							color: 'warning.dark',
-							borderColor: 'warning.main',
-							'&:hover': { borderColor: 'warning.dark', backgroundColor: 'warning.50' },
+							color: "warning.dark",
+							borderColor: "warning.main",
+							"&:hover": {
+								borderColor: "warning.dark",
+								backgroundColor: "warning.50",
+							},
 						}}
 					>
-						Iniciar nova inscrição (a inscrição atual será desativada)
+						Iniciar nova inscrição (a inscrição atual será
+						desativada)
 					</Button>
 				</DialogActions>
 			</Dialog>
@@ -221,19 +263,26 @@ export default function EtapaCpf({
 				maxWidth="sm"
 				fullWidth
 			>
-				<DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+				<DialogTitle
+					sx={{ display: "flex", alignItems: "center", gap: 1 }}
+				>
 					<EditIcon color="primary" />
 					Inscrição em andamento
 				</DialogTitle>
 				<DialogContent>
 					<DialogContentText>
-						Encontramos uma inscrição em andamento para este CPF no edital vigente. Deseja
-						continuar de onde parou ou iniciar uma nova?
+						Encontramos uma inscrição em andamento para este CPF no
+						edital vigente. Deseja continuar de onde parou ou
+						iniciar uma nova?
 					</DialogContentText>
 					{inscricaoEncontrada && (
 						<Alert severity="info" sx={{ mt: 2 }}>
-							Você retornará para:{' '}
-							<strong>{obterLabelEtapa((inscricaoEncontrada.etapa ?? 0) + 1)}</strong>
+							Você retornará para:{" "}
+							<strong>
+								{obterLabelEtapa(
+									(inscricaoEncontrada.etapa ?? 0) + 1,
+								)}
+							</strong>
 						</Alert>
 					)}
 				</DialogContent>
@@ -242,14 +291,21 @@ export default function EtapaCpf({
 						onClick={handleSolicitarNovaInscricao}
 						variant="outlined"
 						sx={{
-							color: 'warning.dark',
-							borderColor: 'warning.main',
-							'&:hover': { borderColor: 'warning.dark', backgroundColor: 'warning.50' },
+							color: "warning.dark",
+							borderColor: "warning.main",
+							"&:hover": {
+								borderColor: "warning.dark",
+								backgroundColor: "warning.50",
+							},
 						}}
 					>
 						Iniciar nova
 					</Button>
-					<Button onClick={handleContinuar} variant="contained" color="primary">
+					<Button
+						onClick={handleContinuar}
+						variant="contained"
+						color="primary"
+					>
 						Continuar inscrição
 					</Button>
 				</DialogActions>
@@ -265,32 +321,43 @@ export default function EtapaCpf({
 				<DialogTitle>Confirmar nova inscrição</DialogTitle>
 				<DialogContent>
 					<Alert severity="warning" sx={{ mb: 2 }}>
-						A inscrição <strong>nº {inscricaoEncontrada?.id}</strong> será{' '}
-						<strong>desativada</strong> e você precisará preencher os dados novamente. Esta ação
-						não pode ser desfeita.
+						A inscrição{" "}
+						<strong>nº {inscricaoEncontrada?.id}</strong> será{" "}
+						<strong>desativada</strong> e você precisará preencher
+						os dados novamente. Esta ação não pode ser desfeita.
 					</Alert>
 					<DialogContentText sx={{ mb: 2 }}>
-						Para confirmar, digite o <strong>número da sua inscrição atual</strong> no campo
+						Para confirmar, digite o{" "}
+						<strong>número da sua inscrição atual</strong> no campo
 						abaixo:
 					</DialogContentText>
 					<TextField
 						fullWidth
 						label="Número da inscrição atual"
-						placeholder={String(inscricaoEncontrada?.id ?? '')}
+						placeholder={String(inscricaoEncontrada?.id ?? "")}
 						value={confirmNumeroInscricao}
-						onChange={(e) => setConfirmNumeroInscricao(e.target.value)}
-						error={confirmNumeroInscricao.trim() !== '' && !numeroInscricaoConfirmadoCorreto}
+						onChange={(e) =>
+							setConfirmNumeroInscricao(e.target.value)
+						}
+						error={
+							confirmNumeroInscricao.trim() !== "" &&
+							!numeroInscricaoConfirmadoCorreto
+						}
 						helperText={
-							confirmNumeroInscricao.trim() !== '' && !numeroInscricaoConfirmadoCorreto
-								? 'Número de inscrição incorreto'
-								: ' '
+							confirmNumeroInscricao.trim() !== "" &&
+							!numeroInscricaoConfirmadoCorreto
+								? "Número de inscrição incorreto"
+								: " "
 						}
 						autoFocus
-						slotProps={{ htmlInput: { inputMode: 'numeric' } }}
+						slotProps={{ htmlInput: { inputMode: "numeric" } }}
 					/>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleCancelarNovaInscricao} color="inherit">
+					<Button
+						onClick={handleCancelarNovaInscricao}
+						color="inherit"
+					>
 						Cancelar
 					</Button>
 					<Button
@@ -304,5 +371,5 @@ export default function EtapaCpf({
 				</DialogActions>
 			</Dialog>
 		</Box>
-	)
+	);
 }

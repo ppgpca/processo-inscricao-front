@@ -1,23 +1,23 @@
-import type { DadosComplementares } from '../types'
+import type { DadosComplementares } from "../types";
 
-export const ANO_MIN = 1950
-export const ANO_MAX = new Date().getFullYear() + 1
+export const ANO_MIN = 1950;
+export const ANO_MAX = new Date().getFullYear() + 1;
 
 /**
  * Aplica máscara de telefone (fixo ou celular)
  */
 export function aplicarMascaraTelefone(valor: string): string {
-	const digits = valor.replace(/\D/g, '').slice(0, 11)
+	const digits = valor.replace(/\D/g, "").slice(0, 11);
 	if (digits.length <= 10) {
 		return digits
-			.replace(/^(\d{0,2})/, '($1')
-			.replace(/^(\(\d{2})(\d)/, '$1) $2')
-			.replace(/(\d{4})(\d{1,4})$/, '$1-$2')
+			.replace(/^(\d{0,2})/, "($1")
+			.replace(/^(\(\d{2})(\d)/, "$1) $2")
+			.replace(/(\d{4})(\d{1,4})$/, "$1-$2");
 	}
 	return digits
-		.replace(/^(\d{0,2})/, '($1')
-		.replace(/^(\(\d{2})(\d)/, '$1) $2')
-		.replace(/(\d{5})(\d{1,4})$/, '$1-$2')
+		.replace(/^(\d{0,2})/, "($1")
+		.replace(/^(\(\d{2})(\d)/, "$1) $2")
+		.replace(/(\d{5})(\d{1,4})$/, "$1-$2");
 }
 
 /**
@@ -25,49 +25,52 @@ export function aplicarMascaraTelefone(valor: string): string {
  * Retorna string de erro ou null se válido
  */
 export function validarAno(valor: string | number | undefined): string | null {
-	if (!valor) return null
-	const ano = Number(valor)
-	if (ano < ANO_MIN) return `Ano não pode ser anterior a ${ANO_MIN}`
-	if (ano > ANO_MAX) return `Ano não pode ser posterior a ${ANO_MAX}`
-	return null
+	if (!valor) return null;
+	const ano = Number(valor);
+	if (ano < ANO_MIN) return `Ano não pode ser anterior a ${ANO_MIN}`;
+	if (ano > ANO_MAX) return `Ano não pode ser posterior a ${ANO_MAX}`;
+	return null;
 }
 
 /**
  * Valida os campos obrigatórios dos dados de formação
  */
-export function validarDadosFormacao(
-	dados: DadosComplementares,
-): { isValid: boolean; message?: string } {
-	const g1 = dados.graduacao1 ?? {}
-	const errors: string[] = []
+export function validarDadosFormacao(dados: DadosComplementares): {
+	isValid: boolean;
+	message?: string;
+} {
+	const g1 = dados.graduacao1 ?? {};
+	const errors: string[] = [];
 
-	if (!g1.curso) errors.push('Curso da Graduação 1 é obrigatório')
-	if (!g1.instituicao) errors.push('Instituição da Graduação 1 é obrigatória')
-	if (!g1.anoConclusao) errors.push('Ano de Conclusão da Graduação 1 é obrigatório')
+	if (!g1.curso) errors.push("Curso da Graduação 1 é obrigatório");
+	if (!g1.instituicao)
+		errors.push("Instituição da Graduação 1 é obrigatória");
+	if (!g1.anoConclusao)
+		errors.push("Ano de Conclusão da Graduação 1 é obrigatório");
 	else {
-		const errAno = validarAno(g1.anoConclusao)
-		if (errAno) errors.push(errAno)
+		const errAno = validarAno(g1.anoConclusao);
+		if (errAno) errors.push(errAno);
 	}
 
-	const g2 = dados.graduacao2 ?? {}
+	const g2 = dados.graduacao2 ?? {};
 	if (g2.anoConclusao) {
-		const errAnoG2 = validarAno(g2.anoConclusao)
-		if (errAnoG2) errors.push(errAnoG2)
+		const errAnoG2 = validarAno(g2.anoConclusao);
+		if (errAnoG2) errors.push(errAnoG2);
 	}
 
 	if (errors.length > 0) {
-		return { isValid: false, message: errors.join('. ') }
+		return { isValid: false, message: errors.join(". ") };
 	}
 
-	return { isValid: true }
+	return { isValid: true };
 }
 
 /**
  * Verifica se a graduação 1 obrigatória está preenchida (para habilitar o botão Próximo)
  */
 export function isDadosFormacaoValidos(dados: DadosComplementares): boolean {
-	const g1 = dados.graduacao1 ?? {}
-	return !!(g1.curso && g1.instituicao && g1.anoConclusao)
+	const g1 = dados.graduacao1 ?? {};
+	return !!(g1.curso && g1.instituicao && g1.anoConclusao);
 }
 
 /**
@@ -75,10 +78,10 @@ export function isDadosFormacaoValidos(dados: DadosComplementares): boolean {
  */
 export function getInitialDadosComplementares(): DadosComplementares {
 	return {
-		graduacao1: { curso: '', instituicao: '', anoConclusao: '' },
-		graduacao2: { curso: '', instituicao: '', anoConclusao: '' },
-		ocupacaoProfissional: { instituicao: '', cargo: '', telefone: '' },
-	}
+		graduacao1: { curso: "", instituicao: "", anoConclusao: "" },
+		graduacao2: { curso: "", instituicao: "", anoConclusao: "" },
+		ocupacaoProfissional: { instituicao: "", cargo: "", telefone: "" },
+	};
 }
 
 /**
@@ -87,16 +90,24 @@ export function getInitialDadosComplementares(): DadosComplementares {
 export function carregarDadosComplementares(
 	dc: Partial<DadosComplementares> | null | undefined,
 ): DadosComplementares {
-	if (!dc) return getInitialDadosComplementares()
+	if (!dc) return getInitialDadosComplementares();
 	return {
-		graduacao1: dc.graduacao1 ?? { curso: '', instituicao: '', anoConclusao: '' },
-		graduacao2: dc.graduacao2 ?? { curso: '', instituicao: '', anoConclusao: '' },
-		ocupacaoProfissional: dc.ocupacaoProfissional ?? {
-			instituicao: '',
-			cargo: '',
-			telefone: '',
+		graduacao1: dc.graduacao1 ?? {
+			curso: "",
+			instituicao: "",
+			anoConclusao: "",
 		},
-	}
+		graduacao2: dc.graduacao2 ?? {
+			curso: "",
+			instituicao: "",
+			anoConclusao: "",
+		},
+		ocupacaoProfissional: dc.ocupacaoProfissional ?? {
+			instituicao: "",
+			cargo: "",
+			telefone: "",
+		},
+	};
 }
 
 const formacaoController = {
@@ -108,6 +119,6 @@ const formacaoController = {
 	isDadosFormacaoValidos,
 	getInitialDadosComplementares,
 	carregarDadosComplementares,
-}
+};
 
-export default formacaoController
+export default formacaoController;

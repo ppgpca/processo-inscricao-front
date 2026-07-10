@@ -1,42 +1,57 @@
-import { Box, Divider, Grid, TextField, Typography } from '@mui/material'
-import type { ChangeEvent } from 'react'
-import type { DadosComplementares } from '../../types'
+import { Box, Divider, Grid, TextField, Typography } from "@mui/material";
+import type { ChangeEvent } from "react";
+import type { DadosComplementares } from "../../types";
 import {
 	aplicarMascaraTelefone,
 	validarAno,
 	ANO_MIN,
 	ANO_MAX,
-} from '../../controllers/formacao-controller'
+} from "../../controllers/formacao-controller";
 
 interface EtapaFormacaoProps {
-	dados: DadosComplementares
-	onChange: (dados: DadosComplementares) => void
+	dados: DadosComplementares;
+	onChange: (dados: DadosComplementares) => void;
 }
 
 export default function EtapaFormacao({ dados, onChange }: EtapaFormacaoProps) {
-	const g1 = dados.graduacao1 ?? { curso: '', instituicao: '', anoConclusao: '' }
-	const g2 = dados.graduacao2 ?? { curso: '', instituicao: '', anoConclusao: '' }
-	const op = dados.ocupacaoProfissional ?? { instituicao: '', cargo: '', telefone: '' }
+	const g1 = dados.graduacao1 ?? {
+		curso: "",
+		instituicao: "",
+		anoConclusao: "",
+	};
+	const g2 = dados.graduacao2 ?? {
+		curso: "",
+		instituicao: "",
+		anoConclusao: "",
+	};
+	const op = dados.ocupacaoProfissional ?? {
+		instituicao: "",
+		cargo: "",
+		telefone: "",
+	};
 
-	const erroAnoG1 = validarAno(g1.anoConclusao)
-	const erroAnoG2 = validarAno(g2.anoConclusao)
+	const erroAnoG1 = validarAno(g1.anoConclusao);
+	const erroAnoG2 = validarAno(g2.anoConclusao);
 
-	const updateG1 =
-		(field: string) => (e: ChangeEvent<HTMLInputElement>) =>
-			onChange({ ...dados, graduacao1: { ...g1, [field]: e.target.value } })
+	const updateG1 = (field: string) => (e: ChangeEvent<HTMLInputElement>) =>
+		onChange({ ...dados, graduacao1: { ...g1, [field]: e.target.value } });
 
-	const updateG2 =
-		(field: string) => (e: ChangeEvent<HTMLInputElement>) =>
-			onChange({ ...dados, graduacao2: { ...g2, [field]: e.target.value } })
+	const updateG2 = (field: string) => (e: ChangeEvent<HTMLInputElement>) =>
+		onChange({ ...dados, graduacao2: { ...g2, [field]: e.target.value } });
 
-	const updateOp =
-		(field: string) => (e: ChangeEvent<HTMLInputElement>) =>
-			onChange({ ...dados, ocupacaoProfissional: { ...op, [field]: e.target.value } })
+	const updateOp = (field: string) => (e: ChangeEvent<HTMLInputElement>) =>
+		onChange({
+			...dados,
+			ocupacaoProfissional: { ...op, [field]: e.target.value },
+		});
 
 	const updateOpTelefone = (e: ChangeEvent<HTMLInputElement>) => {
-		const masked = aplicarMascaraTelefone(e.target.value)
-		onChange({ ...dados, ocupacaoProfissional: { ...op, telefone: masked } })
-	}
+		const masked = aplicarMascaraTelefone(e.target.value);
+		onChange({
+			...dados,
+			ocupacaoProfissional: { ...op, telefone: masked },
+		});
+	};
 
 	return (
 		<Box>
@@ -59,7 +74,7 @@ export default function EtapaFormacao({ dados, onChange }: EtapaFormacaoProps) {
 						fullWidth
 						label="Curso de Graduação *"
 						value={g1.curso}
-						onChange={updateG1('curso')}
+						onChange={updateG1("curso")}
 						required
 					/>
 				</Grid>
@@ -68,7 +83,7 @@ export default function EtapaFormacao({ dados, onChange }: EtapaFormacaoProps) {
 						fullWidth
 						label="Instituição *"
 						value={g1.instituicao}
-						onChange={updateG1('instituicao')}
+						onChange={updateG1("instituicao")}
 						required
 					/>
 				</Grid>
@@ -78,9 +93,11 @@ export default function EtapaFormacao({ dados, onChange }: EtapaFormacaoProps) {
 						label="Ano de Conclusão *"
 						type="number"
 						value={g1.anoConclusao}
-						onChange={updateG1('anoConclusao')}
+						onChange={updateG1("anoConclusao")}
 						required
-						slotProps={{ htmlInput: { min: ANO_MIN, max: ANO_MAX } }}
+						slotProps={{
+							htmlInput: { min: ANO_MIN, max: ANO_MAX },
+						}}
 						error={!!erroAnoG1}
 						helperText={erroAnoG1}
 					/>
@@ -99,7 +116,7 @@ export default function EtapaFormacao({ dados, onChange }: EtapaFormacaoProps) {
 						fullWidth
 						label="Curso de Graduação"
 						value={g2.curso}
-						onChange={updateG2('curso')}
+						onChange={updateG2("curso")}
 					/>
 				</Grid>
 				<Grid size={{ xs: 12, sm: 5 }}>
@@ -107,7 +124,7 @@ export default function EtapaFormacao({ dados, onChange }: EtapaFormacaoProps) {
 						fullWidth
 						label="Instituição"
 						value={g2.instituicao}
-						onChange={updateG2('instituicao')}
+						onChange={updateG2("instituicao")}
 					/>
 				</Grid>
 				<Grid size={{ xs: 12, sm: 2 }}>
@@ -116,8 +133,10 @@ export default function EtapaFormacao({ dados, onChange }: EtapaFormacaoProps) {
 						label="Ano de Conclusão"
 						type="number"
 						value={g2.anoConclusao}
-						onChange={updateG2('anoConclusao')}
-						slotProps={{ htmlInput: { min: ANO_MIN, max: ANO_MAX } }}
+						onChange={updateG2("anoConclusao")}
+						slotProps={{
+							htmlInput: { min: ANO_MIN, max: ANO_MAX },
+						}}
 						error={!!erroAnoG2}
 						helperText={erroAnoG2}
 					/>
@@ -136,7 +155,7 @@ export default function EtapaFormacao({ dados, onChange }: EtapaFormacaoProps) {
 						fullWidth
 						label="Instituição / Empresa"
 						value={op.instituicao}
-						onChange={updateOp('instituicao')}
+						onChange={updateOp("instituicao")}
 					/>
 				</Grid>
 				<Grid size={{ xs: 12, sm: 4 }}>
@@ -144,7 +163,7 @@ export default function EtapaFormacao({ dados, onChange }: EtapaFormacaoProps) {
 						fullWidth
 						label="Cargo / Função"
 						value={op.cargo}
-						onChange={updateOp('cargo')}
+						onChange={updateOp("cargo")}
 					/>
 				</Grid>
 				<Grid size={{ xs: 12, sm: 3 }}>
@@ -159,5 +178,5 @@ export default function EtapaFormacao({ dados, onChange }: EtapaFormacaoProps) {
 				</Grid>
 			</Grid>
 		</Box>
-	)
+	);
 }

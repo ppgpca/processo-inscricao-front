@@ -1,15 +1,20 @@
-import type { DadosComplementares, DadosPessoais, Inscricao, ProjetoPesquisa } from '../types'
-import { isDadosPessoaisValidos } from './dados-pessoais-controller'
-import { isDadosFormacaoValidos } from './formacao-controller'
-import { isProjetoPesquisaValido } from './projeto-pesquisa-controller'
+import type {
+	DadosComplementares,
+	DadosPessoais,
+	Inscricao,
+	ProjetoPesquisa,
+} from "../types";
+import { isDadosPessoaisValidos } from "./dados-pessoais-controller";
+import { isDadosFormacaoValidos } from "./formacao-controller";
+import { isProjetoPesquisaValido } from "./projeto-pesquisa-controller";
 
 export const STEPS = [
-	'Identificação',
-	'Linha de Pesquisa',
-	'Dados Pessoais',
-	'Formação',
-	'Documentos',
-]
+	"Identificação",
+	"Linha de Pesquisa",
+	"Dados Pessoais",
+	"Formação",
+	"Documentos",
+];
 
 /**
  * Mapeamento de etapa da inscrição (backend) para step da UI (frontend)
@@ -17,21 +22,21 @@ export const STEPS = [
  * Etapa 2 ou 3 → step 3 (Formação)
  * Etapa 4 → step 4 (Documentos)
  */
-const ETAPA_PARA_STEP: Record<number, number> = { 1: 1, 2: 3, 3: 4, 4: 4 }
+const ETAPA_PARA_STEP: Record<number, number> = { 1: 1, 2: 3, 3: 4, 4: 4 };
 
 /**
  * Retorna o step da UI correspondente à etapa da inscrição para continuar de onde parou
  */
 export function obterStepParaContinuar(etapa: number | undefined): number {
-	return ETAPA_PARA_STEP[etapa ?? 1] ?? 1
+	return ETAPA_PARA_STEP[etapa ?? 1] ?? 1;
 }
 
 interface ValidarEtapaParams {
-	projetoPesquisa: ProjetoPesquisa
-	dadosPessoais: DadosPessoais
-	dadosComplementares: DadosComplementares
-	emailConfirmValido: boolean
-	todosObrigatoriosEnviados: boolean
+	projetoPesquisa: ProjetoPesquisa;
+	dadosPessoais: DadosPessoais;
+	dadosComplementares: DadosComplementares;
+	emailConfirmValido: boolean;
+	todosObrigatoriosEnviados: boolean;
 }
 
 /**
@@ -41,35 +46,43 @@ export function validarEtapaAtual(
 	activeStep: number,
 	params: ValidarEtapaParams,
 ): boolean {
-	const { projetoPesquisa, dadosPessoais, dadosComplementares, emailConfirmValido, todosObrigatoriosEnviados } =
-		params
+	const {
+		projetoPesquisa,
+		dadosPessoais,
+		dadosComplementares,
+		emailConfirmValido,
+		todosObrigatoriosEnviados,
+	} = params;
 	switch (activeStep) {
 		case 1:
-			return isProjetoPesquisaValido(projetoPesquisa)
+			return isProjetoPesquisaValido(projetoPesquisa);
 		case 2:
-			return isDadosPessoaisValidos(dadosPessoais, emailConfirmValido)
+			return isDadosPessoaisValidos(dadosPessoais, emailConfirmValido);
 		case 3:
-			return isDadosFormacaoValidos(dadosComplementares)
+			return isDadosFormacaoValidos(dadosComplementares);
 		case 4:
-			return todosObrigatoriosEnviados
+			return todosObrigatoriosEnviados;
 		default:
-			return true
+			return true;
 	}
 }
 
 /**
  * Obtém o texto do botão de avançar
  */
-export function obterTextoBotaoProximo(saving: boolean, activeStep: number): string {
-	if (saving) return 'Salvando...'
-	if (activeStep === STEPS.length - 1) return 'Finalizar Inscrição'
-	return 'Próximo'
+export function obterTextoBotaoProximo(
+	saving: boolean,
+	activeStep: number,
+): string {
+	if (saving) return "Salvando...";
+	if (activeStep === STEPS.length - 1) return "Finalizar Inscrição";
+	return "Próximo";
 }
 
 interface PayloadEtapa2Result {
-	update: boolean
-	id?: number
-	dados: Record<string, unknown>
+	update: boolean;
+	id?: number;
+	dados: Record<string, unknown>;
 }
 
 /**
@@ -89,16 +102,20 @@ export function prepararPayloadEtapa2(
 		deficiente: projetoPesquisa.deficiente,
 		indigena: projetoPesquisa.indigena,
 		pretoPardo: projetoPesquisa.pretoPardo,
-	}
+	};
 
 	if (inscricaoExistente) {
-		return { update: true, id: inscricaoExistente.id, dados: { etapa: 2, ...dadosLinha } }
+		return {
+			update: true,
+			id: inscricaoExistente.id,
+			dados: { etapa: 2, ...dadosLinha },
+		};
 	}
 
 	return {
 		update: false,
 		dados: { cpf, idEdital, etapa: 2, ...dadosLinha },
-	}
+	};
 }
 
 /**
@@ -110,7 +127,7 @@ export function prepararPayloadEtapa3(
 	return {
 		etapa: 3,
 		dadosComplementares,
-	}
+	};
 }
 
 /**
@@ -120,7 +137,7 @@ export function prepararPayloadFinalizacao(): Record<string, unknown> {
 	return {
 		etapa: 5,
 		dataEnvio: new Date().toISOString(),
-	}
+	};
 }
 
 /**
@@ -131,7 +148,11 @@ export function obterFonteDadosComplementares(
 	inscricaoAnterior: Inscricao | null,
 	inscricaoHistorico: Inscricao | null,
 ): DadosComplementares | null {
-	return inscricaoAnterior?.dadosComplementares ?? inscricaoHistorico?.dadosComplementares ?? null
+	return (
+		inscricaoAnterior?.dadosComplementares ??
+		inscricaoHistorico?.dadosComplementares ??
+		null
+	);
 }
 
 const inscricaoController = {
@@ -143,6 +164,6 @@ const inscricaoController = {
 	prepararPayloadEtapa3,
 	prepararPayloadFinalizacao,
 	obterFonteDadosComplementares,
-}
+};
 
-export default inscricaoController
+export default inscricaoController;

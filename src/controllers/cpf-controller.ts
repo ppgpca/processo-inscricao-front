@@ -1,40 +1,45 @@
-import type { Inscricao } from '../types'
+import type { Inscricao } from "../types";
 
 /**
  * Aplica máscara de CPF: 000.000.000-00
  */
 export function formatarCpf(valor: string): string {
-	const digits = valor.replace(/\D/g, '').slice(0, 11)
+	const digits = valor.replace(/\D/g, "").slice(0, 11);
 	return digits
-		.replace(/(\d{3})(\d)/, '$1.$2')
-		.replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
-		.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4')
+		.replace(/(\d{3})(\d)/, "$1.$2")
+		.replace(/(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+		.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
 }
 
 /**
  * Remove formatação do CPF, retornando apenas dígitos
  */
 export function limparCpf(cpf: string): string {
-	return cpf.replace(/\D/g, '')
+	return cpf.replace(/\D/g, "");
 }
 
 /**
  * Valida se o CPF possui exatamente 11 dígitos
  */
-export function validarCpfDigitos(cpf: string): { valido: boolean; erro: string | null } {
-	const digits = limparCpf(cpf)
+export function validarCpfDigitos(cpf: string): {
+	valido: boolean;
+	erro: string | null;
+} {
+	const digits = limparCpf(cpf);
 	if (digits.length !== 11) {
-		return { valido: false, erro: 'Informe um CPF válido com 11 dígitos.' }
+		return { valido: false, erro: "Informe um CPF válido com 11 dígitos." };
 	}
-	return { valido: true, erro: null }
+	return { valido: true, erro: null };
 }
 
 /**
  * Verifica se a inscrição está finalizada (enviada ou etapa >= 5)
  */
 export function isInscricaoFinalizada(insc: Inscricao | null): boolean {
-	if (!insc) return false
-	return insc.status === 'enviada' || !!insc.dataEnvio || (insc.etapa ?? 0) >= 5
+	if (!insc) return false;
+	return (
+		insc.status === "enviada" || !!insc.dataEnvio || (insc.etapa ?? 0) >= 5
+	);
 }
 
 /**
@@ -42,12 +47,12 @@ export function isInscricaoFinalizada(insc: Inscricao | null): boolean {
  */
 export function obterLabelEtapa(etapa: number): string {
 	const labels: Record<number, string> = {
-		1: 'Linha de Pesquisa',
-		2: 'Dados Pessoais',
-		3: 'Formação',
-		4: 'Documentos',
-	}
-	return labels[etapa] ?? `Etapa ${etapa}`
+		1: "Linha de Pesquisa",
+		2: "Dados Pessoais",
+		3: "Formação",
+		4: "Documentos",
+	};
+	return labels[etapa] ?? `Etapa ${etapa}`;
 }
 
 /**
@@ -57,17 +62,19 @@ export function validarConfirmacaoNumeroInscricao(
 	confirmacao: string,
 	inscricaoId: number | null | undefined,
 ): boolean {
-	if (!inscricaoId) return false
-	return confirmacao.trim() === String(inscricaoId)
+	if (!inscricaoId) return false;
+	return confirmacao.trim() === String(inscricaoId);
 }
 
 /**
  * Obtém o texto de status de uma inscrição existente para exibição
  */
-export function obterTextoStatusInscricao(insc: Inscricao | null): string | null {
-	if (!insc) return null
-	if (isInscricaoFinalizada(insc)) return 'enviada'
-	return 'em andamento'
+export function obterTextoStatusInscricao(
+	insc: Inscricao | null,
+): string | null {
+	if (!insc) return null;
+	if (isInscricaoFinalizada(insc)) return "enviada";
+	return "em andamento";
 }
 
 const cpfController = {
@@ -78,6 +85,6 @@ const cpfController = {
 	obterLabelEtapa,
 	validarConfirmacaoNumeroInscricao,
 	obterTextoStatusInscricao,
-}
+};
 
-export default cpfController
+export default cpfController;

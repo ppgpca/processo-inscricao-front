@@ -1,24 +1,29 @@
-import { useContext } from 'react'
-import { AuthContext } from '../contexts/AuthContext'
-import permissoesService from '../services/permissoesService'
-import type { Grupo, Permissao } from '../types'
+import { useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
+import permissoesService from "../services/permissoesService";
+import type { Grupo, Permissao } from "../types";
 
-type GrupoRequerido = number | string | Partial<Grupo>
+type GrupoRequerido = number | string | Partial<Grupo>;
 
 export const usePermissions = () => {
-	const authContext = useContext(AuthContext)
+	const authContext = useContext(AuthContext);
 
-	const hasPermission = (grupos: GrupoRequerido | GrupoRequerido[]): boolean => {
+	const hasPermission = (
+		grupos: GrupoRequerido | GrupoRequerido[],
+	): boolean => {
 		if (!authContext || !authContext.gruposUsuario) {
-			return false
+			return false;
 		}
-		return permissoesService.verificarPermissaoPorGrupos(authContext.gruposUsuario, grupos)
-	}
+		return permissoesService.verificarPermissaoPorGrupos(
+			authContext.gruposUsuario,
+			grupos,
+		);
+	};
 
 	return {
 		hasPermission,
 		userPermissions: authContext?.permissoesUsuario ?? ([] as Permissao[]),
 		gruposUsuario: authContext?.gruposUsuario ?? ([] as Grupo[]),
 		isLoading: authContext?.loading ?? false,
-	}
-}
+	};
+};

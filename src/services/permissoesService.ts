@@ -1,13 +1,16 @@
-import type { Grupo, Permissao } from '../types'
+import type { Grupo, Permissao } from "../types";
 
-type GrupoRequerido = number | string | Partial<Grupo>
+type GrupoRequerido = number | string | Partial<Grupo>;
 
 const permissoesService = {
-	verificarPermissaoPorId(permissoes: Permissao[], permissaoId: number): boolean {
+	verificarPermissaoPorId(
+		permissoes: Permissao[],
+		permissaoId: number,
+	): boolean {
 		if (!permissoes || !Array.isArray(permissoes)) {
-			return false
+			return false;
 		}
-		return permissoes.some((permissao) => permissao.id === permissaoId)
+		return permissoes.some((permissao) => permissao.id === permissaoId);
 	},
 
 	verificarPermissaoPorIds(
@@ -15,10 +18,12 @@ const permissoesService = {
 		permissaoIds: number | number[],
 	): boolean {
 		if (!permissoes || !Array.isArray(permissoes)) {
-			return false
+			return false;
 		}
-		const ids = Array.isArray(permissaoIds) ? permissaoIds : [permissaoIds]
-		return ids.some((id) => permissoes.some((permissao) => permissao.id === id))
+		const ids = Array.isArray(permissaoIds) ? permissaoIds : [permissaoIds];
+		return ids.some((id) =>
+			permissoes.some((permissao) => permissao.id === id),
+		);
 	},
 
 	verificarPermissaoPorGrupos(
@@ -26,26 +31,36 @@ const permissoesService = {
 		gruposRequeridos: GrupoRequerido | GrupoRequerido[],
 	): boolean {
 		if (!gruposUsuario || !Array.isArray(gruposUsuario)) {
-			return false
+			return false;
 		}
-		const requeridos = Array.isArray(gruposRequeridos) ? gruposRequeridos : [gruposRequeridos]
+		const requeridos = Array.isArray(gruposRequeridos)
+			? gruposRequeridos
+			: [gruposRequeridos];
 
 		return requeridos.some((grupoRequerido) => {
-			if (typeof grupoRequerido === 'number') {
-				return gruposUsuario.some((grupo) => grupo.id === grupoRequerido)
-			} else if (typeof grupoRequerido === 'string') {
-				return gruposUsuario.some((grupo) => grupo.nome === grupoRequerido)
-			} else if (typeof grupoRequerido === 'object') {
+			if (typeof grupoRequerido === "number") {
+				return gruposUsuario.some(
+					(grupo) => grupo.id === grupoRequerido,
+				);
+			} else if (typeof grupoRequerido === "string") {
+				return gruposUsuario.some(
+					(grupo) => grupo.nome === grupoRequerido,
+				);
+			} else if (typeof grupoRequerido === "object") {
 				if (grupoRequerido.id) {
-					return gruposUsuario.some((grupo) => grupo.id === grupoRequerido.id)
+					return gruposUsuario.some(
+						(grupo) => grupo.id === grupoRequerido.id,
+					);
 				}
 				if (grupoRequerido.nome) {
-					return gruposUsuario.some((grupo) => grupo.nome === grupoRequerido.nome)
+					return gruposUsuario.some(
+						(grupo) => grupo.nome === grupoRequerido.nome,
+					);
 				}
 			}
-			return false
-		})
+			return false;
+		});
 	},
-}
+};
 
-export default permissoesService
+export default permissoesService;
