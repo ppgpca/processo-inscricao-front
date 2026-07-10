@@ -12,7 +12,7 @@ function mascaraCpf(cpf: string): string {
 	if (!cpf) return "";
 	const limpo = cpf.replace(/\D/g, "");
 	if (limpo.length !== 11) return cpf;
-	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 9)}-**`;
+	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 8)}*-**`;
 }
 
 const colunas: GridColDef[] = [

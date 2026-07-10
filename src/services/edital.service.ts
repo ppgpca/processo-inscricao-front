@@ -18,4 +18,9 @@ export const editalService = {
 		);
 		return res.data;
 	},
+
+	async findAll(): Promise<Edital[]> {
+		const res = await axiosInstance.get<Edital[]>("/editais");
+		return res.data;
+	},
 };

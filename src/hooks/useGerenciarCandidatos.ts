@@ -1,0 +1,128 @@
+import { useState, useEffect } from "react";
+import { dashboardService } from "../services/dashboard.service";
+import { editalService } from "../services/edital.service";
+import { inscricaoService } from "../services/inscricao.service";
+import type { Edital, InscritoDashboard } from "../types";
+
+export function useGerenciarCandidatos() {
+	const [editais, setEditais] = useState<Edital[]>([]);
+	const [editalSelecionado, setEditalSelecionado] = useState<number | "">("");
+	const [inscritos, setInscritos] = useState<InscritoDashboard[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [loadingEditais, setLoadingEditais] = useState(true);
+	const [erro, setErro] = useState<string | null>(null);
+
+	/**
+	 * Alterações feitas localmente ainda não enviadas à API.
+	 * Chave = idInscricao, valor = novo valor de deferida.
+	 */
+	const [alteracoesPendentes, setAlteracoesPendentes] = useState<
+		Record<number, boolean>
+	>({});
+	const [sincronizando, setSincronizando] = useState(false);
+
+	const contadorPendentes = Object.keys(alteracoesPendentes).length;
+
+	useEffect(() => {
+		const carregarEditais = async () => {
+			setLoadingEditais(true);
+			try {
+				const lista = await editalService.findAll();
+				setEditais(lista);
+			} catch {
+				setErro("Não foi possível carregar os editais.");
+			} finally {
+				setLoadingEditais(false);
+			}
+		};
+		carregarEditais();
+	}, []);
+
+	useEffect(() => {
+		if (!editalSelecionado) {
+			setInscritos([]);
+			setAlteracoesPendentes({});
+			return;
+		}
+		const carregarInscritos = async () => {
+			setLoading(true);
+			setErro(null);
+			setAlteracoesPendentes({});
+			try {
+				const dados = await dashboardService.obterDados(
+					Number(editalSelecionado),
+				);
+				setInscritos(dados.inscritos ?? []);
+			} catch {
+				setErro("Não foi possível carregar os candidatos.");
+			} finally {
+				setLoading(false);
+			}
+		};
+		carregarInscritos();
+	}, [editalSelecionado]);
+
+	/**
+	 * Marca uma alteração local de deferida. Se o valor novo for igual ao valor
+	 * já salvo na API, a alteração é removida das pendentes (revertida).
+	 */
+	const marcarDeferida = (idInscricao: number, novoValor: boolean) => {
+		const original = inscritos.find((i) => i.idInscricao === idInscricao);
+		if (original?.deferida === novoValor) {
+			setAlteracoesPendentes((prev) => {
+				const next = { ...prev };
+				delete next[idInscricao];
+				return next;
+			});
+		} else {
+			setAlteracoesPendentes((prev) => ({
+				...prev,
+				[idInscricao]: novoValor,
+			}));
+		}
+	};
+
+	/**
+	 * Envia todas as alterações pendentes para a API em paralelo,
+	 * atualiza o estado local e limpa as pendências.
+	 */
+	const sincronizar = async () => {
+		if (contadorPendentes === 0 || sincronizando) return;
+		setSincronizando(true);
+		setErro(null);
+		try {
+			await Promise.all(
+				Object.entries(alteracoesPendentes).map(([id, valor]) =>
+					inscricaoService.update(Number(id), { deferida: valor }),
+				),
+			);
+			setInscritos((prev) =>
+				prev.map((i) =>
+					i.idInscricao in alteracoesPendentes
+						? { ...i, deferida: alteracoesPendentes[i.idInscricao] }
+						: i,
+				),
+			);
+			setAlteracoesPendentes({});
+		} catch {
+			setErro("Falha ao sincronizar. Verifique sua conexão e tente novamente.");
+		} finally {
+			setSincronizando(false);
+		}
+	};
+
+	return {
+		editais,
+		editalSelecionado,
+		setEditalSelecionado,
+		inscritos,
+		loading,
+		loadingEditais,
+		erro,
+		alteracoesPendentes,
+		contadorPendentes,
+		sincronizando,
+		marcarDeferida,
+		sincronizar,
+	};
+}

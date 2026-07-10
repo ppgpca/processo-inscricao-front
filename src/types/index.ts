@@ -135,11 +135,15 @@ export interface InscritoPorLinhaPesquisa {
 }
 
 export interface InscritoDashboard {
+	idInscricao: number;
+	nome: string;
 	cpf: string;
 	linhaPesquisa: string;
 	siglaLinhaPesquisa: string;
 	anteprojeto: string;
 	palavrasChave: string[];
+	dataInscricao: string;
+	deferida: boolean | null;
 }
 
 export interface DadosDashboard {
