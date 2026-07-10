@@ -1,0 +1,57 @@
+const Permissoes = {};
+
+Permissoes.GRUPOS = {
+	ADMIN: 1,
+	DOCENTE: 2,
+	CANDIDATO: 3,
+};
+
+Permissoes.EDITAL = {
+	VISUALIZAR: 1,
+	VISUALIZAR_TODOS: 2,
+	CRIAR: 3,
+	EDITAR: 4,
+	DELETAR: 5,
+};
+
+Permissoes.INSCRICAO = {
+	VISUALIZAR: 6,
+	VISUALIZAR_TODAS: 7,
+	CRIAR: 8,
+	EDITAR: 9,
+	DELETAR: 10,
+};
+
+Permissoes.CANDIDATO = {
+	VISUALIZAR: 11,
+	VISUALIZAR_TODOS: 12,
+	CRIAR: 13,
+	EDITAR: 14,
+	DELETAR: 15,
+};
+
+Permissoes.DOCUMENTO = {
+	VISUALIZAR: 16,
+	VISUALIZAR_TODOS: 17,
+	CRIAR: 18,
+	EDITAR: 19,
+	DELETAR: 20,
+};
+
+Permissoes.LINHA_PESQUISA = {
+	VISUALIZAR: 21,
+	VISUALIZAR_TODAS: 22,
+	CRIAR: 23,
+	EDITAR: 24,
+	DELETAR: 25,
+};
+
+Permissoes.DOCENTE = {
+	VISUALIZAR: 26,
+	VISUALIZAR_TODOS: 27,
+	CRIAR: 28,
+	EDITAR: 29,
+	DELETAR: 30,
+};
+
+export { Permissoes };
