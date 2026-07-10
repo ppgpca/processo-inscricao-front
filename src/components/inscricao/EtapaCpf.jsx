@@ -35,6 +35,7 @@ export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarIn
   const [confirmNumeroInscricao, setConfirmNumeroInscricao] = useState('')
   const [inscricaoEncontrada, setInscricaoEncontrada] = useState(null)
   const [candidatoEncontrado, setCandidatoEncontrado] = useState(null)
+  const [inscricaoHistoricoEncontrada, setInscricaoHistoricoEncontrada] = useState(null)
 
   const formatarCpf = (valor) => {
     const digits = valor.replace(/\D/g, '').slice(0, 11)
@@ -55,13 +56,14 @@ export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarIn
     setErro('')
     setLoading(true)
     try {
-      const { inscricaoExistente, candidatoExistente } = await onCpfSubmit(cpfLimpo)
+      const { inscricaoExistente, candidatoExistente, inscricaoHistorico } = await onCpfSubmit(cpfLimpo)
       setCandidatoEncontrado(candidatoExistente)
+      setInscricaoHistoricoEncontrada(inscricaoHistorico)
       if (inscricaoExistente) {
         setInscricaoEncontrada(inscricaoExistente)
         setModalOpen(true)
       } else {
-        onIniciarNova(null, candidatoExistente)
+        onIniciarNova(null, candidatoExistente, inscricaoHistorico)
       }
     } catch {
       setErro('Erro ao verificar CPF. Tente novamente.')
@@ -105,7 +107,7 @@ export default function EtapaCpf({ onCpfSubmit, onContinuarExistente, onEditarIn
   const handleConfirmarNovaInscricao = () => {
     setConfirmNovaOpen(false)
     setConfirmNumeroInscricao('')
-    onIniciarNova(inscricaoEncontrada, candidatoEncontrado)
+    onIniciarNova(inscricaoEncontrada, candidatoEncontrado, inscricaoHistoricoEncontrada)
   }
 
   const numeroInscricaoConfirmadoCorreto =

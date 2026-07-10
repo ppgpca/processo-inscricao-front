@@ -97,19 +97,19 @@ export function useInscricao(edital) {
         candidatoService.findByCpf(cpfInformado),
       ])
 
+      let inscricaoHistoricoEncontrada = null
+      if (candidatoExistente) {
+        setCandidato(candidatoExistente)
+        inscricaoHistoricoEncontrada = await inscricaoService.findMaisRecentePorCpf(cpfInformado).catch(() => null)
+        setInscricaoHistorico(inscricaoHistoricoEncontrada)
+      }
+
       if (inscricaoExistente) {
         setInscricao(inscricaoExistente)
         carregarDadosExistentes(inscricaoExistente, candidatoExistente)
-      } else if (candidatoExistente) {
-        const maisRecente = await inscricaoService.findMaisRecentePorCpf(cpfInformado).catch(() => null)
-        setInscricaoHistorico(maisRecente)
       }
 
-      if (candidatoExistente) {
-        setCandidato(candidatoExistente)
-      }
-
-      return { inscricaoExistente, candidatoExistente }
+      return { inscricaoExistente, candidatoExistente, inscricaoHistorico: inscricaoHistoricoEncontrada }
     },
     [edital, carregarDadosExistentes],
   )
@@ -143,7 +143,7 @@ export function useInscricao(edital) {
   )
 
   const iniciarNovaInscricao = useCallback(
-    async (inscricaoAnterior, candExistente) => {
+    async (inscricaoAnterior, candExistente, inscricaoHistoricoParam) => {
       if (!edital) throw new Error('Nenhum edital vigente encontrado.')
 
       if (inscricaoAnterior) {
@@ -169,7 +169,10 @@ export function useInscricao(edital) {
         setCandidato(candExistente)
       }
 
-      const fonteDc = inscricaoAnterior?.dadosComplementares ?? inscricaoHistorico?.dadosComplementares
+      const fonteDc =
+        inscricaoAnterior?.dadosComplementares ??
+        inscricaoHistoricoParam?.dadosComplementares ??
+        inscricaoHistorico?.dadosComplementares
       if (fonteDc) {
         setDadosComplementares({
           graduacao1: fonteDc.graduacao1 ?? { curso: '', instituicao: '', anoConclusao: '' },
