@@ -13,6 +13,7 @@ import Navbar from "./components/Navbar";
 import InscricaoStepper from "./components/InscricaoStepper";
 import Login from "./components/login/Login";
 import Dashboard from "./components/Dashboard";
+import AvaliarAnteprojetos from "./components/gestao/AvaliarAnteprojetos";
 import GerenciarCandidatos from "./components/gestao/GerenciarCandidatos";
 
 interface DrawerContextValue {
@@ -125,6 +126,24 @@ function AppRoutes() {
 								grupos={[Permissoes.GRUPOS.ADMIN, Permissoes.GRUPOS.COORDENADOR]}
 							>
 								<GerenciarCandidatos />
+							</PermissionContext>
+						</GestaoLayout>
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path="/gestao/avaliacao"
+				element={
+					<ProtectedRoute>
+						<GestaoLayout>
+							<PermissionContext
+								grupos={[
+									Permissoes.GRUPOS.ADMIN,
+									Permissoes.GRUPOS.COORDENADOR,
+									Permissoes.GRUPOS.DOCENTE,
+								]}
+							>
+								<AvaliarAnteprojetos />
 							</PermissionContext>
 						</GestaoLayout>
 					</ProtectedRoute>

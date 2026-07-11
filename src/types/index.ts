@@ -49,6 +49,8 @@ export interface Edital {
 	ano: number;
 	dataInicioInscricao: string;
 	dataFimInscricao: string;
+	dataInicioAvaliacao?: string | null;
+	dataFimAvaliacao?: string | null;
 	urlEditalPdf?: string;
 	tiposDocumento?: TipoDocumentoEdital[];
 }
@@ -150,6 +152,25 @@ export interface DadosDashboard {
 	inscricoesPorDia: InscricaoPorDia[];
 	inscritosPorLinhaPesquisa: InscritoPorLinhaPesquisa[];
 	inscritos: InscritoDashboard[];
+}
+
+export interface CriterioAvaliacao {
+	id: number;
+	idCriterioPai: number | null;
+	nome: string;
+	descricao?: string | null;
+	notaMaxima: number;
+	peso: number;
+	ordem: number;
+}
+
+export interface CandidatoAvaliacao {
+	idInscricao: number;
+	cpf: string;
+	anteprojeto: string;
+	palavrasChave: string[];
+	nota: number;
+	comentario: string | null;
 }
 
 export type ThemeMode = "light" | "dark";

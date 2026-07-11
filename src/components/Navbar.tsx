@@ -15,6 +15,7 @@ import {
 	useTheme,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import GavelIcon from "@mui/icons-material/Gavel";
 import GroupIcon from "@mui/icons-material/Group";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router";
@@ -87,6 +88,24 @@ export default function Navbar() {
 								<GroupIcon />
 							</ListItemIcon>
 							<ListItemText primary="Gerenciar Candidatos" />
+						</ListItemButton>
+					</ListItem>
+				</PermissionContext>
+
+				<PermissionContext
+					grupos={[
+						Permissoes.GRUPOS.ADMIN,
+						Permissoes.GRUPOS.COORDENADOR,
+						Permissoes.GRUPOS.DOCENTE,
+					]}
+					showError={false}
+				>
+					<ListItem disablePadding>
+						<ListItemButton onClick={() => navegar("/gestao/avaliacao")}>
+							<ListItemIcon>
+								<GavelIcon />
+							</ListItemIcon>
+							<ListItemText primary="Avaliar Anteprojetos" />
 						</ListItemButton>
 					</ListItem>
 				</PermissionContext>
