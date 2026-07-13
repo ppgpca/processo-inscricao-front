@@ -29,6 +29,18 @@ export function useGerenciarCandidatos() {
 			try {
 				const lista = await editalService.findAll();
 				setEditais(lista);
+
+				const agora = new Date();
+				const emAvaliacao = lista.find((e) => {
+					if (!e.dataInicioAvaliacao || !e.dataFimAvaliacao) return false;
+					return (
+						new Date(e.dataInicioAvaliacao) <= agora &&
+						agora <= new Date(e.dataFimAvaliacao)
+					);
+				});
+				if (emAvaliacao) {
+					setEditalSelecionado(emAvaliacao.id);
+				}
 			} catch {
 				setErro("Não foi possível carregar os editais.");
 			} finally {

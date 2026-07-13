@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import {
 	DataGrid,
 	type DataGridProps,
@@ -8,6 +9,7 @@ import {
 	type GridRowHeightReturnValue,
 	type GridColumnVisibilityModel,
 } from "@mui/x-data-grid";
+import { customColors } from "../../theme/customColors";
 
 interface CustomDataGridProps
 	extends Omit<
@@ -48,6 +50,12 @@ export default function CustomDataGrid({
 	sx = {},
 	...otherProps
 }: CustomDataGridProps) {
+	const theme = useTheme();
+	const iconColor =
+		theme.palette.mode === "light"
+			? customColors.teal
+			: customColors.platinum;
+
 	const defaultSx: DataGridProps["sx"] = {
 		"& .MuiDataGrid-cell": {
 			display: "flex",
@@ -59,6 +67,18 @@ export default function CustomDataGrid({
 			display: "flex",
 			alignItems: "center",
 			justifyContent: "flex-start",
+		},
+		"& .MuiIconButton-root": {
+			color: iconColor,
+		},
+		"& .MuiIconButton-root .MuiSvgIcon-root": {
+			color: iconColor,
+		},
+		"& .MuiIconButton-root:hover": {
+			color:
+				theme.palette.mode === "light"
+					? customColors.darkGray
+					: customColors.veronica,
 		},
 		...(sx as object),
 	};

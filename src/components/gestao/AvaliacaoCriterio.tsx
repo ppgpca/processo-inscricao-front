@@ -40,19 +40,21 @@ const dataGridBgSx = (bgColor: string) => ({
 });
 
 /**
- * Célula isolada com estado local para evitar perda de foco ao redigitar.
- * onNotaChange e onErrorChange são chamados a cada tecla.
+ * Campo de nota isolado com estado local para evitar perda de foco.
+ * Funciona tanto dentro do DataGrid quanto standalone (modo folha).
  */
 const NotaCell = memo(function NotaCell({
 	criterioId,
 	notaMaxima,
 	onNotaChange,
 	onErrorChange,
+	size = "small",
 }: {
 	criterioId: number;
 	notaMaxima: number;
 	onNotaChange: (id: number, valor: number) => void;
 	onErrorChange: (id: number, hasError: boolean) => void;
+	size?: "small" | "medium";
 }) {
 	const [rawValue, setRawValue] = useState("0");
 
@@ -82,7 +84,7 @@ const NotaCell = memo(function NotaCell({
 	return (
 		<TextField
 			type="number"
-			size="small"
+			size={size}
 			value={rawValue}
 			onChange={handleChange}
 			error={hasError}
@@ -94,7 +96,7 @@ const NotaCell = memo(function NotaCell({
 						: undefined
 			}
 			inputProps={{ min: 0, max: notaMaxima, step: 0.1 }}
-			sx={{ width: 140 }}
+			sx={{ width: size === "medium" ? 200 : 140 }}
 		/>
 	);
 });
@@ -119,6 +121,7 @@ export default function AvaliacaoCriterio({
 	const theme = useTheme();
 
 	const [subCriterios, setSubCriterios] = useState<SubCriterioRow[]>([]);
+	const [isLeaf, setIsLeaf] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [erro, setErro] = useState<string | null>(null);
 
@@ -144,21 +147,31 @@ export default function AvaliacaoCriterio({
 			setErro(null);
 			try {
 				const subs = await docenteService.findSubCriteriosByPai(criterio.id);
-				const rows: SubCriterioRow[] = subs.map((s) => ({
-					id: s.id,
-					nome: s.nome,
-					notaMaxima: Number(s.notaMaxima),
-				}));
-				setSubCriterios(rows);
 
-				const init: Record<number, number> = {};
-				const initErrors: Record<number, boolean> = {};
-				rows.forEach((r) => {
-					init[r.id] = 0;
-					initErrors[r.id] = false;
-				});
-				notasRef.current = init;
-				errorsRef.current = initErrors;
+				if (subs.length === 0) {
+					// Critério folha: usa o próprio critério como única nota
+					setIsLeaf(true);
+					setSubCriterios([]);
+					notasRef.current = { [criterio.id]: 0 };
+					errorsRef.current = { [criterio.id]: false };
+				} else {
+					setIsLeaf(false);
+					const rows: SubCriterioRow[] = subs.map((s) => ({
+						id: s.id,
+						nome: s.nome,
+						notaMaxima: Number(s.notaMaxima),
+					}));
+					setSubCriterios(rows);
+					const init: Record<number, number> = {};
+					const initErrors: Record<number, boolean> = {};
+					rows.forEach((r) => {
+						init[r.id] = 0;
+						initErrors[r.id] = false;
+					});
+					notasRef.current = init;
+					errorsRef.current = initErrors;
+				}
+
 				setSomatorio(0);
 				setHasErrors(false);
 			} catch {
@@ -185,40 +198,55 @@ export default function AvaliacaoCriterio({
 		if (hasErrors || salvando) return;
 		setSalvando(true);
 		try {
-			// Notas individuais de cada subcritério
-			const notasSubCriterios = Object.entries(notasRef.current).map(
-				([idCriterioAvaliacao, nota]) => ({
-					idInscricao: candidato.idInscricao,
-					idCriterioAvaliacao: Number(idCriterioAvaliacao),
-					nota,
-				}),
-			);
+			let payload: {
+				idInscricao: number;
+				idCriterioAvaliacao: number;
+				nota: number;
+			}[];
 
-			// Nota final do critério pai = somatório calculado direto da ref
-			const notaTotal = Object.values(notasRef.current).reduce(
-				(a, b) => a + b,
-				0,
-			);
+			if (isLeaf) {
+				// Critério folha: salva apenas a nota do próprio critério
+				payload = [
+					{
+						idInscricao: candidato.idInscricao,
+						idCriterioAvaliacao: criterio.id,
+						nota: notasRef.current[criterio.id] ?? 0,
+					},
+				];
+			} else {
+				// Critério com filhos: salva notas individuais + somatório no pai
+				const notasSubCriterios = Object.entries(notasRef.current).map(
+					([idCriterioAvaliacao, nota]) => ({
+						idInscricao: candidato.idInscricao,
+						idCriterioAvaliacao: Number(idCriterioAvaliacao),
+						nota,
+					}),
+				);
+				const notaTotal = Object.values(notasRef.current).reduce(
+					(a, b) => a + b,
+					0,
+				);
+				payload = [
+					...notasSubCriterios,
+					{
+						idInscricao: candidato.idInscricao,
+						idCriterioAvaliacao: criterio.id,
+						nota: notaTotal,
+					},
+				];
+			}
 
-			await docenteService.salvarNotas([
-				...notasSubCriterios,
-				{
-					idInscricao: candidato.idInscricao,
-					idCriterioAvaliacao: criterio.id,
-					nota: notaTotal,
-				},
-			]);
-
+			await docenteService.salvarNotas(payload);
 			setSnackbar({
 				open: true,
 				severity: "success",
-				message: "Notas salvas com sucesso!",
+				message: "Nota salva com sucesso!",
 			});
 		} catch {
 			setSnackbar({
 				open: true,
 				severity: "error",
-				message: "Erro ao salvar as notas. Tente novamente.",
+				message: "Erro ao salvar. Tente novamente.",
 			});
 		} finally {
 			setSalvando(false);
@@ -275,6 +303,7 @@ export default function AvaliacaoCriterio({
 
 	return (
 		<Box>
+			{/* Barra de ações: Voltar + Salvar */}
 			<Box
 				sx={{
 					display: "flex",
@@ -293,7 +322,7 @@ export default function AvaliacaoCriterio({
 					Voltar
 				</Button>
 
-				{!loading && subCriterios.length > 0 && (
+				{!loading && (
 					<Button
 						variant="contained"
 						startIcon={
@@ -334,7 +363,7 @@ export default function AvaliacaoCriterio({
 				))}
 			</Box>
 
-			{/* Informações do critério pai */}
+			{/* Informações do critério */}
 			<Card
 				sx={{
 					mb: 3,
@@ -366,6 +395,14 @@ export default function AvaliacaoCriterio({
 							size="small"
 							variant="outlined"
 						/>
+						{isLeaf && !loading && (
+							<Chip
+								label="Critério folha"
+								size="small"
+								variant="outlined"
+								color="secondary"
+							/>
+						)}
 					</Box>
 				</CardContent>
 			</Card>
@@ -380,11 +417,55 @@ export default function AvaliacaoCriterio({
 				<Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
 					<CircularProgress />
 				</Box>
-			) : subCriterios.length === 0 ? (
-				<Typography variant="body2" color="text.secondary">
-					Nenhum subcritério encontrado para este critério.
-				</Typography>
+			) : isLeaf ? (
+				/* ── Modo folha: campo único de nota ── */
+				<Card sx={{ backgroundColor: theme.palette.background.default }}>
+					<CardContent>
+						{hasErrors && (
+							<Alert severity="warning" sx={{ mb: 2 }}>
+								Corrija o campo antes de salvar.
+							</Alert>
+						)}
+
+						<Box
+							sx={{
+								display: "flex",
+								alignItems: "center",
+								gap: 2,
+								mb: 2,
+							}}
+						>
+							<NotaCell
+								criterioId={criterio.id}
+								notaMaxima={notaMaximaPai}
+								onNotaChange={onNotaChange}
+								onErrorChange={onErrorChange}
+								size="medium"
+							/>
+							<Typography variant="body1" color="text.secondary">
+								/ {notaMaximaPai}
+							</Typography>
+						</Box>
+
+						<LinearProgress
+							variant="determinate"
+							value={percentual}
+							color={excedeu ? "error" : "primary"}
+							sx={{ height: 8, borderRadius: 4 }}
+						/>
+						{excedeu && (
+							<Typography
+								variant="caption"
+								color="error"
+								sx={{ mt: 0.5, display: "block" }}
+							>
+								Nota excede o máximo permitido ({notaMaximaPai}).
+							</Typography>
+						)}
+					</CardContent>
+				</Card>
 			) : (
+				/* ── Modo com filhos: grid + somatório ── */
 				<>
 					{hasErrors && (
 						<Alert severity="warning" sx={{ mb: 2 }}>
@@ -392,7 +473,6 @@ export default function AvaliacaoCriterio({
 						</Alert>
 					)}
 
-					{/* Grid de subcritérios */}
 					<Card
 						sx={{ backgroundColor: theme.palette.background.default }}
 					>
