@@ -20,11 +20,20 @@ import {
 	Typography,
 } from "@mui/material";
 import GavelIcon from "@mui/icons-material/Gavel";
+import EditIcon from "@mui/icons-material/Edit";
 import SyncIcon from "@mui/icons-material/Sync";
-import type { GridColDef } from "@mui/x-data-grid";
+import type {
+	GridColDef,
+	GridColumnGroupingModel,
+} from "@mui/x-data-grid";
 import { useTheme } from "@mui/material/styles";
 import { GridToolbarQuickFilter } from "@mui/x-data-grid";
-import type { InscritoDashboard } from "../../types";
+import { useNavigate } from "react-router";
+import type {
+	AvaliacaoInscrito,
+	InscritoDashboard,
+	NavegacaoEdicaoAvaliacao,
+} from "../../types";
 import CustomDataGrid from "../customs/CustomDataGrid";
 import { useGerenciarCandidatos } from "../../hooks/useGerenciarCandidatos";
 
@@ -39,6 +48,8 @@ const MENU_FECHADO: MenuState = {
 	idInscricao: null,
 	valorEfetivo: null,
 };
+
+const ALTURA_LINHA_AVALIACAO = 32;
 
 function mascaraCpf(cpf: string): string {
 	if (!cpf) return "";
@@ -55,6 +66,14 @@ function formatarData(dataStr: string): string {
 		day: "2-digit",
 		month: "2-digit",
 		year: "numeric",
+	});
+}
+
+function formatarNota(nota: number | null): string {
+	if (nota === null || nota === undefined || Number.isNaN(nota)) return "-";
+	return Number(nota).toLocaleString("pt-BR", {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
 	});
 }
 
@@ -146,8 +165,132 @@ function ChipDeferida({
 	);
 }
 
+function CelulaAvaliacaoSubdividida({
+	avaliacoes,
+	campo,
+	onAbrirMenuAvaliadores,
+}: {
+	avaliacoes: AvaliacaoInscrito[];
+	campo: "nome" | "nota";
+	onAbrirMenuAvaliadores?: (
+		event: React.MouseEvent<HTMLElement>,
+		avaliacao: AvaliacaoInscrito,
+	) => void;
+}) {
+	if (!avaliacoes || avaliacoes.length === 0) {
+		return (
+			<Typography
+				variant="body2"
+				color="text.disabled"
+				sx={{ fontStyle: "italic" }}
+			>
+				—
+			</Typography>
+		);
+	}
+
+	return (
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: "column",
+				width: "100%",
+				alignSelf: "stretch",
+			}}
+		>
+			{avaliacoes.map((avaliacao, index) => (
+				<Box
+					key={avaliacao.idCriterio}
+					sx={{
+						minHeight: ALTURA_LINHA_AVALIACAO,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: campo === "nota" ? "flex-end" : "flex-start",
+						gap: 0.25,
+						px: 0.5,
+						borderBottom:
+							index < avaliacoes.length - 1
+								? "1px solid"
+								: "none",
+						borderColor: "divider",
+					}}
+				>
+					{campo === "nome" ? (
+						<Typography variant="body2" sx={{ lineHeight: 1.2 }}>
+							<Box component="span" sx={{ fontWeight: 700 }}>
+								{avaliacao.nome}
+							</Box>{" "}
+							<Box
+								component="span"
+								sx={{ fontWeight: 400, color: "text.secondary" }}
+							>
+								({avaliacao.qtdAvaliadores ?? 0})
+							</Box>
+						</Typography>
+					) : (
+						<>
+							<Typography
+								variant="body2"
+								sx={{
+									lineHeight: 1.2,
+									fontVariantNumeric: "tabular-nums",
+								}}
+								color={
+									avaliacao.nota === null
+										? "text.disabled"
+										: "text.primary"
+								}
+							>
+								{formatarNota(avaliacao.nota)}
+							</Typography>
+							{onAbrirMenuAvaliadores && (
+								<Tooltip
+									title={
+										(avaliacao.avaliadores?.length ?? 0) === 0
+											? "Nenhum avaliador atribuiu nota"
+											: "Editar nota de um avaliador"
+									}
+								>
+									<span>
+										<IconButton
+											size="small"
+											disabled={
+												(avaliacao.avaliadores?.length ?? 0) === 0
+											}
+											onClick={(e) => {
+												e.stopPropagation();
+												onAbrirMenuAvaliadores(e, avaliacao);
+											}}
+											sx={{ p: 0.25 }}
+										>
+											<EditIcon sx={{ fontSize: 16 }} />
+										</IconButton>
+									</span>
+								</Tooltip>
+							)}
+						</>
+					)}
+				</Box>
+			))}
+		</Box>
+	);
+}
+
+const columnGroupingModel: GridColumnGroupingModel = [
+	{
+		groupId: "avaliacoes",
+		headerName: "Avaliações",
+		headerAlign: "center",
+		children: [
+			{ field: "avaliacaoCriterio" },
+			{ field: "avaliacaoNota" },
+		],
+	},
+];
+
 export default function GerenciarCandidatos() {
 	const theme = useTheme();
+	const navigate = useNavigate();
 	const {
 		editais,
 		editalSelecionado,
@@ -164,6 +307,17 @@ export default function GerenciarCandidatos() {
 	} = useGerenciarCandidatos();
 
 	const [menuState, setMenuState] = useState<MenuState>(MENU_FECHADO);
+	const [menuAvaliadores, setMenuAvaliadores] = useState<{
+		anchorEl: HTMLElement | null;
+		inscrito: InscritoDashboard | null;
+		avaliacao: AvaliacaoInscrito | null;
+		codigoSelecionado: string;
+	}>({
+		anchorEl: null,
+		inscrito: null,
+		avaliacao: null,
+		codigoSelecionado: "",
+	});
 
 	const handleAbrirMenu = (
 		event: React.MouseEvent<HTMLElement>,
@@ -179,6 +333,59 @@ export default function GerenciarCandidatos() {
 		if (menuState.idInscricao === null) return;
 		marcarDeferida(menuState.idInscricao, valor);
 		handleFecharMenu();
+	};
+
+	const handleAbrirMenuAvaliadores = (
+		event: React.MouseEvent<HTMLElement>,
+		inscrito: InscritoDashboard,
+		avaliacao: AvaliacaoInscrito,
+	) => {
+		setMenuAvaliadores({
+			anchorEl: event.currentTarget,
+			inscrito,
+			avaliacao,
+			codigoSelecionado: "",
+		});
+	};
+
+	const handleFecharMenuAvaliadores = () => {
+		setMenuAvaliadores({
+			anchorEl: null,
+			inscrito: null,
+			avaliacao: null,
+			codigoSelecionado: "",
+		});
+	};
+
+	const handleSelecionarAvaliador = (codigoDocente: string) => {
+		const { inscrito, avaliacao } = menuAvaliadores;
+		if (!inscrito || !avaliacao || !editalSelecionado) return;
+
+		const state: NavegacaoEdicaoAvaliacao = {
+			origem: "candidatos",
+			idEdital: Number(editalSelecionado),
+			codigoDocente,
+			criterio: {
+				id: avaliacao.idCriterio,
+				idCriterioPai: null,
+				nome: avaliacao.nome,
+				descricao: avaliacao.descricao ?? null,
+				notaMaxima: avaliacao.notaMaxima,
+				peso: avaliacao.peso,
+				ordem: avaliacao.ordem,
+			},
+			candidato: {
+				idInscricao: inscrito.idInscricao,
+				cpf: inscrito.cpf,
+				anteprojeto: inscrito.anteprojeto,
+				palavrasChave: inscrito.palavrasChave ?? [],
+				nota: avaliacao.nota ?? 0,
+				comentario: null,
+			},
+		};
+
+		handleFecharMenuAvaliadores();
+		navigate("/gestao/avaliacao", { state });
 	};
 
 	const colunas = useMemo<GridColDef[]>(
@@ -259,6 +466,42 @@ export default function GerenciarCandidatos() {
 				},
 			},
 			{
+				field: "avaliacaoCriterio",
+				headerName: "Critério",
+				width: 180,
+				sortable: false,
+				filterable: false,
+				renderCell: (params) => (
+					<CelulaAvaliacaoSubdividida
+						avaliacoes={
+							(params.row as InscritoDashboard).avaliacoes ?? []
+						}
+						campo="nome"
+					/>
+				),
+			},
+			{
+				field: "avaliacaoNota",
+				headerName: "Nota",
+				width: 120,
+				sortable: false,
+				filterable: false,
+				align: "right",
+				headerAlign: "right",
+				renderCell: (params) => {
+					const row = params.row as InscritoDashboard;
+					return (
+						<CelulaAvaliacaoSubdividida
+							avaliacoes={row.avaliacoes ?? []}
+							campo="nota"
+							onAbrirMenuAvaliadores={(e, avaliacao) =>
+								handleAbrirMenuAvaliadores(e, row, avaliacao)
+							}
+						/>
+					);
+				},
+			},
+			{
 				field: "dataInscricao",
 				headerName: "Data de inscrição",
 				width: 150,
@@ -322,7 +565,7 @@ export default function GerenciarCandidatos() {
 			},
 		],
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[alteracoesPendentes],
+		[alteracoesPendentes, editalSelecionado],
 	);
 
 	const rows = inscritos.map((inscrito: InscritoDashboard) => ({
@@ -456,12 +699,18 @@ export default function GerenciarCandidatos() {
 									pageSize={10}
 									getRowId={(row) => row.id}
 									getRowHeight={() => "auto"}
+									columnGroupingModel={columnGroupingModel}
 									slots={{ toolbar: BarraBusca }}
 									sx={{
 										...dataGridBgSx(theme.palette.background.default),
 										"& .MuiDataGrid-cell": {
 											alignItems: "flex-start",
 											py: 1,
+										},
+										"& .MuiDataGrid-columnHeader--filledGroup": {
+											"& .MuiDataGrid-columnHeaderTitleContainer": {
+												justifyContent: "center",
+											},
 										},
 									}}
 								/>
@@ -502,6 +751,42 @@ export default function GerenciarCandidatos() {
 					/>
 					<ListItemText primary="Indeferir" />
 				</MenuItem>
+			</Menu>
+
+			{/* Menu de avaliadores para edição de nota */}
+			<Menu
+				anchorEl={menuAvaliadores.anchorEl}
+				open={Boolean(menuAvaliadores.anchorEl)}
+				onClose={handleFecharMenuAvaliadores}
+				slotProps={{ paper: { sx: { minWidth: 240 } } }}
+			>
+				<Typography
+					variant="caption"
+					color="text.secondary"
+					sx={{ px: 2, pt: 1, pb: 0.5, display: "block" }}
+				>
+					Selecione o avaliador
+				</Typography>
+				{(menuAvaliadores.avaliacao?.avaliadores ?? []).map((avaliador) => (
+					<MenuItem
+						key={avaliador.codigoDocente}
+						dense
+						onClick={() =>
+							handleSelecionarAvaliador(avaliador.codigoDocente)
+						}
+					>
+						<Radio
+							checked={
+								menuAvaliadores.codigoSelecionado ===
+								avaliador.codigoDocente
+							}
+							size="small"
+							sx={{ p: 0, mr: 1 }}
+							readOnly
+						/>
+						<ListItemText primary={avaliador.nome} />
+					</MenuItem>
+				))}
 			</Menu>
 		</Box>
 	);

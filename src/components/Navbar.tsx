@@ -105,7 +105,7 @@ export default function Navbar() {
 							<ListItemIcon>
 								<GavelIcon />
 							</ListItemIcon>
-							<ListItemText primary="Avaliar Anteprojetos" />
+							<ListItemText primary="Avaliar Candidatos" />
 						</ListItemButton>
 					</ListItem>
 				</PermissionContext>

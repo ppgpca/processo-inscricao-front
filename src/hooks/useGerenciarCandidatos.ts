@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router";
 import { dashboardService } from "../services/dashboard.service";
 import { editalService } from "../services/edital.service";
 import { inscricaoService } from "../services/inscricao.service";
 import type { Edital, InscritoDashboard } from "../types";
 
 export function useGerenciarCandidatos() {
+	const location = useLocation();
+	const idEditalRetorno =
+		(location.state as { idEdital?: number } | null)?.idEdital ?? null;
+
 	const [editais, setEditais] = useState<Edital[]>([]);
 	const [editalSelecionado, setEditalSelecionado] = useState<number | "">("");
 	const [inscritos, setInscritos] = useState<InscritoDashboard[]>([]);
@@ -30,6 +35,11 @@ export function useGerenciarCandidatos() {
 				const lista = await editalService.findAll();
 				setEditais(lista);
 
+				if (idEditalRetorno && lista.some((e) => e.id === idEditalRetorno)) {
+					setEditalSelecionado(idEditalRetorno);
+					return;
+				}
+
 				const agora = new Date();
 				const emAvaliacao = lista.find((e) => {
 					if (!e.dataInicioAvaliacao || !e.dataFimAvaliacao) return false;
@@ -48,7 +58,7 @@ export function useGerenciarCandidatos() {
 			}
 		};
 		carregarEditais();
-	}, []);
+	}, [idEditalRetorno]);
 
 	useEffect(() => {
 		if (!editalSelecionado) {

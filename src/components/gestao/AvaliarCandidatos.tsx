@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
 	Alert,
 	Box,
@@ -18,9 +18,14 @@ import EditIcon from "@mui/icons-material/Edit";
 import { useTheme } from "@mui/material/styles";
 import { GridToolbarQuickFilter } from "@mui/x-data-grid";
 import type { GridColDef } from "@mui/x-data-grid";
-import type { CandidatoAvaliacao, CriterioAvaliacao } from "../../types";
+import { useLocation, useNavigate } from "react-router";
+import type {
+	CandidatoAvaliacao,
+	CriterioAvaliacao,
+	NavegacaoEdicaoAvaliacao,
+} from "../../types";
 import CustomDataGrid from "../customs/CustomDataGrid";
-import { useAvaliarAnteprojetos } from "../../hooks/useAvaliarAnteprojetos";
+import { useAvaliarCandidatos } from "../../hooks/useAvaliarCandidatos";
 import AvaliacaoCriterio from "./AvaliacaoCriterio";
 
 function mascaraCpf(cpf: string): string {
@@ -57,10 +62,15 @@ function BarraBusca() {
 interface AvaliacaoAtiva {
 	candidato: CandidatoAvaliacao;
 	criterio: CriterioAvaliacao;
+	codigoDocente?: string;
+	voltarParaCandidatos?: boolean;
+	idEdital?: number;
 }
 
-export default function AvaliarAnteprojetos() {
+export default function AvaliarCandidatos() {
 	const theme = useTheme();
+	const location = useLocation();
+	const navigate = useNavigate();
 	const {
 		editais,
 		editalSelecionado,
@@ -73,11 +83,29 @@ export default function AvaliarAnteprojetos() {
 		loadingCriterios,
 		loadingCandidatos,
 		erro,
-	} = useAvaliarAnteprojetos();
+	} = useAvaliarCandidatos();
+
+	const stateOrigem = location.state as NavegacaoEdicaoAvaliacao | null;
+	const veioDeCandidatos = stateOrigem?.origem === "candidatos";
 
 	const [avaliacaoAtiva, setAvaliacaoAtiva] = useState<AvaliacaoAtiva | null>(
-		null,
+		() =>
+			veioDeCandidatos && stateOrigem
+				? {
+						candidato: stateOrigem.candidato,
+						criterio: stateOrigem.criterio,
+						codigoDocente: stateOrigem.codigoDocente,
+						voltarParaCandidatos: true,
+						idEdital: stateOrigem.idEdital,
+					}
+				: null,
 	);
+
+	useEffect(() => {
+		if (!veioDeCandidatos || !stateOrigem) return;
+		setEditalSelecionado(stateOrigem.idEdital);
+		setCriterioSelecionado(stateOrigem.criterio.id);
+	}, [veioDeCandidatos, stateOrigem, setEditalSelecionado, setCriterioSelecionado]);
 
 	const criterioAtual = criterios.find(
 		(cr) => cr.id === Number(criterioSelecionado),
@@ -92,6 +120,16 @@ export default function AvaliarAnteprojetos() {
 		if (!criterio) return;
 		setAvaliacaoAtiva({ candidato, criterio });
 	}, []);
+
+	const handleVoltarAvaliacao = () => {
+		if (avaliacaoAtiva?.voltarParaCandidatos) {
+			navigate("/gestao/candidatos", {
+				state: { idEdital: avaliacaoAtiva.idEdital },
+			});
+			return;
+		}
+		setAvaliacaoAtiva(null);
+	};
 
 	const colunas = useMemo<GridColDef[]>(
 		() => [
@@ -202,7 +240,8 @@ export default function AvaliarAnteprojetos() {
 			<AvaliacaoCriterio
 				criterio={avaliacaoAtiva.criterio}
 				candidato={avaliacaoAtiva.candidato}
-				onVoltar={() => setAvaliacaoAtiva(null)}
+				codigoDocente={avaliacaoAtiva.codigoDocente}
+				onVoltar={handleVoltarAvaliacao}
 			/>
 		);
 	}
@@ -210,7 +249,7 @@ export default function AvaliarAnteprojetos() {
 	return (
 		<Box>
 			<Typography variant="h5" sx={{ mb: 3 }}>
-				Avaliar Anteprojetos
+				Avaliar Candidatos
 			</Typography>
 
 			<Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>

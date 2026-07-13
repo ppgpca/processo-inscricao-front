@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { docenteService } from "../services/docente.service";
 import type { CandidatoAvaliacao, CriterioAvaliacao, Edital } from "../types";
 
-export function useAvaliarAnteprojetos() {
+export function useAvaliarCandidatos() {
 	const [editais, setEditais] = useState<Edital[]>([]);
 	const [editalSelecionado, setEditalSelecionado] = useState<number | "">("");
 	const [criterios, setCriterios] = useState<CriterioAvaliacao[]>([]);

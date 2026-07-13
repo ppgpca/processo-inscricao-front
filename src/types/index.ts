@@ -136,6 +136,23 @@ export interface InscritoPorLinhaPesquisa {
 	quantidade: number;
 }
 
+export interface AvaliadorNota {
+	codigoDocente: string;
+	nome: string;
+}
+
+export interface AvaliacaoInscrito {
+	idCriterio: number;
+	nome: string;
+	descricao?: string | null;
+	notaMaxima: number;
+	peso: number;
+	nota: number | null;
+	qtdAvaliadores: number;
+	ordem: number;
+	avaliadores: AvaliadorNota[];
+}
+
 export interface InscritoDashboard {
 	idInscricao: number;
 	nome: string;
@@ -146,6 +163,16 @@ export interface InscritoDashboard {
 	palavrasChave: string[];
 	dataInscricao: string;
 	deferida: boolean | null;
+	avaliacoes?: AvaliacaoInscrito[];
+}
+
+/** Estado de navegação de GerenciarCandidatos → AvaliarCandidatos. */
+export interface NavegacaoEdicaoAvaliacao {
+	origem: "candidatos";
+	idEdital: number;
+	codigoDocente: string;
+	criterio: CriterioAvaliacao;
+	candidato: CandidatoAvaliacao;
 }
 
 export interface DadosDashboard {

@@ -13,7 +13,7 @@ import Navbar from "./components/Navbar";
 import InscricaoStepper from "./components/InscricaoStepper";
 import Login from "./components/login/Login";
 import Dashboard from "./components/Dashboard";
-import AvaliarAnteprojetos from "./components/gestao/AvaliarAnteprojetos";
+import AvaliarCandidatos from "./components/gestao/AvaliarCandidatos";
 import GerenciarCandidatos from "./components/gestao/GerenciarCandidatos";
 
 interface DrawerContextValue {
@@ -143,7 +143,7 @@ function AppRoutes() {
 									Permissoes.GRUPOS.DOCENTE,
 								]}
 							>
-								<AvaliarAnteprojetos />
+								<AvaliarCandidatos />
 							</PermissionContext>
 						</GestaoLayout>
 					</ProtectedRoute>

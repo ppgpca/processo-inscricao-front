@@ -46,17 +46,23 @@ const dataGridBgSx = (bgColor: string) => ({
 const NotaCell = memo(function NotaCell({
 	criterioId,
 	notaMaxima,
+	valorInicial = 0,
 	onNotaChange,
 	onErrorChange,
 	size = "small",
 }: {
 	criterioId: number;
 	notaMaxima: number;
+	valorInicial?: number;
 	onNotaChange: (id: number, valor: number) => void;
 	onErrorChange: (id: number, hasError: boolean) => void;
 	size?: "small" | "medium";
 }) {
-	const [rawValue, setRawValue] = useState("0");
+	const [rawValue, setRawValue] = useState(() => String(valorInicial));
+
+	useEffect(() => {
+		setRawValue(String(valorInicial));
+	}, [valorInicial]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const raw = e.target.value;
@@ -105,17 +111,21 @@ interface SubCriterioRow {
 	id: number;
 	nome: string;
 	notaMaxima: number;
+	nota: number;
 }
 
 interface Props {
 	criterio: CriterioAvaliacao;
 	candidato: CandidatoAvaliacao;
+	/** Quando informado (admin/coordenador), salva as notas em nome deste avaliador. */
+	codigoDocente?: string;
 	onVoltar: () => void;
 }
 
 export default function AvaliacaoCriterio({
 	criterio,
 	candidato,
+	codigoDocente,
 	onVoltar,
 }: Props) {
 	const theme = useTheme();
@@ -124,9 +134,13 @@ export default function AvaliacaoCriterio({
 	const [isLeaf, setIsLeaf] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [erro, setErro] = useState<string | null>(null);
+	const [notasCarregadas, setNotasCarregadas] = useState(false);
 
 	// Ref para notas válidas sem causar re-render no DataGrid
 	const notasRef = useRef<Record<number, number>>({});
+	const [notasIniciais, setNotasIniciais] = useState<Record<number, number>>(
+		{},
+	);
 	const [somatorio, setSomatorio] = useState(0);
 
 	// Rastreio de erros de validação por célula
@@ -144,44 +158,71 @@ export default function AvaliacaoCriterio({
 	useEffect(() => {
 		const carregar = async () => {
 			setLoading(true);
+			setNotasCarregadas(false);
 			setErro(null);
 			try {
-				const subs = await docenteService.findSubCriteriosByPai(criterio.id);
+				const [subs, notasGravadas] = await Promise.all([
+					docenteService.findSubCriteriosByPai(criterio.id),
+					docenteService.findNotasPorInscricaoECriterio(
+						candidato.idInscricao,
+						criterio.id,
+						codigoDocente,
+					),
+				]);
+
+				const listaNotas = Array.isArray(notasGravadas)
+					? notasGravadas
+					: [];
+				const notasMap: Record<number, number> = {};
+				for (const n of listaNotas) {
+					if (n.nota !== null && n.nota !== undefined) {
+						notasMap[Number(n.idCriterioAvaliacao)] = Number(n.nota);
+					}
+				}
 
 				if (subs.length === 0) {
 					// Critério folha: usa o próprio critério como única nota
+					const notaFolha = notasMap[criterio.id] ?? 0;
 					setIsLeaf(true);
 					setSubCriterios([]);
-					notasRef.current = { [criterio.id]: 0 };
+					notasRef.current = { [criterio.id]: notaFolha };
 					errorsRef.current = { [criterio.id]: false };
+					setNotasIniciais({ [criterio.id]: notaFolha });
+					setSomatorio(notaFolha);
 				} else {
 					setIsLeaf(false);
 					const rows: SubCriterioRow[] = subs.map((s) => ({
 						id: s.id,
 						nome: s.nome,
 						notaMaxima: Number(s.notaMaxima),
+						nota: notasMap[s.id] ?? 0,
 					}));
 					setSubCriterios(rows);
 					const init: Record<number, number> = {};
 					const initErrors: Record<number, boolean> = {};
 					rows.forEach((r) => {
-						init[r.id] = 0;
+						init[r.id] = r.nota;
 						initErrors[r.id] = false;
 					});
 					notasRef.current = init;
 					errorsRef.current = initErrors;
+					setNotasIniciais(init);
+					setSomatorio(
+						Object.values(init).reduce((a, b) => a + b, 0),
+					);
 				}
 
-				setSomatorio(0);
 				setHasErrors(false);
+				setNotasCarregadas(true);
 			} catch {
-				setErro("Não foi possível carregar os subcritérios.");
+				setErro("Não foi possível carregar os subcritérios e notas.");
+				setNotasCarregadas(true);
 			} finally {
 				setLoading(false);
 			}
 		};
 		carregar();
-	}, [criterio.id]);
+	}, [criterio.id, candidato.idInscricao, codigoDocente]);
 
 	const onNotaChange = useCallback((id: number, valor: number) => {
 		notasRef.current[id] = valor;
@@ -236,7 +277,7 @@ export default function AvaliacaoCriterio({
 				];
 			}
 
-			await docenteService.salvarNotas(payload);
+			await docenteService.salvarNotas(payload, codigoDocente);
 			setSnackbar({
 				open: true,
 				severity: "success",
@@ -283,8 +324,10 @@ export default function AvaliacaoCriterio({
 				sortable: false,
 				renderCell: (params) => (
 					<NotaCell
+						key={`${params.row.id}-${params.row.nota}`}
 						criterioId={params.row.id as number}
 						notaMaxima={params.row.notaMaxima as number}
+						valorInicial={params.row.nota as number}
 						onNotaChange={onNotaChange}
 						onErrorChange={onErrorChange}
 					/>
@@ -413,7 +456,7 @@ export default function AvaliacaoCriterio({
 				</Alert>
 			)}
 
-			{loading ? (
+			{loading || !notasCarregadas ? (
 				<Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
 					<CircularProgress />
 				</Box>
@@ -436,8 +479,10 @@ export default function AvaliacaoCriterio({
 							}}
 						>
 							<NotaCell
+								key={`folha-${criterio.id}-${notasIniciais[criterio.id] ?? 0}`}
 								criterioId={criterio.id}
 								notaMaxima={notaMaximaPai}
+								valorInicial={notasIniciais[criterio.id] ?? 0}
 								onNotaChange={onNotaChange}
 								onErrorChange={onErrorChange}
 								size="medium"
@@ -481,6 +526,7 @@ export default function AvaliacaoCriterio({
 						>
 							<Box sx={{ minHeight: 200 }}>
 								<CustomDataGrid
+									key={`avaliacao-${criterio.id}-${candidato.idInscricao}-${codigoDocente ?? "me"}`}
 									rows={subCriterios}
 									columns={colunas}
 									pageSize={25}
