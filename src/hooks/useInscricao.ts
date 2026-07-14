@@ -176,7 +176,7 @@ export function useInscricao(edital: Edital | null) {
 
 			const payload = prepararPayloadEtapa2(
 				cpf,
-				edital.id,
+				edital,
 				projetoPesquisa,
 				inscricao,
 			);
@@ -202,12 +202,12 @@ export function useInscricao(edital: Edital | null) {
 	}, [cpf, dadosPessoais, edital, inscricao, projetoPesquisa]);
 
 	const salvarEtapa3 = useCallback(async () => {
-		if (!inscricao) return;
+		if (!inscricao || !edital) return;
 		setSaving(true);
 		try {
 			const atualizada = await inscricaoService.update(
 				inscricao.id,
-				prepararPayloadEtapa3(dadosComplementares),
+				prepararPayloadEtapa3(edital, dadosComplementares),
 			);
 			setInscricao(atualizada);
 			setActiveStep(4);
@@ -217,15 +217,15 @@ export function useInscricao(edital: Edital | null) {
 		} finally {
 			setSaving(false);
 		}
-	}, [dadosComplementares, inscricao]);
+	}, [dadosComplementares, edital, inscricao]);
 
 	const finalizarInscricao = useCallback(async (): Promise<boolean> => {
-		if (!inscricao) return false;
+		if (!inscricao || !edital) return false;
 		setSaving(true);
 		try {
 			const atualizada = await inscricaoService.update(
 				inscricao.id,
-				prepararPayloadFinalizacao(),
+				prepararPayloadFinalizacao(edital),
 			);
 			setInscricao(atualizada);
 			setInscricaoEnviada(true);
@@ -239,7 +239,7 @@ export function useInscricao(edital: Edital | null) {
 		} finally {
 			setSaving(false);
 		}
-	}, [inscricao]);
+	}, [edital, inscricao]);
 
 	const voltarEtapa = useCallback(() => {
 		setActiveStep((prev) => Math.max(0, prev - 1));

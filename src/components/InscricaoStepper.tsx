@@ -24,7 +24,7 @@ import {
 	validarEtapaAtual,
 	obterTextoBotaoProximo,
 } from "../controllers/inscricao-controller";
-import { formatarData } from "../controllers/edital-controller";
+import { formatarData, obterDataFimInscricao, obterDataInicioInscricao } from "../controllers/edital-controller";
 import { todosObrigatoriosEnviados as calcTodosObrigatoriosEnviados } from "../controllers/documentos-controller";
 import EtapaCpf from "./inscricao/EtapaCpf";
 import EtapaDadosPessoais from "./inscricao/EtapaDadosPessoais";
@@ -193,7 +193,7 @@ export default function InscricaoStepper() {
 							</Typography>
 							<Typography variant="h5" sx={{ fontWeight: 700 }}>
 								{formatarData(
-									editalProximo.dataInicioInscricao,
+									obterDataInicioInscricao(editalProximo),
 								)}
 							</Typography>
 						</>
@@ -276,7 +276,7 @@ export default function InscricaoStepper() {
 					>
 						Edital nº {edital.numero} ({edital.ano})
 					</Link>{" "}
-					| Inscrições até {formatarData(edital.dataFimInscricao)}
+					| Inscrições até {formatarData(obterDataFimInscricao(edital))}
 				</Alert>
 			)}
 

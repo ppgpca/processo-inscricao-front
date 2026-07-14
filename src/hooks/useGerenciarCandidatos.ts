@@ -42,10 +42,13 @@ export function useGerenciarCandidatos() {
 
 				const agora = new Date();
 				const emAvaliacao = lista.find((e) => {
-					if (!e.dataInicioAvaliacao || !e.dataFimAvaliacao) return false;
+					const etapa = e.etapas?.find(
+						(et) => et.tipo === "ANALISE_CURRICULO",
+					);
+					if (!etapa?.dataInicio || !etapa?.dataFim) return false;
 					return (
-						new Date(e.dataInicioAvaliacao) <= agora &&
-						agora <= new Date(e.dataFimAvaliacao)
+						new Date(etapa.dataInicio) <= agora &&
+						agora <= new Date(etapa.dataFim)
 					);
 				});
 				if (emAvaliacao) {

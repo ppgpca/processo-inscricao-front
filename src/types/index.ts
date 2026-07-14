@@ -72,10 +72,6 @@ export interface Edital {
 	titulo: string;
 	numero: string;
 	ano: number;
-	dataInicioInscricao: string;
-	dataFimInscricao: string;
-	dataInicioAvaliacao?: string | null;
-	dataFimAvaliacao?: string | null;
 	urlEditalPdf?: string;
 	tiposDocumento?: TipoDocumentoEdital[];
 	etapas?: EtapaEdital[];

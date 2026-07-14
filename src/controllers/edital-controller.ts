@@ -15,21 +15,23 @@ export function formatarData(data: string | null | undefined): string | null {
 }
 
 /**
- * Formata a data de fim de inscrições do edital
+ * Retorna a data de início da etapa de INSCRICAO do edital, ou null.
  */
-export function formatarDataFimInscricao(
-	data: string | null | undefined,
+export function obterDataInicioInscricao(
+	edital: Edital | null,
 ): string | null {
-	return formatarData(data);
+	return (
+		edital?.etapas?.find((e) => e.tipo === "INSCRICAO")?.dataInicio ?? null
+	);
 }
 
 /**
- * Formata a data de início de inscrições do edital
+ * Retorna a data de fim da etapa de INSCRICAO do edital, ou null.
  */
-export function formatarDataInicioInscricao(
-	data: string | null | undefined,
-): string | null {
-	return formatarData(data);
+export function obterDataFimInscricao(edital: Edital | null): string | null {
+	return (
+		edital?.etapas?.find((e) => e.tipo === "INSCRICAO")?.dataFim ?? null
+	);
 }
 
 /**
@@ -45,26 +47,28 @@ export function obterTextoEdital(edital: Edital | null): string {
  */
 export function obterPeriodoInscricoes(edital: Edital | null): string {
 	if (!edital) return "";
-	const inicio = formatarData(edital.dataInicioInscricao);
-	const fim = formatarData(edital.dataFimInscricao);
+	const inicio = formatarData(obterDataInicioInscricao(edital));
+	const fim = formatarData(obterDataFimInscricao(edital));
 	return `Inscrições de ${inicio} até ${fim}`;
 }
 
 /**
- * Verifica se o edital ainda está dentro do período de inscrições
+ * Verifica se o edital ainda está dentro do período de inscrições,
+ * usando as datas da etapa INSCRICAO.
  */
 export function isEditalVigente(edital: Edital | null): boolean {
 	if (!edital) return false;
+	const inicioStr = obterDataInicioInscricao(edital);
+	const fimStr = obterDataFimInscricao(edital);
+	if (!inicioStr || !fimStr) return false;
 	const agora = new Date();
-	const inicio = new Date(edital.dataInicioInscricao);
-	const fim = new Date(edital.dataFimInscricao);
-	return agora >= inicio && agora <= fim;
+	return agora >= new Date(inicioStr) && agora <= new Date(fimStr);
 }
 
 const editalController = {
 	formatarData,
-	formatarDataFimInscricao,
-	formatarDataInicioInscricao,
+	obterDataFimInscricao,
+	obterDataInicioInscricao,
 	obterTextoEdital,
 	obterPeriodoInscricoes,
 	isEditalVigente,

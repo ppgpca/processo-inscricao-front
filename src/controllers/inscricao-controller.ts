@@ -1,9 +1,20 @@
 import type {
 	DadosComplementares,
 	DadosPessoais,
+	Edital,
 	Inscricao,
 	ProjetoPesquisa,
 } from "../types";
+
+const ORDEM_ETAPA_INSCRICAO = 1;
+const ORDEM_ETAPA_HOMOLOGACAO = 2;
+
+export function obterIdEtapaPorOrdem(
+	edital: Edital | null,
+	ordem: number,
+): number | undefined {
+	return edital?.etapas?.find((e) => e.ordem === ordem)?.id;
+}
 import { isDadosPessoaisValidos } from "./dados-pessoais-controller";
 import { isDadosFormacaoValidos } from "./formacao-controller";
 import { isProjetoPesquisaValido } from "./projeto-pesquisa-controller";
@@ -90,10 +101,11 @@ interface PayloadEtapa2Result {
  */
 export function prepararPayloadEtapa2(
 	cpf: string,
-	idEdital: number,
+	edital: Edital,
 	projetoPesquisa: ProjetoPesquisa,
 	inscricaoExistente: Inscricao | null,
 ): PayloadEtapa2Result {
+	const idEtapaInscricao = obterIdEtapaPorOrdem(edital, ORDEM_ETAPA_INSCRICAO);
 	const dadosLinha = {
 		idLinhaPesquisa: projetoPesquisa.idLinhaPesquisa
 			? Number(projetoPesquisa.idLinhaPesquisa)
@@ -103,6 +115,7 @@ export function prepararPayloadEtapa2(
 		indigena: projetoPesquisa.indigena,
 		pretoPardo: projetoPesquisa.pretoPardo,
 		idsPalavrasChave: projetoPesquisa.idsPalavrasChave,
+		...(idEtapaInscricao !== undefined && { idEtapaAtual: idEtapaInscricao }),
 	};
 
 	if (inscricaoExistente) {
@@ -115,7 +128,7 @@ export function prepararPayloadEtapa2(
 
 	return {
 		update: false,
-		dados: { cpf, idEdital, etapa: 2, ...dadosLinha },
+		dados: { cpf, idEdital: edital.id, etapa: 2, ...dadosLinha },
 	};
 }
 
@@ -123,21 +136,33 @@ export function prepararPayloadEtapa2(
  * Prepara o payload para atualizar uma inscrição na etapa 3 (formação)
  */
 export function prepararPayloadEtapa3(
+	edital: Edital,
 	dadosComplementares: DadosComplementares,
 ): Record<string, unknown> {
+	const idEtapaInscricao = obterIdEtapaPorOrdem(edital, ORDEM_ETAPA_INSCRICAO);
 	return {
 		etapa: 3,
 		dadosComplementares,
+		...(idEtapaInscricao !== undefined && { idEtapaAtual: idEtapaInscricao }),
 	};
 }
 
 /**
  * Prepara o payload para finalizar a inscrição (etapa 5)
  */
-export function prepararPayloadFinalizacao(): Record<string, unknown> {
+export function prepararPayloadFinalizacao(
+	edital: Edital,
+): Record<string, unknown> {
+	const idEtapaHomologacao = obterIdEtapaPorOrdem(
+		edital,
+		ORDEM_ETAPA_HOMOLOGACAO,
+	);
 	return {
 		etapa: 5,
 		dataEnvio: new Date().toISOString(),
+		...(idEtapaHomologacao !== undefined && {
+			idEtapaAtual: idEtapaHomologacao,
+		}),
 	};
 }
 
@@ -161,6 +186,7 @@ const inscricaoController = {
 	obterStepParaContinuar,
 	validarEtapaAtual,
 	obterTextoBotaoProximo,
+	obterIdEtapaPorOrdem,
 	prepararPayloadEtapa2,
 	prepararPayloadEtapa3,
 	prepararPayloadFinalizacao,

@@ -5,6 +5,8 @@ import {
 	Alert,
 	Box,
 	Button,
+	Card,
+	CardContent,
 	Chip,
 	CircularProgress,
 	Dialog,
@@ -15,21 +17,17 @@ import {
 	IconButton,
 	InputLabel,
 	MenuItem,
-	Paper,
 	Select,
 	Snackbar,
 	Stack,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
 	TextField,
 	Tooltip,
 	Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useTheme } from "@mui/material/styles";
+import type { GridColDef } from "@mui/x-data-grid";
+import { GridToolbarQuickFilter } from "@mui/x-data-grid";
+import { useEffect, useMemo, useState } from "react";
 import type { AppMessage, EtapaEdital, TipoEtapaOption } from "../../types";
 import {
 	etapaEditalService,
@@ -38,6 +36,7 @@ import {
 import { editalService } from "../../services/edital.service";
 import type { Edital } from "../../types";
 import { formatarData } from "../../controllers/edital-controller";
+import CustomDataGrid from "../customs/CustomDataGrid";
 
 interface FormState {
 	tipo: string;
@@ -47,6 +46,13 @@ interface FormState {
 	dataFim: string;
 }
 
+type StatusEtapa = "concluida" | "ativa" | "futura";
+
+interface EtapaRow extends EtapaEdital {
+	tipoLabel: string;
+	status: StatusEtapa;
+}
+
 const FORM_VAZIO: FormState = {
 	tipo: "",
 	nome: "",
@@ -54,6 +60,53 @@ const FORM_VAZIO: FormState = {
 	dataInicio: "",
 	dataFim: "",
 };
+
+const dataGridBgSx = (bgColor: string) => ({
+	backgroundColor: bgColor,
+	"& .MuiDataGrid-columnHeaders": { backgroundColor: bgColor },
+	"& .MuiDataGrid-columnHeader": { backgroundColor: bgColor },
+	"& .MuiDataGrid-columnHeadersInner": { backgroundColor: bgColor },
+	"& .MuiDataGrid-scrollbarFiller": { backgroundColor: bgColor },
+	"& .MuiDataGrid-footerContainer": { backgroundColor: bgColor },
+	"& .MuiDataGrid-row": { backgroundColor: bgColor },
+	"& .MuiDataGrid-filler": { backgroundColor: bgColor },
+});
+
+function BarraBusca() {
+	return (
+		<Box sx={{ p: 1 }}>
+			<GridToolbarQuickFilter
+				fullWidth
+				variant="outlined"
+				size="small"
+				placeholder="Buscar etapa..."
+			/>
+		</Box>
+	);
+}
+
+function ChipStatusEtapa({ status }: { status: StatusEtapa }) {
+	if (status === "concluida") {
+		return <Chip label="Concluída" size="small" color="success" />;
+	}
+	if (status === "ativa") {
+		return (
+			<Chip label="Em andamento" size="small" color="success" variant="outlined" />
+		);
+	}
+	return (
+		<Chip
+			label="Aguardando"
+			size="small"
+			variant="outlined"
+			sx={{
+				backgroundColor: "transparent !important",
+				borderColor: "text.secondary",
+				color: "text.secondary",
+			}}
+		/>
+	);
+}
 
 function toInputDate(iso: string | null | undefined): string {
 	if (!iso) return "";
@@ -65,7 +118,17 @@ function toIsoFromInput(val: string): string | null {
 	return new Date(val + "T00:00:00").toISOString();
 }
 
+function obterStatusEtapa(
+	etapa: EtapaEdital,
+	agora: Date,
+): StatusEtapa {
+	if (etapa.dataFim && new Date(etapa.dataFim) < agora) return "concluida";
+	if (etapa.dataInicio && new Date(etapa.dataInicio) <= agora) return "ativa";
+	return "futura";
+}
+
 export default function GerenciarEtapas() {
+	const theme = useTheme();
 	const [editais, setEditais] = useState<Edital[]>([]);
 	const [editalSelecionado, setEditalSelecionado] = useState<number | "">("");
 	const [etapas, setEtapas] = useState<EtapaEdital[]>([]);
@@ -120,6 +183,9 @@ export default function GerenciarEtapas() {
 		};
 		carregar();
 	}, [editalSelecionado]);
+
+	const labelTipo = (tipo: string) =>
+		tipos.find((t) => t.tipo === tipo)?.label ?? tipo;
 
 	const abrirCriar = () => {
 		setEtapaEditando(null);
@@ -211,14 +277,142 @@ export default function GerenciarEtapas() {
 
 	const agora = new Date();
 
-	function obterStatusEtapa(etapa: EtapaEdital): "concluida" | "ativa" | "futura" {
-		if (etapa.dataFim && new Date(etapa.dataFim) < agora) return "concluida";
-		if (etapa.dataInicio && new Date(etapa.dataInicio) <= agora) return "ativa";
-		return "futura";
-	}
+	const rows = useMemo<EtapaRow[]>(
+		() =>
+			etapas.map((etapa) => ({
+				...etapa,
+				tipoLabel: labelTipo(etapa.tipo),
+				status: obterStatusEtapa(etapa, agora),
+			})),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[etapas, tipos],
+	);
 
-	const labelTipo = (tipo: string) =>
-		tipos.find((t) => t.tipo === tipo)?.label ?? tipo;
+	const colunas = useMemo<GridColDef[]>(
+		() => [
+			{
+				field: "ordem",
+				headerName: "Ordem",
+				width: 80,
+				type: "number",
+			},
+			{
+				field: "tipoLabel",
+				headerName: "Tipo",
+				width: 200,
+				renderCell: (params) =>
+					params.value || (
+						<Typography
+							variant="body2"
+							color="text.disabled"
+							sx={{ fontStyle: "italic" }}
+						>
+							Não informado
+						</Typography>
+					),
+			},
+			{
+				field: "nome",
+				headerName: "Nome",
+				flex: 1,
+				minWidth: 180,
+				renderCell: (params) =>
+					params.value || (
+						<Typography
+							variant="body2"
+							color="text.disabled"
+							sx={{ fontStyle: "italic" }}
+						>
+							Não informado
+						</Typography>
+					),
+			},
+			{
+				field: "dataInicio",
+				headerName: "Início",
+				width: 130,
+				renderCell: (params) =>
+					params.value ? (
+						formatarData(params.value as string)
+					) : (
+						<Typography
+							variant="body2"
+							color="text.disabled"
+							sx={{ fontStyle: "italic" }}
+						>
+							—
+						</Typography>
+					),
+			},
+			{
+				field: "dataFim",
+				headerName: "Fim",
+				width: 130,
+				renderCell: (params) =>
+					params.value ? (
+						formatarData(params.value as string)
+					) : (
+						<Typography
+							variant="body2"
+							color="text.disabled"
+							sx={{ fontStyle: "italic" }}
+						>
+							—
+						</Typography>
+					),
+			},
+			{
+				field: "status",
+				headerName: "Status",
+				width: 140,
+				sortable: false,
+				filterable: false,
+				renderCell: (params) => (
+					<ChipStatusEtapa status={params.value as StatusEtapa} />
+				),
+			},
+			{
+				field: "acoes",
+				headerName: "Ações",
+				width: 100,
+				sortable: false,
+				filterable: false,
+				align: "center",
+				headerAlign: "center",
+				renderCell: (params) => {
+					const row = params.row as EtapaRow;
+					return (
+						<Stack
+							direction="row"
+							spacing={0.5}
+							sx={{ justifyContent: "center" }}
+						>
+							<Tooltip title="Editar">
+								<IconButton
+									size="small"
+									color="inherit"
+									onClick={() => abrirEditar(row)}
+								>
+									<EditIcon fontSize="small" />
+								</IconButton>
+							</Tooltip>
+							<Tooltip title="Remover">
+								<IconButton
+									size="small"
+									color="inherit"
+									onClick={() => setConfirmarRemocao(row)}
+								>
+									<DeleteIcon fontSize="small" />
+								</IconButton>
+							</Tooltip>
+						</Stack>
+					);
+				},
+			},
+		],
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
+	);
 
 	const formValido = form.tipo && form.nome.trim() && Number(form.ordem) >= 1;
 
@@ -251,139 +445,88 @@ export default function GerenciarEtapas() {
 				</Select>
 			</FormControl>
 
-			{editalSelecionado ? (
-				<>
-					<Box
+			{loading ? (
+				<Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
+					<CircularProgress />
+				</Box>
+			) : editalSelecionado ? (
+				<Card
+					sx={{
+						backgroundColor: theme.palette.background.default,
+						display: "flex",
+						flexDirection: "column",
+					}}
+				>
+					<CardContent
 						sx={{
 							display: "flex",
-							alignItems: "center",
-							justifyContent: "space-between",
-							mb: 2,
+							flexDirection: "column",
+							height: "100%",
+							"&:last-child": { paddingBottom: "8px" },
 						}}
 					>
-						<Typography variant="subtitle1">
-							{etapas.length === 0 && !loading
-								? "Nenhuma etapa configurada"
-								: `${etapas.length} etapa${etapas.length !== 1 ? "s" : ""} configurada${etapas.length !== 1 ? "s" : ""}`}
-						</Typography>
-						<Button
-							variant="contained"
-							startIcon={<AddIcon />}
-							onClick={abrirCriar}
-							size="small"
+						<Box
+							sx={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "space-between",
+								mb: 1,
+								flexWrap: "wrap",
+								gap: 1,
+							}}
 						>
-							Nova etapa
-						</Button>
-					</Box>
+							<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+								<Typography variant="subtitle1">
+									Etapas do processo seletivo
+								</Typography>
+								<Chip
+									label={`${etapas.length} etapa${etapas.length !== 1 ? "s" : ""}`}
+									size="small"
+									color="primary"
+									variant="outlined"
+								/>
+							</Box>
 
-					{loading ? (
-						<Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-							<CircularProgress />
+							<Button
+								variant="contained"
+								startIcon={<AddIcon />}
+								onClick={abrirCriar}
+								size="small"
+							>
+								Nova etapa
+							</Button>
 						</Box>
-					) : etapas.length > 0 ? (
-						<TableContainer component={Paper} variant="outlined">
-							<Table size="small">
-								<TableHead>
-									<TableRow>
-										<TableCell sx={{ width: 56 }}>Ordem</TableCell>
-										<TableCell>Tipo</TableCell>
-										<TableCell>Nome</TableCell>
-										<TableCell>Início</TableCell>
-										<TableCell>Fim</TableCell>
-										<TableCell sx={{ width: 80 }}>Status</TableCell>
-										<TableCell sx={{ width: 96 }} align="center">
-											Ações
-										</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{etapas.map((etapa) => {
-										const status = obterStatusEtapa(etapa);
-										return (
-											<TableRow key={etapa.id} hover>
-												<TableCell>{etapa.ordem}</TableCell>
-												<TableCell>
-													<Typography
-														variant="caption"
-														sx={{
-															fontFamily: "monospace",
-															color: "text.secondary",
-														}}
-													>
-														{labelTipo(etapa.tipo)}
-													</Typography>
-												</TableCell>
-												<TableCell>
-													<Typography variant="body2" fontWeight={600}>
-														{etapa.nome}
-													</Typography>
-												</TableCell>
-												<TableCell>
-													{etapa.dataInicio
-														? formatarData(etapa.dataInicio)
-														: <Typography variant="caption" color="text.disabled">—</Typography>
-													}
-												</TableCell>
-												<TableCell>
-													{etapa.dataFim
-														? formatarData(etapa.dataFim)
-														: <Typography variant="caption" color="text.disabled">—</Typography>
-													}
-												</TableCell>
-												<TableCell>
-													<Chip
-														label={
-															status === "ativa"
-																? "Em andamento"
-																: status === "concluida"
-																	? "Concluída"
-																	: "Aguardando"
-														}
-														size="small"
-														color={
-															status === "ativa"
-																? "primary"
-																: status === "concluida"
-																	? "success"
-																	: "default"
-														}
-														variant={
-															status === "futura" ? "outlined" : "filled"
-														}
-													/>
-												</TableCell>
-												<TableCell align="center">
-													<Stack direction="row" spacing={0.5} justifyContent="center">
-														<Tooltip title="Editar">
-															<IconButton
-																size="small"
-																onClick={() => abrirEditar(etapa)}
-															>
-																<EditIcon fontSize="small" />
-															</IconButton>
-														</Tooltip>
-														<Tooltip title="Remover">
-															<IconButton
-																size="small"
-																color="error"
-																onClick={() => setConfirmarRemocao(etapa)}
-															>
-																<DeleteIcon fontSize="small" />
-															</IconButton>
-														</Tooltip>
-													</Stack>
-												</TableCell>
-											</TableRow>
-										);
-									})}
-								</TableBody>
-							</Table>
-						</TableContainer>
-					) : null}
-				</>
+
+						{etapas.length === 0 ? (
+							<Typography
+								variant="body2"
+								color="text.secondary"
+								sx={{ mt: 1 }}
+							>
+								Nenhuma etapa configurada para este edital.
+							</Typography>
+						) : (
+							<Box sx={{ flex: 1, minHeight: 400 }}>
+								<CustomDataGrid
+									rows={rows}
+									columns={colunas}
+									pageSize={10}
+									getRowId={(row) => row.id}
+									slots={{ toolbar: BarraBusca }}
+									sx={{
+										...dataGridBgSx(theme.palette.background.default),
+										"& .MuiDataGrid-cell": {
+											alignItems: "flex-start",
+											py: 1,
+										},
+									}}
+								/>
+							</Box>
+						)}
+					</CardContent>
+				</Card>
 			) : null}
 
-			{/* Dialog criar / editar */}
 			<Dialog
 				open={dialogAberto}
 				onClose={fecharDialog}
@@ -494,7 +637,6 @@ export default function GerenciarEtapas() {
 				</DialogActions>
 			</Dialog>
 
-			{/* Dialog confirmar remoção */}
 			<Dialog
 				open={Boolean(confirmarRemocao)}
 				onClose={() => setConfirmarRemocao(null)}
