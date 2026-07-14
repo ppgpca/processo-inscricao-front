@@ -31,6 +31,7 @@ import EtapaDadosPessoais from "./inscricao/EtapaDadosPessoais";
 import EtapaDocumentos from "./inscricao/EtapaDocumentos";
 import EtapaFormacao from "./inscricao/EtapaFormacao";
 import EtapaProjetoPesquisa from "./inscricao/EtapaProjetoPesquisa";
+import ProcessoTimeline from "./ProcessoTimeline";
 
 export default function InscricaoStepper() {
 	const [edital, setEdital] = useState<Edital | null>(null);
@@ -279,8 +280,12 @@ export default function InscricaoStepper() {
 				</Alert>
 			)}
 
-			<Paper sx={{ p: 3 }}>
-				<Stepper
+		{edital?.etapas && edital.etapas.length > 0 && (
+			<ProcessoTimeline etapas={edital.etapas} />
+		)}
+
+		<Paper sx={{ p: 3 }}>
+			<Stepper
 					activeStep={activeStep}
 					sx={{ mb: 4 }}
 					alternativeLabel

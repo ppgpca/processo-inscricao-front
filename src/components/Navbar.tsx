@@ -14,6 +14,7 @@ import {
 	Typography,
 	useTheme,
 } from "@mui/material";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import GavelIcon from "@mui/icons-material/Gavel";
 import GroupIcon from "@mui/icons-material/Group";
@@ -92,23 +93,37 @@ export default function Navbar() {
 					</ListItem>
 				</PermissionContext>
 
-				<PermissionContext
-					grupos={[
-						Permissoes.GRUPOS.ADMIN,
-						Permissoes.GRUPOS.COORDENADOR,
-						Permissoes.GRUPOS.DOCENTE,
-					]}
-					showError={false}
-				>
-					<ListItem disablePadding>
-						<ListItemButton onClick={() => navegar("/gestao/avaliacao")}>
-							<ListItemIcon>
-								<GavelIcon />
-							</ListItemIcon>
-							<ListItemText primary="Avaliar Candidatos" />
-						</ListItemButton>
-					</ListItem>
-				</PermissionContext>
+			<PermissionContext
+				grupos={[Permissoes.GRUPOS.ADMIN, Permissoes.GRUPOS.COORDENADOR]}
+				showError={false}
+			>
+				<ListItem disablePadding>
+					<ListItemButton onClick={() => navegar("/gestao/etapas")}>
+						<ListItemIcon>
+							<AccountTreeIcon />
+						</ListItemIcon>
+						<ListItemText primary="Etapas do Processo" />
+					</ListItemButton>
+				</ListItem>
+			</PermissionContext>
+
+			<PermissionContext
+				grupos={[
+					Permissoes.GRUPOS.ADMIN,
+					Permissoes.GRUPOS.COORDENADOR,
+					Permissoes.GRUPOS.DOCENTE,
+				]}
+				showError={false}
+			>
+				<ListItem disablePadding>
+					<ListItemButton onClick={() => navegar("/gestao/avaliacao")}>
+						<ListItemIcon>
+							<GavelIcon />
+						</ListItemIcon>
+						<ListItemText primary="Avaliar Candidatos" />
+					</ListItemButton>
+				</ListItem>
+			</PermissionContext>
 			</List>
 		</Box>
 	);

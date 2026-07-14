@@ -33,6 +33,31 @@ export interface InscricaoPalavraChave {
 	palavraChave?: PalavraChave;
 }
 
+export type TipoEtapa =
+	| "INSCRICAO"
+	| "HOMOLOGACAO"
+	| "ANALISE_CURRICULO"
+	| "ANTEPROJETO"
+	| "ENTREVISTA"
+	| "RESULTADO_PARCIAL"
+	| "RECURSO"
+	| "RESULTADO_FINAL";
+
+export interface TipoEtapaOption {
+	tipo: TipoEtapa;
+	label: string;
+}
+
+export interface EtapaEdital {
+	id: number;
+	idEdital: number;
+	tipo: TipoEtapa;
+	nome: string;
+	ordem: number;
+	dataInicio: string | null;
+	dataFim: string | null;
+}
+
 export interface TipoDocumentoEdital {
 	id: number;
 	nome: string;
@@ -53,6 +78,7 @@ export interface Edital {
 	dataFimAvaliacao?: string | null;
 	urlEditalPdf?: string;
 	tiposDocumento?: TipoDocumentoEdital[];
+	etapas?: EtapaEdital[];
 }
 
 export interface Documento {
@@ -121,6 +147,8 @@ export interface Inscricao {
 	pretoPardo?: boolean;
 	dadosComplementares?: DadosComplementares;
 	etapa?: number;
+	idEtapaAtual?: number | null;
+	etapaAtual?: EtapaEdital | null;
 	status?: string;
 	dataEnvio?: string;
 	inscricoesPalavraChave?: InscricaoPalavraChave[];

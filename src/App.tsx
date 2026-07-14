@@ -15,6 +15,7 @@ import Login from "./components/login/Login";
 import Dashboard from "./components/Dashboard";
 import AvaliarCandidatos from "./components/gestao/AvaliarCandidatos";
 import GerenciarCandidatos from "./components/gestao/GerenciarCandidatos";
+import GerenciarEtapas from "./components/gestao/GerenciarEtapas";
 
 interface DrawerContextValue {
 	drawerOpen: boolean;
@@ -131,25 +132,39 @@ function AppRoutes() {
 					</ProtectedRoute>
 				}
 			/>
-			<Route
-				path="/gestao/avaliacao"
-				element={
-					<ProtectedRoute>
-						<GestaoLayout>
-							<PermissionContext
-								grupos={[
-									Permissoes.GRUPOS.ADMIN,
-									Permissoes.GRUPOS.COORDENADOR,
-									Permissoes.GRUPOS.DOCENTE,
-								]}
-							>
-								<AvaliarCandidatos />
-							</PermissionContext>
-						</GestaoLayout>
-					</ProtectedRoute>
-				}
-			/>
-			<Route path="*" element={<Navigate to="/" replace />} />
+		<Route
+			path="/gestao/avaliacao"
+			element={
+				<ProtectedRoute>
+					<GestaoLayout>
+						<PermissionContext
+							grupos={[
+								Permissoes.GRUPOS.ADMIN,
+								Permissoes.GRUPOS.COORDENADOR,
+								Permissoes.GRUPOS.DOCENTE,
+							]}
+						>
+							<AvaliarCandidatos />
+						</PermissionContext>
+					</GestaoLayout>
+				</ProtectedRoute>
+			}
+		/>
+		<Route
+			path="/gestao/etapas"
+			element={
+				<ProtectedRoute>
+					<GestaoLayout>
+						<PermissionContext
+							grupos={[Permissoes.GRUPOS.ADMIN, Permissoes.GRUPOS.COORDENADOR]}
+						>
+							<GerenciarEtapas />
+						</PermissionContext>
+					</GestaoLayout>
+				</ProtectedRoute>
+			}
+		/>
+		<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
 	);
 }
