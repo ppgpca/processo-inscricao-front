@@ -41,6 +41,11 @@ function redirecionarParaLogin() {
 	}
 }
 
+function isLoginRequest(config?: RetryableConfig): boolean {
+	const url = config?.url ?? "";
+	return url.includes("/auth/login");
+}
+
 async function handleResponseError(error: unknown): Promise<never> {
 	const err = error as {
 		config?: RetryableConfig;
@@ -49,10 +54,12 @@ async function handleResponseError(error: unknown): Promise<never> {
 	};
 	const originalRequest = err.config;
 
+	// Credenciais inválidas no login também retornam 401 — não tratar como sessão expirada
 	if (
 		err.response?.status === 401 &&
 		originalRequest &&
-		!originalRequest._retry
+		!originalRequest._retry &&
+		!isLoginRequest(originalRequest)
 	) {
 		originalRequest._retry = true;
 		const token = authService.getToken();
