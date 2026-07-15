@@ -36,7 +36,8 @@ export default function Navbar() {
 	const [mobileOpen, setMobileOpen] = useState(false);
 
 	const isMobile =
-		typeof window !== "undefined" && window.innerWidth < theme.breakpoints.values.md;
+		typeof window !== "undefined" &&
+		window.innerWidth < theme.breakpoints.values.md;
 
 	const handleToggle = () => {
 		if (isMobile) {
@@ -66,7 +67,11 @@ export default function Navbar() {
 			<Divider />
 			<List>
 				<PermissionContext
-					grupos={[Permissoes.GRUPOS.ADMIN, Permissoes.GRUPOS.COORDENADOR, Permissoes.GRUPOS.DOCENTE]}
+					grupos={[
+						Permissoes.GRUPOS.ADMIN,
+						Permissoes.GRUPOS.COORDENADOR,
+						Permissoes.GRUPOS.DOCENTE,
+					]}
 					showError={false}
 				>
 					<ListItem disablePadding>
@@ -80,11 +85,16 @@ export default function Navbar() {
 				</PermissionContext>
 
 				<PermissionContext
-					grupos={[Permissoes.GRUPOS.ADMIN, Permissoes.GRUPOS.COORDENADOR]}
+					grupos={[
+						Permissoes.GRUPOS.ADMIN,
+						Permissoes.GRUPOS.COORDENADOR,
+					]}
 					showError={false}
 				>
 					<ListItem disablePadding>
-						<ListItemButton onClick={() => navegar("/gestao/candidatos")}>
+						<ListItemButton
+							onClick={() => navegar("/gestao/candidatos")}
+						>
 							<ListItemIcon>
 								<GroupIcon />
 							</ListItemIcon>
@@ -93,37 +103,44 @@ export default function Navbar() {
 					</ListItem>
 				</PermissionContext>
 
-			<PermissionContext
-				grupos={[Permissoes.GRUPOS.ADMIN, Permissoes.GRUPOS.COORDENADOR]}
-				showError={false}
-			>
-				<ListItem disablePadding>
-					<ListItemButton onClick={() => navegar("/gestao/etapas")}>
-						<ListItemIcon>
-							<AccountTreeIcon />
-						</ListItemIcon>
-						<ListItemText primary="Etapas do Processo" />
-					</ListItemButton>
-				</ListItem>
-			</PermissionContext>
+				<PermissionContext
+					grupos={[
+						Permissoes.GRUPOS.ADMIN,
+						Permissoes.GRUPOS.COORDENADOR,
+					]}
+					showError={false}
+				>
+					<ListItem disablePadding>
+						<ListItemButton
+							onClick={() => navegar("/gestao/etapas")}
+						>
+							<ListItemIcon>
+								<AccountTreeIcon />
+							</ListItemIcon>
+							<ListItemText primary="Etapas do Processo" />
+						</ListItemButton>
+					</ListItem>
+				</PermissionContext>
 
-			<PermissionContext
-				grupos={[
-					Permissoes.GRUPOS.ADMIN,
-					Permissoes.GRUPOS.COORDENADOR,
-					Permissoes.GRUPOS.DOCENTE,
-				]}
-				showError={false}
-			>
-				<ListItem disablePadding>
-					<ListItemButton onClick={() => navegar("/gestao/avaliacao")}>
-						<ListItemIcon>
-							<GavelIcon />
-						</ListItemIcon>
-						<ListItemText primary="Avaliar Candidatos" />
-					</ListItemButton>
-				</ListItem>
-			</PermissionContext>
+				<PermissionContext
+					grupos={[
+						Permissoes.GRUPOS.ADMIN,
+						Permissoes.GRUPOS.COORDENADOR,
+						Permissoes.GRUPOS.DOCENTE,
+					]}
+					showError={false}
+				>
+					<ListItem disablePadding>
+						<ListItemButton
+							onClick={() => navegar("/gestao/avaliacao")}
+						>
+							<ListItemIcon>
+								<GavelIcon />
+							</ListItemIcon>
+							<ListItemText primary="Avaliar Candidatos" />
+						</ListItemButton>
+					</ListItem>
+				</PermissionContext>
 			</List>
 		</Box>
 	);
@@ -153,12 +170,23 @@ export default function Navbar() {
 					<Typography
 						variant="h6"
 						component="div"
-						sx={{ flex: 1, textAlign: "center", fontWeight: 600, cursor: "pointer" }}
+						sx={{
+							flex: 1,
+							textAlign: "center",
+							fontWeight: 600,
+							cursor: "pointer",
+						}}
 						onClick={() => navegar("/gestao")}
 					>
 						Gestão — PPGPCA
 					</Typography>
-					<Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+					<Box
+						sx={{
+							flex: 1,
+							display: "flex",
+							justifyContent: "flex-end",
+						}}
+					>
 						<UserMenu />
 					</Box>
 				</Toolbar>

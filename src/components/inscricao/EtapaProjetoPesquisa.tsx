@@ -236,7 +236,8 @@ export default function EtapaProjetoPesquisa({
 					</FormControl>
 					{semSelecao && !loadingPalavras && (
 						<Alert severity="info" sx={{ mt: 1 }}>
-							Selecione ao menos uma palavra-chave relacionada ao seu projeto.
+							Selecione ao menos uma palavra-chave relacionada ao
+							seu projeto.
 						</Alert>
 					)}
 				</Grid>

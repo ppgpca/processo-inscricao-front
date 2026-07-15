@@ -176,7 +176,9 @@ export default function AvaliacaoCriterio({
 				const notasMap: Record<number, number> = {};
 				for (const n of listaNotas) {
 					if (n.nota !== null && n.nota !== undefined) {
-						notasMap[Number(n.idCriterioAvaliacao)] = Number(n.nota);
+						notasMap[Number(n.idCriterioAvaliacao)] = Number(
+							n.nota,
+						);
 					}
 				}
 
@@ -462,7 +464,9 @@ export default function AvaliacaoCriterio({
 				</Box>
 			) : isLeaf ? (
 				/* ── Modo folha: campo único de nota ── */
-				<Card sx={{ backgroundColor: theme.palette.background.default }}>
+				<Card
+					sx={{ backgroundColor: theme.palette.background.default }}
+				>
 					<CardContent>
 						{hasErrors && (
 							<Alert severity="warning" sx={{ mb: 2 }}>
@@ -504,7 +508,8 @@ export default function AvaliacaoCriterio({
 								color="error"
 								sx={{ mt: 0.5, display: "block" }}
 							>
-								Nota excede o máximo permitido ({notaMaximaPai}).
+								Nota excede o máximo permitido ({notaMaximaPai}
+								).
 							</Typography>
 						)}
 					</CardContent>
@@ -519,7 +524,9 @@ export default function AvaliacaoCriterio({
 					)}
 
 					<Card
-						sx={{ backgroundColor: theme.palette.background.default }}
+						sx={{
+							backgroundColor: theme.palette.background.default,
+						}}
 					>
 						<CardContent
 							sx={{ "&:last-child": { paddingBottom: "8px" } }}
@@ -579,7 +586,9 @@ export default function AvaliacaoCriterio({
 								>
 									<Typography
 										variant="h5"
-										color={excedeu ? "error" : "text.primary"}
+										color={
+											excedeu ? "error" : "text.primary"
+										}
 										sx={{ fontWeight: 700 }}
 									>
 										{somatorio.toFixed(1)}

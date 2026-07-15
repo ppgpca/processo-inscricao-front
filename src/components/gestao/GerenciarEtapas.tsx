@@ -91,7 +91,12 @@ function ChipStatusEtapa({ status }: { status: StatusEtapa }) {
 	}
 	if (status === "ativa") {
 		return (
-			<Chip label="Em andamento" size="small" color="success" variant="outlined" />
+			<Chip
+				label="Em andamento"
+				size="small"
+				color="success"
+				variant="outlined"
+			/>
 		);
 	}
 	return (
@@ -118,10 +123,7 @@ function toIsoFromInput(val: string): string | null {
 	return new Date(val + "T00:00:00").toISOString();
 }
 
-function obterStatusEtapa(
-	etapa: EtapaEdital,
-	agora: Date,
-): StatusEtapa {
+function obterStatusEtapa(etapa: EtapaEdital, agora: Date): StatusEtapa {
 	if (etapa.dataFim && new Date(etapa.dataFim) < agora) return "concluida";
 	if (etapa.dataInicio && new Date(etapa.dataInicio) <= agora) return "ativa";
 	return "futura";
@@ -139,11 +141,12 @@ export default function GerenciarEtapas() {
 	const [message, setMessage] = useState<AppMessage | null>(null);
 
 	const [dialogAberto, setDialogAberto] = useState(false);
-	const [etapaEditando, setEtapaEditando] = useState<EtapaEdital | null>(null);
-	const [form, setForm] = useState<FormState>(FORM_VAZIO);
-	const [confirmarRemocao, setConfirmarRemocao] = useState<EtapaEdital | null>(
+	const [etapaEditando, setEtapaEditando] = useState<EtapaEdital | null>(
 		null,
 	);
+	const [form, setForm] = useState<FormState>(FORM_VAZIO);
+	const [confirmarRemocao, setConfirmarRemocao] =
+		useState<EtapaEdital | null>(null);
 
 	useEffect(() => {
 		const carregar = async () => {
@@ -155,7 +158,10 @@ export default function GerenciarEtapas() {
 				setEditais(listaEditais);
 				setTipos(listaTipos);
 			} catch {
-				setMessage({ text: "Erro ao carregar editais.", severity: "error" });
+				setMessage({
+					text: "Erro ao carregar editais.",
+					severity: "error",
+				});
 			} finally {
 				setLoadingEditais(false);
 			}
@@ -176,7 +182,10 @@ export default function GerenciarEtapas() {
 				);
 				setEtapas(lista);
 			} catch {
-				setMessage({ text: "Erro ao carregar etapas.", severity: "error" });
+				setMessage({
+					text: "Erro ao carregar etapas.",
+					severity: "error",
+				});
 			} finally {
 				setLoading(false);
 			}
@@ -214,7 +223,8 @@ export default function GerenciarEtapas() {
 	};
 
 	const salvar = async () => {
-		if (!editalSelecionado || !form.tipo || !form.nome || !form.ordem) return;
+		if (!editalSelecionado || !form.tipo || !form.nome || !form.ordem)
+			return;
 		setSalvando(true);
 		try {
 			const dto: CreateEtapaEditalDto = {
@@ -233,7 +243,9 @@ export default function GerenciarEtapas() {
 				);
 				setEtapas((prev) =>
 					prev
-						.map((e) => (e.id === etapaEditando.id ? atualizada : e))
+						.map((e) =>
+							e.id === etapaEditando.id ? atualizada : e,
+						)
 						.sort((a, b) => a.ordem - b.ordem),
 				);
 				setMessage({
@@ -264,7 +276,10 @@ export default function GerenciarEtapas() {
 	const remover = async (etapa: EtapaEdital) => {
 		setSalvando(true);
 		try {
-			await etapaEditalService.remover(Number(editalSelecionado), etapa.id);
+			await etapaEditalService.remover(
+				Number(editalSelecionado),
+				etapa.id,
+			);
 			setEtapas((prev) => prev.filter((e) => e.id !== etapa.id));
 			setMessage({ text: "Etapa removida.", severity: "success" });
 		} catch {
@@ -430,7 +445,9 @@ export default function GerenciarEtapas() {
 					labelId="select-edital-etapas-label"
 					value={editalSelecionado}
 					label="Selecionar edital"
-					onChange={(e) => setEditalSelecionado(e.target.value as number | "")}
+					onChange={(e) =>
+						setEditalSelecionado(e.target.value as number | "")
+					}
 					disabled={loadingEditais}
 				>
 					<MenuItem value="">
@@ -475,7 +492,13 @@ export default function GerenciarEtapas() {
 								gap: 1,
 							}}
 						>
-							<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 1,
+								}}
+							>
 								<Typography variant="subtitle1">
 									Etapas do processo seletivo
 								</Typography>
@@ -514,7 +537,9 @@ export default function GerenciarEtapas() {
 									getRowId={(row) => row.id}
 									slots={{ toolbar: BarraBusca }}
 									sx={{
-										...dataGridBgSx(theme.palette.background.default),
+										...dataGridBgSx(
+											theme.palette.background.default,
+										),
 										"& .MuiDataGrid-cell": {
 											alignItems: "flex-start",
 											py: 1,
@@ -552,7 +577,8 @@ export default function GerenciarEtapas() {
 											...prev,
 											tipo: e.target.value,
 											nome:
-												prev.nome === "" && tipoSelecionado
+												prev.nome === "" &&
+												tipoSelecionado
 													? tipoSelecionado.label
 													: prev.nome,
 										};
@@ -573,7 +599,10 @@ export default function GerenciarEtapas() {
 							fullWidth
 							value={form.nome}
 							onChange={(e) =>
-								setForm((prev) => ({ ...prev, nome: e.target.value }))
+								setForm((prev) => ({
+									...prev,
+									nome: e.target.value,
+								}))
 							}
 							helperText="Pode personalizar o nome exibido aos candidatos"
 						/>
@@ -585,7 +614,10 @@ export default function GerenciarEtapas() {
 							inputProps={{ min: 1 }}
 							value={form.ordem}
 							onChange={(e) =>
-								setForm((prev) => ({ ...prev, ordem: e.target.value }))
+								setForm((prev) => ({
+									...prev,
+									ordem: e.target.value,
+								}))
 							}
 							sx={{ width: 120 }}
 						/>
@@ -623,14 +655,22 @@ export default function GerenciarEtapas() {
 					</Stack>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={fecharDialog} color="inherit" disabled={salvando}>
+					<Button
+						onClick={fecharDialog}
+						color="inherit"
+						disabled={salvando}
+					>
 						Cancelar
 					</Button>
 					<Button
 						onClick={salvar}
 						variant="contained"
 						disabled={!formValido || salvando}
-						startIcon={salvando ? <CircularProgress size={16} /> : undefined}
+						startIcon={
+							salvando ? (
+								<CircularProgress size={16} />
+							) : undefined
+						}
 					>
 						{etapaEditando ? "Salvar" : "Criar"}
 					</Button>
@@ -645,8 +685,8 @@ export default function GerenciarEtapas() {
 				<DialogContent>
 					<Typography>
 						Deseja remover a etapa{" "}
-						<strong>{confirmarRemocao?.nome}</strong>? Esta ação não pode
-						ser desfeita.
+						<strong>{confirmarRemocao?.nome}</strong>? Esta ação não
+						pode ser desfeita.
 					</Typography>
 				</DialogContent>
 				<DialogActions>
@@ -658,11 +698,17 @@ export default function GerenciarEtapas() {
 						Cancelar
 					</Button>
 					<Button
-						onClick={() => confirmarRemocao && remover(confirmarRemocao)}
+						onClick={() =>
+							confirmarRemocao && remover(confirmarRemocao)
+						}
 						color="error"
 						variant="contained"
 						disabled={salvando}
-						startIcon={salvando ? <CircularProgress size={16} /> : undefined}
+						startIcon={
+							salvando ? (
+								<CircularProgress size={16} />
+							) : undefined
+						}
 					>
 						Remover
 					</Button>
@@ -674,7 +720,10 @@ export default function GerenciarEtapas() {
 				autoHideDuration={4000}
 				onClose={() => setMessage(null)}
 			>
-				<Alert severity={message?.severity ?? "info"} onClose={() => setMessage(null)}>
+				<Alert
+					severity={message?.severity ?? "info"}
+					onClose={() => setMessage(null)}
+				>
 					{message?.text}
 				</Alert>
 			</Snackbar>

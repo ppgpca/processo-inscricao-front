@@ -48,7 +48,12 @@ export default function GraficoInscricoesPorDia({ dados }: Props) {
 						<ResponsiveContainer width="100%" height={300}>
 							<LineChart
 								data={dados}
-								margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+								margin={{
+									top: 10,
+									right: 20,
+									left: 0,
+									bottom: 0,
+								}}
 							>
 								<CartesianGrid
 									strokeDasharray="3 3"
@@ -76,12 +81,17 @@ export default function GraficoInscricoesPorDia({ dados }: Props) {
 								<Tooltip
 									wrapperStyle={{ outline: "none" }}
 									contentStyle={{
-										backgroundColor: theme.palette.background.paper,
+										backgroundColor:
+											theme.palette.background.paper,
 										border: `1px solid ${theme.palette.divider}`,
 										color: theme.palette.text.primary,
 									}}
-									labelStyle={{ color: theme.palette.text.secondary }}
-									itemStyle={{ color: theme.palette.text.primary }}
+									labelStyle={{
+										color: theme.palette.text.secondary,
+									}}
+									itemStyle={{
+										color: theme.palette.text.primary,
+									}}
 									labelFormatter={formatarDataCompleta}
 								/>
 								<Line
@@ -90,7 +100,10 @@ export default function GraficoInscricoesPorDia({ dados }: Props) {
 									name="Inscrições"
 									stroke={theme.palette.primary.main}
 									strokeWidth={2}
-									dot={{ r: 3, fill: theme.palette.primary.main }}
+									dot={{
+										r: 3,
+										fill: theme.palette.primary.main,
+									}}
 									activeDot={{ r: 5 }}
 								/>
 							</LineChart>

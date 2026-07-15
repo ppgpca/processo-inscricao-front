@@ -84,7 +84,14 @@ export default function CustomDataGrid({
 	};
 
 	return (
-		<Box style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
+		<Box
+			style={{
+				display: "flex",
+				flexDirection: "column",
+				height: "100%",
+				width: "100%",
+			}}
+		>
 			<DataGrid
 				rows={rows}
 				columns={columns}

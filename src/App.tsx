@@ -70,7 +70,13 @@ function GestaoLayout({ children }: { children: ReactNode }) {
 
 	return (
 		<DrawerContext.Provider value={{ drawerOpen, setDrawerOpen }}>
-			<Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+			<Box
+				sx={{
+					minHeight: "100vh",
+					display: "flex",
+					flexDirection: "column",
+				}}
+			>
 				<Navbar />
 				<Toolbar />
 				<Box component="main" sx={{ flex: 1, p: { xs: 2, md: 4 } }}>
@@ -124,7 +130,10 @@ function AppRoutes() {
 					<ProtectedRoute>
 						<GestaoLayout>
 							<PermissionContext
-								grupos={[Permissoes.GRUPOS.ADMIN, Permissoes.GRUPOS.COORDENADOR]}
+								grupos={[
+									Permissoes.GRUPOS.ADMIN,
+									Permissoes.GRUPOS.COORDENADOR,
+								]}
 							>
 								<GerenciarCandidatos />
 							</PermissionContext>
@@ -132,39 +141,42 @@ function AppRoutes() {
 					</ProtectedRoute>
 				}
 			/>
-		<Route
-			path="/gestao/avaliacao"
-			element={
-				<ProtectedRoute>
-					<GestaoLayout>
-						<PermissionContext
-							grupos={[
-								Permissoes.GRUPOS.ADMIN,
-								Permissoes.GRUPOS.COORDENADOR,
-								Permissoes.GRUPOS.DOCENTE,
-							]}
-						>
-							<AvaliarCandidatos />
-						</PermissionContext>
-					</GestaoLayout>
-				</ProtectedRoute>
-			}
-		/>
-		<Route
-			path="/gestao/etapas"
-			element={
-				<ProtectedRoute>
-					<GestaoLayout>
-						<PermissionContext
-							grupos={[Permissoes.GRUPOS.ADMIN, Permissoes.GRUPOS.COORDENADOR]}
-						>
-							<GerenciarEtapas />
-						</PermissionContext>
-					</GestaoLayout>
-				</ProtectedRoute>
-			}
-		/>
-		<Route path="*" element={<Navigate to="/" replace />} />
+			<Route
+				path="/gestao/avaliacao"
+				element={
+					<ProtectedRoute>
+						<GestaoLayout>
+							<PermissionContext
+								grupos={[
+									Permissoes.GRUPOS.ADMIN,
+									Permissoes.GRUPOS.COORDENADOR,
+									Permissoes.GRUPOS.DOCENTE,
+								]}
+							>
+								<AvaliarCandidatos />
+							</PermissionContext>
+						</GestaoLayout>
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path="/gestao/etapas"
+				element={
+					<ProtectedRoute>
+						<GestaoLayout>
+							<PermissionContext
+								grupos={[
+									Permissoes.GRUPOS.ADMIN,
+									Permissoes.GRUPOS.COORDENADOR,
+								]}
+							>
+								<GerenciarEtapas />
+							</PermissionContext>
+						</GestaoLayout>
+					</ProtectedRoute>
+				}
+			/>
+			<Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
 	);
 }

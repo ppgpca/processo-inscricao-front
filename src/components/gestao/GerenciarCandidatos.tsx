@@ -22,10 +22,7 @@ import {
 import GavelIcon from "@mui/icons-material/Gavel";
 import EditIcon from "@mui/icons-material/Edit";
 import SyncIcon from "@mui/icons-material/Sync";
-import type {
-	GridColDef,
-	GridColumnGroupingModel,
-} from "@mui/x-data-grid";
+import type { GridColDef, GridColumnGroupingModel } from "@mui/x-data-grid";
 import { useTheme } from "@mui/material/styles";
 import { GridToolbarQuickFilter } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
@@ -205,7 +202,8 @@ function CelulaAvaliacaoSubdividida({
 						minHeight: ALTURA_LINHA_AVALIACAO,
 						display: "flex",
 						alignItems: "center",
-						justifyContent: campo === "nota" ? "flex-end" : "flex-start",
+						justifyContent:
+							campo === "nota" ? "flex-end" : "flex-start",
 						gap: 0.25,
 						px: 0.5,
 						borderBottom:
@@ -222,7 +220,10 @@ function CelulaAvaliacaoSubdividida({
 							</Box>{" "}
 							<Box
 								component="span"
-								sx={{ fontWeight: 400, color: "text.secondary" }}
+								sx={{
+									fontWeight: 400,
+									color: "text.secondary",
+								}}
 							>
 								({avaliacao.qtdAvaliadores ?? 0})
 							</Box>
@@ -246,7 +247,8 @@ function CelulaAvaliacaoSubdividida({
 							{onAbrirMenuAvaliadores && (
 								<Tooltip
 									title={
-										(avaliacao.avaliadores?.length ?? 0) === 0
+										(avaliacao.avaliadores?.length ?? 0) ===
+										0
 											? "Nenhum avaliador atribuiu nota"
 											: "Editar nota de um avaliador"
 									}
@@ -255,11 +257,15 @@ function CelulaAvaliacaoSubdividida({
 										<IconButton
 											size="small"
 											disabled={
-												(avaliacao.avaliadores?.length ?? 0) === 0
+												(avaliacao.avaliadores
+													?.length ?? 0) === 0
 											}
 											onClick={(e) => {
 												e.stopPropagation();
-												onAbrirMenuAvaliadores(e, avaliacao);
+												onAbrirMenuAvaliadores(
+													e,
+													avaliacao,
+												);
 											}}
 											sx={{ p: 0.25 }}
 										>
@@ -281,10 +287,7 @@ const columnGroupingModel: GridColumnGroupingModel = [
 		groupId: "avaliacoes",
 		headerName: "Avaliações",
 		headerAlign: "center",
-		children: [
-			{ field: "avaliacaoCriterio" },
-			{ field: "avaliacaoNota" },
-		],
+		children: [{ field: "avaliacaoCriterio" }, { field: "avaliacaoNota" }],
 	},
 ];
 
@@ -324,7 +327,11 @@ export default function GerenciarCandidatos() {
 		idInscricao: number,
 		valorEfetivo: boolean | null,
 	) => {
-		setMenuState({ anchorEl: event.currentTarget, idInscricao, valorEfetivo });
+		setMenuState({
+			anchorEl: event.currentTarget,
+			idInscricao,
+			valorEfetivo,
+		});
 	};
 
 	const handleFecharMenu = () => setMenuState(MENU_FECHADO);
@@ -457,9 +464,20 @@ export default function GerenciarCandidatos() {
 						);
 					}
 					return (
-						<Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, py: 0.5 }}>
+						<Box
+							sx={{
+								display: "flex",
+								flexWrap: "wrap",
+								gap: 0.5,
+								py: 0.5,
+							}}
+						>
 							{palavras.map((palavra) => (
-								<Chip key={palavra} label={palavra} size="small" />
+								<Chip
+									key={palavra}
+									label={palavra}
+									size="small"
+								/>
 							))}
 						</Box>
 					);
@@ -530,7 +548,10 @@ export default function GerenciarCandidatos() {
 						? alteracoesPendentes[row.idInscricao]
 						: (params.value as boolean | null);
 					return (
-						<ChipDeferida valor={valorEfetivo} pendente={temPendente} />
+						<ChipDeferida
+							valor={valorEfetivo}
+							pendente={temPendente}
+						/>
 					);
 				},
 			},
@@ -553,7 +574,11 @@ export default function GerenciarCandidatos() {
 							<IconButton
 								size="small"
 								onClick={(e) =>
-									handleAbrirMenu(e, row.idInscricao, valorEfetivo)
+									handleAbrirMenu(
+										e,
+										row.idInscricao,
+										valorEfetivo,
+									)
 								}
 								color="inherit"
 							>
@@ -580,7 +605,9 @@ export default function GerenciarCandidatos() {
 			</Typography>
 
 			<FormControl fullWidth sx={{ mb: 3, maxWidth: 480 }}>
-				<InputLabel id="select-edital-label">Selecionar edital</InputLabel>
+				<InputLabel id="select-edital-label">
+					Selecionar edital
+				</InputLabel>
 				<Select
 					labelId="select-edital-label"
 					value={editalSelecionado}
@@ -638,7 +665,13 @@ export default function GerenciarCandidatos() {
 								gap: 1,
 							}}
 						>
-							<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 1,
+								}}
+							>
 								<Typography variant="subtitle1">
 									Candidatos inscritos
 								</Typography>
@@ -668,13 +701,19 @@ export default function GerenciarCandidatos() {
 											size="small"
 											startIcon={
 												sincronizando ? (
-													<CircularProgress size={14} color="inherit" />
+													<CircularProgress
+														size={14}
+														color="inherit"
+													/>
 												) : (
 													<SyncIcon />
 												)
 											}
 											onClick={sincronizar}
-											disabled={contadorPendentes === 0 || sincronizando}
+											disabled={
+												contadorPendentes === 0 ||
+												sincronizando
+											}
 										>
 											Sincronizar
 										</Button>
@@ -702,16 +741,21 @@ export default function GerenciarCandidatos() {
 									columnGroupingModel={columnGroupingModel}
 									slots={{ toolbar: BarraBusca }}
 									sx={{
-										...dataGridBgSx(theme.palette.background.default),
+										...dataGridBgSx(
+											theme.palette.background.default,
+										),
 										"& .MuiDataGrid-cell": {
 											alignItems: "flex-start",
 											py: 1,
 										},
-										"& .MuiDataGrid-columnHeader--filledGroup": {
-											"& .MuiDataGrid-columnHeaderTitleContainer": {
-												justifyContent: "center",
+										"& .MuiDataGrid-columnHeader--filledGroup":
+											{
+												"& .MuiDataGrid-columnHeaderTitleContainer":
+													{
+														justifyContent:
+															"center",
+													},
 											},
-										},
 									}}
 								/>
 							</Box>
@@ -727,10 +771,7 @@ export default function GerenciarCandidatos() {
 				onClose={handleFecharMenu}
 				slotProps={{ paper: { sx: { minWidth: 180 } } }}
 			>
-				<MenuItem
-					dense
-					onClick={() => handleSelecionarDeferida(true)}
-				>
+				<MenuItem dense onClick={() => handleSelecionarDeferida(true)}>
 					<Radio
 						checked={menuState.valorEfetivo === true}
 						size="small"
@@ -739,10 +780,7 @@ export default function GerenciarCandidatos() {
 					/>
 					<ListItemText primary="Deferir" />
 				</MenuItem>
-				<MenuItem
-					dense
-					onClick={() => handleSelecionarDeferida(false)}
-				>
+				<MenuItem dense onClick={() => handleSelecionarDeferida(false)}>
 					<Radio
 						checked={menuState.valorEfetivo === false}
 						size="small"
@@ -767,26 +805,30 @@ export default function GerenciarCandidatos() {
 				>
 					Selecione o avaliador
 				</Typography>
-				{(menuAvaliadores.avaliacao?.avaliadores ?? []).map((avaliador) => (
-					<MenuItem
-						key={avaliador.codigoDocente}
-						dense
-						onClick={() =>
-							handleSelecionarAvaliador(avaliador.codigoDocente)
-						}
-					>
-						<Radio
-							checked={
-								menuAvaliadores.codigoSelecionado ===
-								avaliador.codigoDocente
+				{(menuAvaliadores.avaliacao?.avaliadores ?? []).map(
+					(avaliador) => (
+						<MenuItem
+							key={avaliador.codigoDocente}
+							dense
+							onClick={() =>
+								handleSelecionarAvaliador(
+									avaliador.codigoDocente,
+								)
 							}
-							size="small"
-							sx={{ p: 0, mr: 1 }}
-							readOnly
-						/>
-						<ListItemText primary={avaliador.nome} />
-					</MenuItem>
-				))}
+						>
+							<Radio
+								checked={
+									menuAvaliadores.codigoSelecionado ===
+									avaliador.codigoDocente
+								}
+								size="small"
+								sx={{ p: 0, mr: 1 }}
+								readOnly
+							/>
+							<ListItemText primary={avaliador.nome} />
+						</MenuItem>
+					),
+				)}
 			</Menu>
 		</Box>
 	);

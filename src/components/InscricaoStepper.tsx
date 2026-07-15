@@ -24,7 +24,11 @@ import {
 	validarEtapaAtual,
 	obterTextoBotaoProximo,
 } from "../controllers/inscricao-controller";
-import { formatarData, obterDataFimInscricao, obterDataInicioInscricao } from "../controllers/edital-controller";
+import {
+	formatarData,
+	obterDataFimInscricao,
+	obterDataInicioInscricao,
+} from "../controllers/edital-controller";
 import { todosObrigatoriosEnviados as calcTodosObrigatoriosEnviados } from "../controllers/documentos-controller";
 import EtapaCpf from "./inscricao/EtapaCpf";
 import EtapaDadosPessoais from "./inscricao/EtapaDadosPessoais";
@@ -276,16 +280,17 @@ export default function InscricaoStepper() {
 					>
 						Edital nº {edital.numero} ({edital.ano})
 					</Link>{" "}
-					| Inscrições até {formatarData(obterDataFimInscricao(edital))}
+					| Inscrições até{" "}
+					{formatarData(obterDataFimInscricao(edital))}
 				</Alert>
 			)}
 
-		{edital?.etapas && edital.etapas.length > 0 && (
-			<ProcessoTimeline etapas={edital.etapas} />
-		)}
+			{edital?.etapas && edital.etapas.length > 0 && (
+				<ProcessoTimeline etapas={edital.etapas} />
+			)}
 
-		<Paper sx={{ p: 3 }}>
-			<Stepper
+			<Paper sx={{ p: 3 }}>
+				<Stepper
 					activeStep={activeStep}
 					sx={{ mb: 4 }}
 					alternativeLabel

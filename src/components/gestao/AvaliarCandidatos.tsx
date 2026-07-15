@@ -105,7 +105,12 @@ export default function AvaliarCandidatos() {
 		if (!veioDeCandidatos || !stateOrigem) return;
 		setEditalSelecionado(stateOrigem.idEdital);
 		setCriterioSelecionado(stateOrigem.criterio.id);
-	}, [veioDeCandidatos, stateOrigem, setEditalSelecionado, setCriterioSelecionado]);
+	}, [
+		veioDeCandidatos,
+		stateOrigem,
+		setEditalSelecionado,
+		setCriterioSelecionado,
+	]);
 
 	const criterioAtual = criterios.find(
 		(cr) => cr.id === Number(criterioSelecionado),
@@ -196,7 +201,11 @@ export default function AvaliarCandidatos() {
 							}}
 						>
 							{palavras.map((palavra) => (
-								<Chip key={palavra} label={palavra} size="small" />
+								<Chip
+									key={palavra}
+									label={palavra}
+									size="small"
+								/>
 							))}
 						</Box>
 					);
@@ -217,7 +226,9 @@ export default function AvaliarCandidatos() {
 							color="inherit"
 							onClick={(e) => {
 								e.stopPropagation();
-								handleRowClick(params.row as CandidatoAvaliacao);
+								handleRowClick(
+									params.row as CandidatoAvaliacao,
+								);
 							}}
 						>
 							<EditIcon fontSize="small" />
@@ -287,7 +298,9 @@ export default function AvaliarCandidatos() {
 						value={criterioSelecionado}
 						label="Critério de avaliação"
 						onChange={(e) =>
-							setCriterioSelecionado(e.target.value as number | "")
+							setCriterioSelecionado(
+								e.target.value as number | "",
+							)
 						}
 						disabled={!editalSelecionado || loadingCriterios}
 					>
@@ -373,7 +386,8 @@ export default function AvaliarCandidatos() {
 								color="text.secondary"
 								sx={{ mt: 1 }}
 							>
-								Nenhum candidato atribuído a você para este critério.
+								Nenhum candidato atribuído a você para este
+								critério.
 							</Typography>
 						) : (
 							<>
@@ -382,7 +396,8 @@ export default function AvaliarCandidatos() {
 									color="text.secondary"
 									sx={{ mb: 1 }}
 								>
-									Clique em um candidato para iniciar a avaliação.
+									Clique em um candidato para iniciar a
+									avaliação.
 								</Typography>
 								<Box sx={{ flex: 1, minHeight: 400 }}>
 									<CustomDataGrid
@@ -399,7 +414,8 @@ export default function AvaliarCandidatos() {
 										}
 										sx={{
 											...dataGridBgSx(
-												theme.palette.background.default,
+												theme.palette.background
+													.default,
 											),
 											"& .MuiDataGrid-row": {
 												cursor: "pointer",

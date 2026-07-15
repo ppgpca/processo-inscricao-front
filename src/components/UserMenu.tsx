@@ -56,15 +56,21 @@ export default function UserMenu() {
 		<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 			<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
 				{isDarkMode ? (
-					<DarkModeIcon sx={{ fontSize: 20, color: "common.white" }} />
+					<DarkModeIcon
+						sx={{ fontSize: 20, color: "common.white" }}
+					/>
 				) : (
-					<LightModeIcon sx={{ fontSize: 20, color: "common.white" }} />
+					<LightModeIcon
+						sx={{ fontSize: 20, color: "common.white" }}
+					/>
 				)}
 				<Switch
 					checked={isDarkMode}
 					onChange={toggleTheme}
 					size="small"
-					sx={{ "& .MuiSwitch-thumb": { bgcolor: "background.paper" } }}
+					sx={{
+						"& .MuiSwitch-thumb": { bgcolor: "background.paper" },
+					}}
 				/>
 			</Box>
 
@@ -92,7 +98,10 @@ export default function UserMenu() {
 			>
 				<MenuItem disabled>
 					<Box sx={{ display: "flex", flexDirection: "column" }}>
-						<Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+						<Typography
+							variant="subtitle2"
+							sx={{ fontWeight: "bold" }}
+						>
 							{usuario.nome}
 						</Typography>
 						<Typography variant="caption" color="text.secondary">

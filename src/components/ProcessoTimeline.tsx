@@ -53,7 +53,10 @@ export default function ProcessoTimeline({ etapas }: ProcessoTimelineProps) {
 				}}
 				onClick={() => setExpandida((v) => !v)}
 			>
-				<Typography variant="subtitle2" sx={{ fontWeight: 600, flexGrow: 1 }}>
+				<Typography
+					variant="subtitle2"
+					sx={{ fontWeight: 600, flexGrow: 1 }}
+				>
 					Fluxo do processo seletivo
 				</Typography>
 
@@ -80,7 +83,10 @@ export default function ProcessoTimeline({ etapas }: ProcessoTimelineProps) {
 						const isLast = index === etapasOrdenadas.length - 1;
 
 						return (
-							<Box key={etapa.id} sx={{ display: "flex", gap: 1.5 }}>
+							<Box
+								key={etapa.id}
+								sx={{ display: "flex", gap: 1.5 }}
+							>
 								<Box
 									sx={{
 										display: "flex",

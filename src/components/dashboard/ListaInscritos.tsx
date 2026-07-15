@@ -21,7 +21,13 @@ const colunas: GridColDef[] = [
 		headerName: "CPF",
 		width: 160,
 		renderCell: (params) => (
-			<span style={{ fontFamily: "monospace", fontSize: 13, whiteSpace: "nowrap" }}>
+			<span
+				style={{
+					fontFamily: "monospace",
+					fontSize: 13,
+					whiteSpace: "nowrap",
+				}}
+			>
 				{mascaraCpf(params.value as string)}
 			</span>
 		),
@@ -32,7 +38,11 @@ const colunas: GridColDef[] = [
 		width: 160,
 		renderCell: (params) =>
 			params.value || (
-				<Typography variant="body2" color="text.disabled" sx={{ fontStyle: "italic" }}>
+				<Typography
+					variant="body2"
+					color="text.disabled"
+					sx={{ fontStyle: "italic" }}
+				>
 					Não informada
 				</Typography>
 			),
@@ -44,7 +54,11 @@ const colunas: GridColDef[] = [
 		minWidth: 200,
 		renderCell: (params) =>
 			params.value || (
-				<Typography variant="body2" color="text.disabled" sx={{ fontStyle: "italic" }}>
+				<Typography
+					variant="body2"
+					color="text.disabled"
+					sx={{ fontStyle: "italic" }}
+				>
 					Não informado
 				</Typography>
 			),
@@ -59,13 +73,24 @@ const colunas: GridColDef[] = [
 			const palavras: string[] = params.value ?? [];
 			if (palavras.length === 0) {
 				return (
-					<Typography variant="body2" color="text.disabled" sx={{ fontStyle: "italic" }}>
+					<Typography
+						variant="body2"
+						color="text.disabled"
+						sx={{ fontStyle: "italic" }}
+					>
 						Nenhuma
 					</Typography>
 				);
 			}
 			return (
-				<Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, py: 0.5 }}>
+				<Box
+					sx={{
+						display: "flex",
+						flexWrap: "wrap",
+						gap: 0.5,
+						py: 0.5,
+					}}
+				>
 					{palavras.map((palavra) => (
 						<Chip key={palavra} label={palavra} size="small" />
 					))}
@@ -115,7 +140,9 @@ export default function ListaInscritos({ dados }: Props) {
 						mb: 1,
 					}}
 				>
-					<Typography variant="subtitle1">Lista de inscritos</Typography>
+					<Typography variant="subtitle1">
+						Lista de inscritos
+					</Typography>
 					<Chip
 						label={`${dados.length} inscri${dados.length !== 1 ? "ções" : "ção"}`}
 						size="small"
@@ -125,7 +152,11 @@ export default function ListaInscritos({ dados }: Props) {
 				</Box>
 
 				{dados.length === 0 ? (
-					<Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+					<Typography
+						variant="body2"
+						color="text.secondary"
+						sx={{ mt: 1 }}
+					>
 						Nenhum inscrito encontrado
 					</Typography>
 				) : (
@@ -137,8 +168,13 @@ export default function ListaInscritos({ dados }: Props) {
 							getRowId={(row) => row.id}
 							getRowHeight={() => "auto"}
 							sx={{
-								...dataGridBgSx(theme.palette.background.default),
-								"& .MuiDataGrid-cell": { alignItems: "flex-start", py: 1 },
+								...dataGridBgSx(
+									theme.palette.background.default,
+								),
+								"& .MuiDataGrid-cell": {
+									alignItems: "flex-start",
+									py: 1,
+								},
 							}}
 						/>
 					</Box>

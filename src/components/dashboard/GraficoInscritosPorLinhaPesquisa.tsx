@@ -36,11 +36,19 @@ export default function GraficoInscritosPorLinhaPesquisa({ dados }: Props) {
 				</Typography>
 				<Box sx={{ minHeight: 200 }}>
 					{dados && dados.length > 0 ? (
-						<ResponsiveContainer width="100%" height={alturaGrafico}>
+						<ResponsiveContainer
+							width="100%"
+							height={alturaGrafico}
+						>
 							<BarChart
 								data={dados}
 								layout="vertical"
-								margin={{ top: 8, right: 20, left: 4, bottom: 8 }}
+								margin={{
+									top: 8,
+									right: 20,
+									left: 4,
+									bottom: 8,
+								}}
 								barCategoryGap="20%"
 							>
 								<CartesianGrid
@@ -74,21 +82,31 @@ export default function GraficoInscritosPorLinhaPesquisa({ dados }: Props) {
 								<Tooltip
 									wrapperStyle={{ outline: "none" }}
 									contentStyle={{
-										backgroundColor: theme.palette.background.paper,
+										backgroundColor:
+											theme.palette.background.paper,
 										border: `1px solid ${theme.palette.divider}`,
 										color: theme.palette.text.primary,
 									}}
-									labelStyle={{ color: theme.palette.text.secondary }}
-									itemStyle={{ color: theme.palette.text.primary }}
+									labelStyle={{
+										color: theme.palette.text.secondary,
+									}}
+									itemStyle={{
+										color: theme.palette.text.primary,
+									}}
 								/>
-								<Bar dataKey="quantidade" name="Inscritos" radius={[0, 4, 4, 0]}>
+								<Bar
+									dataKey="quantidade"
+									name="Inscritos"
+									radius={[0, 4, 4, 0]}
+								>
 									{dados.map((_, index) => (
 										<Cell
 											key={index}
 											fill={
 												index % 2 === 0
 													? theme.palette.primary.main
-													: theme.palette.secondary.main
+													: theme.palette.secondary
+															.main
 											}
 										/>
 									))}
