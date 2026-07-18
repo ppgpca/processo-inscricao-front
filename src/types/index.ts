@@ -33,7 +33,7 @@ export interface InscricaoPalavraChave {
 	palavraChave?: PalavraChave;
 }
 
-export type TipoEtapa =
+export type SiglaEtapa =
 	| "INSCRICAO"
 	| "HOMOLOGACAO"
 	| "ANALISE_CURRICULO"
@@ -43,15 +43,15 @@ export type TipoEtapa =
 	| "RECURSO"
 	| "RESULTADO_FINAL";
 
-export interface TipoEtapaOption {
-	tipo: TipoEtapa;
+export interface SiglaEtapaOption {
+	sigla: SiglaEtapa;
 	label: string;
 }
 
 export interface EtapaEdital {
 	id: number;
 	idEdital: number;
-	tipo: TipoEtapa;
+	sigla: SiglaEtapa;
 	nome: string;
 	ordem: number;
 	dataInicio: string | null;

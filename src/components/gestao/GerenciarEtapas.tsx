@@ -28,7 +28,7 @@ import { useTheme } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { GridToolbarQuickFilter } from "@mui/x-data-grid";
 import { useEffect, useMemo, useState } from "react";
-import type { AppMessage, EtapaEdital, TipoEtapaOption } from "../../types";
+import type { AppMessage, EtapaEdital, SiglaEtapaOption } from "../../types";
 import {
 	etapaEditalService,
 	type CreateEtapaEditalDto,
@@ -39,7 +39,7 @@ import { formatarData } from "../../controllers/edital-controller";
 import CustomDataGrid from "../customs/CustomDataGrid";
 
 interface FormState {
-	tipo: string;
+	sigla: string;
 	nome: string;
 	ordem: string;
 	dataInicio: string;
@@ -49,12 +49,12 @@ interface FormState {
 type StatusEtapa = "concluida" | "ativa" | "futura";
 
 interface EtapaRow extends EtapaEdital {
-	tipoLabel: string;
+	siglaLabel: string;
 	status: StatusEtapa;
 }
 
 const FORM_VAZIO: FormState = {
-	tipo: "",
+	sigla: "",
 	nome: "",
 	ordem: "1",
 	dataInicio: "",
@@ -134,7 +134,7 @@ export default function GerenciarEtapas() {
 	const [editais, setEditais] = useState<Edital[]>([]);
 	const [editalSelecionado, setEditalSelecionado] = useState<number | "">("");
 	const [etapas, setEtapas] = useState<EtapaEdital[]>([]);
-	const [tipos, setTipos] = useState<TipoEtapaOption[]>([]);
+	const [siglas, setSiglas] = useState<SiglaEtapaOption[]>([]);
 	const [loadingEditais, setLoadingEditais] = useState(true);
 	const [loading, setLoading] = useState(false);
 	const [salvando, setSalvando] = useState(false);
@@ -151,12 +151,12 @@ export default function GerenciarEtapas() {
 	useEffect(() => {
 		const carregar = async () => {
 			try {
-				const [listaEditais, listaTipos] = await Promise.all([
+				const [listaEditais, listaSiglas] = await Promise.all([
 					editalService.findAll(),
-					etapaEditalService.findTipos(),
+					etapaEditalService.findSiglas(),
 				]);
 				setEditais(listaEditais);
-				setTipos(listaTipos);
+				setSiglas(listaSiglas);
 			} catch {
 				setMessage({
 					text: "Erro ao carregar editais.",
@@ -193,8 +193,8 @@ export default function GerenciarEtapas() {
 		carregar();
 	}, [editalSelecionado]);
 
-	const labelTipo = (tipo: string) =>
-		tipos.find((t) => t.tipo === tipo)?.label ?? tipo;
+	const labelSigla = (sigla: string) =>
+		siglas.find((s) => s.sigla === sigla)?.label ?? sigla;
 
 	const abrirCriar = () => {
 		setEtapaEditando(null);
@@ -207,7 +207,7 @@ export default function GerenciarEtapas() {
 	const abrirEditar = (etapa: EtapaEdital) => {
 		setEtapaEditando(etapa);
 		setForm({
-			tipo: etapa.tipo,
+			sigla: etapa.sigla,
 			nome: etapa.nome,
 			ordem: String(etapa.ordem),
 			dataInicio: toInputDate(etapa.dataInicio),
@@ -223,12 +223,12 @@ export default function GerenciarEtapas() {
 	};
 
 	const salvar = async () => {
-		if (!editalSelecionado || !form.tipo || !form.nome || !form.ordem)
+		if (!editalSelecionado || !form.sigla || !form.nome || !form.ordem)
 			return;
 		setSalvando(true);
 		try {
 			const dto: CreateEtapaEditalDto = {
-				tipo: form.tipo,
+				sigla: form.sigla,
 				nome: form.nome,
 				ordem: Number(form.ordem),
 				dataInicio: toIsoFromInput(form.dataInicio),
@@ -296,11 +296,11 @@ export default function GerenciarEtapas() {
 		() =>
 			etapas.map((etapa) => ({
 				...etapa,
-				tipoLabel: labelTipo(etapa.tipo),
+				siglaLabel: labelSigla(etapa.sigla),
 				status: obterStatusEtapa(etapa, agora),
 			})),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[etapas, tipos],
+		[etapas, siglas],
 	);
 
 	const colunas = useMemo<GridColDef[]>(
@@ -312,7 +312,7 @@ export default function GerenciarEtapas() {
 				type: "number",
 			},
 			{
-				field: "tipoLabel",
+				field: "siglaLabel",
 				headerName: "Tipo",
 				width: 200,
 				renderCell: (params) =>
@@ -429,7 +429,8 @@ export default function GerenciarEtapas() {
 		[],
 	);
 
-	const formValido = form.tipo && form.nome.trim() && Number(form.ordem) >= 1;
+	const formValido =
+		form.sigla && form.nome.trim() && Number(form.ordem) >= 1;
 
 	return (
 		<Box>
@@ -566,28 +567,28 @@ export default function GerenciarEtapas() {
 						<FormControl fullWidth size="small">
 							<InputLabel>Tipo</InputLabel>
 							<Select
-								value={form.tipo}
+								value={form.sigla}
 								label="Tipo"
 								onChange={(e) =>
 									setForm((prev) => {
-										const tipoSelecionado = tipos.find(
-											(t) => t.tipo === e.target.value,
+										const siglaSelecionada = siglas.find(
+											(s) => s.sigla === e.target.value,
 										);
 										return {
 											...prev,
-											tipo: e.target.value,
+											sigla: e.target.value,
 											nome:
 												prev.nome === "" &&
-												tipoSelecionado
-													? tipoSelecionado.label
+												siglaSelecionada
+													? siglaSelecionada.label
 													: prev.nome,
 										};
 									})
 								}
 							>
-								{tipos.map((t) => (
-									<MenuItem key={t.tipo} value={t.tipo}>
-										{t.label}
+								{siglas.map((s) => (
+									<MenuItem key={s.sigla} value={s.sigla}>
+										{s.label}
 									</MenuItem>
 								))}
 							</Select>

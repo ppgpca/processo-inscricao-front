@@ -75,23 +75,31 @@ export default function InscricaoStepper() {
 	} = hook;
 
 	useEffect(() => {
-		editalService
-			.findVigente()
-			.then(async (e) => {
-				setEdital(e);
-				const editalComDocs = await editalService.findWithDocumentos(
-					e.id,
-				);
-				setTiposDocumento(editalComDocs.tiposDocumento ?? []);
-			})
-			.catch(async () => {
+		const carregarEdital = async () => {
+			try {
+				const vigente = await editalService.findVigente();
+
+				if (vigente) {
+					setEdital(vigente);
+					const editalComDocs =
+						await editalService.findWithDocumentos(vigente.id);
+					setTiposDocumento(editalComDocs.tiposDocumento ?? []);
+					return;
+				}
+
 				setSemEditalAberto(true);
 				const proximo = await editalService
 					.findProximo()
 					.catch(() => null);
 				setEditalProximo(proximo);
-			})
-			.finally(() => setLoadingEdital(false));
+			} catch {
+				setSemEditalAberto(true);
+			} finally {
+				setLoadingEdital(false);
+			}
+		};
+
+		carregarEdital();
 	}, []);
 
 	const todosObrigatoriosEnviados = calcTodosObrigatoriosEnviados(
