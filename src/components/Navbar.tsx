@@ -15,6 +15,7 @@ import {
 	useTheme,
 } from "@mui/material";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import GavelIcon from "@mui/icons-material/Gavel";
 import GroupIcon from "@mui/icons-material/Group";
@@ -138,6 +139,25 @@ export default function Navbar() {
 								<GavelIcon />
 							</ListItemIcon>
 							<ListItemText primary="Avaliar Candidatos" />
+						</ListItemButton>
+					</ListItem>
+				</PermissionContext>
+
+				<PermissionContext
+					grupos={[
+						Permissoes.GRUPOS.ADMIN,
+						Permissoes.GRUPOS.COORDENADOR,
+					]}
+					showError={false}
+				>
+					<ListItem disablePadding>
+						<ListItemButton
+							onClick={() => navegar("/gestao/distribuicao")}
+						>
+							<ListItemIcon>
+								<AssignmentIndIcon />
+							</ListItemIcon>
+							<ListItemText primary="Distribuição de Avaliadores" />
 						</ListItemButton>
 					</ListItem>
 				</PermissionContext>

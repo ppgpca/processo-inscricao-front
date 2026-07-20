@@ -224,6 +224,61 @@ export interface CandidatoAvaliacao {
 	comentario: string | null;
 }
 
+export type SiglaEtapaDistribuicao = Extract<
+	SiglaEtapa,
+	"ANTEPROJETO" | "ENTREVISTA" | "ANALISE_CURRICULO"
+>;
+
+export interface Docente {
+	codigo: string;
+	nome: string;
+	email: string;
+	ativo: boolean;
+}
+
+export interface DocenteDistribuicao {
+	codigo: string;
+	nome: string;
+	palavrasChave: string[];
+	linhasPesquisa: { id: number; nome: string }[];
+	cargaAtual: number;
+}
+
+export interface DocenteAtribuido {
+	codigoDocente: string;
+	nome: string;
+	temNotaLancada: boolean;
+}
+
+export interface CandidatoDistribuicao {
+	idInscricao: number;
+	cpf: string;
+	nome: string;
+	idLinhaPesquisa: number;
+	linhaPesquisa: string;
+	projetoPesquisa: string;
+	palavrasChave: string[];
+	docentesAtribuidos: DocenteAtribuido[];
+}
+
+export interface AtribuicaoItem {
+	idInscricao: number;
+	codigosDocentes: string[];
+}
+
+export interface ResultadoAtribuicao {
+	sucesso: { idInscricao: number }[];
+	falhas: { idInscricao: number; motivo: string }[];
+}
+
+export interface NotaCriterio {
+	idInscricao: number;
+	idCriterioAvaliacao: number;
+	codigoDocente: string;
+	nota: number | null;
+	comentario: string | null;
+}
+
 export type ThemeMode = "light" | "dark";
 
 export interface AppMessage {
