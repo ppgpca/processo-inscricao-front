@@ -64,6 +64,13 @@ const LABEL_PERIODO: Record<Periodo, string> = {
 	NOITE: "Noite",
 };
 
+function mascaraCpf(cpf: string): string {
+	if (!cpf) return "";
+	const limpo = cpf.replace(/\D/g, "");
+	if (limpo.length !== 11) return cpf;
+	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 8)}*-**`;
+}
+
 interface Banca {
 	id: string;
 	periodo?: Periodo;
@@ -1033,12 +1040,72 @@ export default function MontagemBancas({
 
 	const colunas = useMemo<GridColDef[]>(
 		() => [
-			{ field: "nome", headerName: "Candidato", flex: 1, minWidth: 180 },
+			{
+				field: "cpf",
+				headerName: "CPF",
+				width: 140,
+				renderCell: (params) => (
+					<span style={{ fontFamily: "monospace", fontSize: 13 }}>
+						{mascaraCpf(params.value as string)}
+					</span>
+				),
+			},
+			{
+				field: "projetoPesquisa",
+				headerName: "Título do projeto",
+				flex: 1.5,
+				minWidth: 200,
+				renderCell: (params) =>
+					params.value ? (
+						params.value
+					) : (
+						<Typography
+							variant="body2"
+							color="text.disabled"
+							sx={{ fontStyle: "italic" }}
+						>
+							Não informado
+						</Typography>
+					),
+			},
+			{
+				field: "linhaPesquisa",
+				headerName: "Linha de pesquisa",
+				width: 180,
+			},
+			{
+				field: "palavrasChave",
+				headerName: "Palavras-chave",
+				flex: 1,
+				minWidth: 200,
+				sortable: false,
+				renderCell: (params) => {
+					const palavras: string[] = params.value ?? [];
+					if (palavras.length === 0) {
+						return (
+							<Typography
+								variant="body2"
+								color="text.disabled"
+								sx={{ fontStyle: "italic" }}
+							>
+								Nenhuma
+							</Typography>
+						);
+					}
+					return (
+						<Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, py: 0.5 }}>
+							{palavras.map((palavra) => (
+								<Chip key={palavra} label={palavra} size="small" />
+							))}
+						</Box>
+					);
+				},
+			},
 			...(mostrarPeriodo
 				? [
 						{
 							field: "dataBanca",
-							headerName: "Horário do slot",
+							headerName: "Data/horário da entrevista",
 							flex: 0.9,
 							minWidth: 220,
 							sortable: true,

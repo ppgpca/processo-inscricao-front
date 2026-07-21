@@ -219,6 +219,7 @@ export interface CandidatoAvaliacao {
 	idInscricao: number;
 	cpf: string;
 	anteprojeto: string;
+	linhaPesquisa: string;
 	palavrasChave: string[];
 	nota: number;
 	comentario: string | null;

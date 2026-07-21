@@ -258,7 +258,24 @@ export default function SecaoAnteprojeto({
 					</span>
 				),
 			},
-			{ field: "nome", headerName: "Candidato", flex: 1, minWidth: 180 },
+			{
+				field: "projetoPesquisa",
+				headerName: "Título do projeto",
+				flex: 1.5,
+				minWidth: 200,
+				renderCell: (params) =>
+					params.value ? (
+						params.value
+					) : (
+						<Typography
+							variant="body2"
+							color="text.disabled"
+							sx={{ fontStyle: "italic" }}
+						>
+							Não informado
+						</Typography>
+					),
+			},
 			{
 				field: "linhaPesquisa",
 				headerName: "Linha de pesquisa",
@@ -272,6 +289,17 @@ export default function SecaoAnteprojeto({
 				sortable: false,
 				renderCell: (params) => {
 					const palavras: string[] = params.value ?? [];
+					if (palavras.length === 0) {
+						return (
+							<Typography
+								variant="body2"
+								color="text.disabled"
+								sx={{ fontStyle: "italic" }}
+							>
+								Nenhuma
+							</Typography>
+						);
+					}
 					return (
 						<Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, py: 0.5 }}>
 							{palavras.map((palavra) => (

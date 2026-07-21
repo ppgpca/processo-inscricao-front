@@ -424,6 +424,7 @@ export default function GerenciarCandidatos() {
 				idInscricao: inscrito.idInscricao,
 				cpf: inscrito.cpf,
 				anteprojeto: inscrito.anteprojeto,
+				linhaPesquisa: inscrito.linhaPesquisa,
 				palavrasChave: inscrito.palavrasChave ?? [],
 				nota: avaliacao.nota ?? 0,
 				comentario: null,
