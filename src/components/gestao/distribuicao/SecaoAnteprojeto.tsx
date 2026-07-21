@@ -27,7 +27,9 @@ import type {
 	CandidatoDistribuicao,
 	DocenteAtribuido,
 } from "../../../types";
-import MenuAtribuicaoDocentes from "./MenuAtribuicaoDocentes";
+import MenuAtribuicaoDocentes, {
+	type ResultadoAplicarDocentes,
+} from "./MenuAtribuicaoDocentes";
 
 function mascaraCpf(cpf: string): string {
 	if (!cpf) return "";
@@ -65,9 +67,13 @@ function BarraBusca() {
 
 interface SecaoAnteprojetoProps {
 	idEdital: number | "";
+	onTemPendenciasChange?: (temPendencias: boolean) => void;
 }
 
-export default function SecaoAnteprojeto({ idEdital }: SecaoAnteprojetoProps) {
+export default function SecaoAnteprojeto({
+	idEdital,
+	onTemPendenciasChange,
+}: SecaoAnteprojetoProps) {
 	const theme = useTheme();
 	const {
 		candidatos,
@@ -98,6 +104,14 @@ export default function SecaoAnteprojeto({ idEdital }: SecaoAnteprojetoProps) {
 		setFalhas([]);
 	}, [idEdital]);
 
+	useEffect(() => {
+		onTemPendenciasChange?.(contadorPendentes > 0);
+	}, [contadorPendentes, onTemPendenciasChange]);
+
+	useEffect(() => {
+		return () => onTemPendenciasChange?.(false);
+	}, [onTemPendenciasChange]);
+
 	const docentesEfetivos = (
 		candidato: CandidatoDistribuicao,
 	): DocenteAtribuido[] => {
@@ -118,6 +132,10 @@ export default function SecaoAnteprojeto({ idEdital }: SecaoAnteprojetoProps) {
 		});
 	};
 
+	const todosComAvaliadores =
+		candidatos.length > 0 &&
+		candidatos.every((c) => docentesEfetivos(c).length > 0);
+
 	const abrirMenu = (
 		event: React.MouseEvent<HTMLElement>,
 		candidato: CandidatoDistribuicao,
@@ -134,8 +152,10 @@ export default function SecaoAnteprojeto({ idEdital }: SecaoAnteprojetoProps) {
 		setCandidatoSelecionado(null);
 	};
 
-	const handleAplicarAtribuicao = (codigosDocentes: string[]) => {
-		if (!candidatoSelecionado) return;
+	const handleAplicarAtribuicao = (
+		codigosDocentes: string[],
+	): ResultadoAplicarDocentes => {
+		if (!candidatoSelecionado) return { ok: true };
 		const idInscricao = candidatoSelecionado.idInscricao;
 		const atual = candidatos.find((c) => c.idInscricao === idInscricao);
 		const originais = (atual?.docentesAtribuidos ?? []).map(
@@ -155,6 +175,7 @@ export default function SecaoAnteprojeto({ idEdital }: SecaoAnteprojetoProps) {
 			return next;
 		});
 		fecharMenu();
+		return { ok: true };
 	};
 
 	const handleDistribuirAutomaticamente = async () => {
@@ -215,6 +236,16 @@ export default function SecaoAnteprojeto({ idEdital }: SecaoAnteprojetoProps) {
 		}
 	};
 
+	const handleCancelarPendentes = () => {
+		if (contadorPendentes === 0 || sincronizando) return;
+		setAtribuicaoLocal({});
+		setFalhas([]);
+		setMessage({
+			text: "Atribuições pendentes canceladas.",
+			severity: "info",
+		});
+	};
+
 	const colunas = useMemo<GridColDef[]>(
 		() => [
 			{
@@ -266,34 +297,45 @@ export default function SecaoAnteprojeto({ idEdital }: SecaoAnteprojetoProps) {
 								display: "flex",
 								alignItems: "center",
 								gap: 0.5,
-								flexWrap: "wrap",
 								py: 0.5,
+								width: "100%",
 							}}
 						>
-							{lista.length === 0 ? (
-								<Typography
-									variant="body2"
-									color="text.disabled"
-									sx={{ fontStyle: "italic" }}
-								>
-									Nenhum atribuído
-								</Typography>
-							) : (
-								lista.map((d) => (
-									<Chip
-										key={d.codigoDocente}
-										label={d.nome}
-										size="small"
-										color={
-											d.temNotaLancada
-												? "success"
-												: pendente
-													? "warning"
-													: "default"
-										}
-									/>
-								))
-							)}
+							<Box
+								sx={{
+									display: "flex",
+									flexDirection: "column",
+									flex: 1,
+									minWidth: 0,
+								}}
+							>
+								{lista.length === 0 ? (
+									<Typography
+										variant="body2"
+										color="text.disabled"
+										sx={{ fontStyle: "italic" }}
+									>
+										Nenhum atribuído
+									</Typography>
+								) : (
+									lista.map((d) => (
+										<Typography
+											key={d.codigoDocente}
+											variant="body2"
+											sx={{
+												color: d.temNotaLancada
+													? "success.main"
+													: pendente
+														? "warning.main"
+														: "text.primary",
+												lineHeight: 1.4,
+											}}
+										>
+											{d.nome}
+										</Typography>
+									))
+								)}
+							</Box>
 							<Tooltip title="Editar avaliadores">
 								<IconButton size="small" onClick={(e) => abrirMenu(e, row)}>
 									<EditIcon fontSize="small" />
@@ -378,21 +420,35 @@ export default function SecaoAnteprojeto({ idEdital }: SecaoAnteprojetoProps) {
 							</Box>
 
 							<Stack direction="row" spacing={1}>
-								<Button
-									variant="outlined"
-									size="small"
-									startIcon={
-										distribuindo ? (
-											<CircularProgress size={14} color="inherit" />
-										) : (
-											<ShuffleIcon />
-										)
+								<Tooltip
+									title={
+										todosComAvaliadores
+											? "Todos os candidatos já possuem avaliadores atribuídos"
+											: ""
 									}
-									onClick={handleDistribuirAutomaticamente}
-									disabled={distribuindo || candidatos.length === 0}
 								>
-									Distribuir automaticamente
-								</Button>
+									<span>
+										<Button
+											variant="outlined"
+											size="small"
+											startIcon={
+												distribuindo ? (
+													<CircularProgress size={14} color="inherit" />
+												) : (
+													<ShuffleIcon />
+												)
+											}
+											onClick={handleDistribuirAutomaticamente}
+											disabled={
+												distribuindo ||
+												candidatos.length === 0 ||
+												todosComAvaliadores
+											}
+										>
+											Distribuir automaticamente
+										</Button>
+									</span>
+								</Tooltip>
 								<Tooltip
 									title={
 										contadorPendentes === 0
@@ -422,6 +478,25 @@ export default function SecaoAnteprojeto({ idEdital }: SecaoAnteprojetoProps) {
 												Sincronizar
 											</Button>
 										</Badge>
+									</span>
+								</Tooltip>
+								<Tooltip
+									title={
+										contadorPendentes === 0
+											? "Nenhuma atribuição pendente para cancelar"
+											: "Descarta a distribuição local ainda não sincronizada"
+									}
+								>
+									<span>
+										<Button
+											variant="outlined"
+											color="inherit"
+											size="small"
+											onClick={handleCancelarPendentes}
+											disabled={contadorPendentes === 0 || sincronizando}
+										>
+											Cancelar
+										</Button>
 									</span>
 								</Tooltip>
 							</Stack>

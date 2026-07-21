@@ -108,6 +108,32 @@ export function useGerenciarCandidatos() {
 	};
 
 	/**
+	 * Aplica o mesmo valor de deferida a vários candidatos de uma vez.
+	 */
+	const marcarDeferidaEmLote = (
+		idsInscricao: number[],
+		novoValor: boolean,
+	) => {
+		if (idsInscricao.length === 0) return;
+
+		const originaisPorId = new Map(
+			inscritos.map((i) => [i.idInscricao, i.deferida]),
+		);
+
+		setAlteracoesPendentes((prev) => {
+			const next = { ...prev };
+			for (const id of idsInscricao) {
+				if (originaisPorId.get(id) === novoValor) {
+					delete next[id];
+				} else {
+					next[id] = novoValor;
+				}
+			}
+			return next;
+		});
+	};
+
+	/**
 	 * Envia todas as alterações pendentes para a API em paralelo,
 	 * atualiza o estado local e limpa as pendências.
 	 */
@@ -148,6 +174,7 @@ export function useGerenciarCandidatos() {
 		contadorPendentes,
 		sincronizando,
 		marcarDeferida,
+		marcarDeferidaEmLote,
 		sincronizar,
 	};
 }

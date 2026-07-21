@@ -22,7 +22,11 @@ import {
 import GavelIcon from "@mui/icons-material/Gavel";
 import EditIcon from "@mui/icons-material/Edit";
 import SyncIcon from "@mui/icons-material/Sync";
-import type { GridColDef, GridColumnGroupingModel } from "@mui/x-data-grid";
+import type {
+	GridColDef,
+	GridColumnGroupingModel,
+	GridRowSelectionModel,
+} from "@mui/x-data-grid";
 import { useTheme } from "@mui/material/styles";
 import { GridToolbarQuickFilter } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
@@ -33,6 +37,21 @@ import type {
 } from "../../types";
 import CustomDataGrid from "../customs/CustomDataGrid";
 import { useGerenciarCandidatos } from "../../hooks/useGerenciarCandidatos";
+
+const SELECAO_VAZIA: GridRowSelectionModel = {
+	type: "include",
+	ids: new Set(),
+};
+
+function idsSelecionados(
+	selecao: GridRowSelectionModel,
+	todosIds: number[],
+): number[] {
+	if (selecao.type === "exclude") {
+		return todosIds.filter((id) => !selecao.ids.has(id));
+	}
+	return Array.from(selecao.ids).map(Number);
+}
 
 interface MenuState {
 	anchorEl: HTMLElement | null;
@@ -306,10 +325,13 @@ export default function GerenciarCandidatos() {
 		contadorPendentes,
 		sincronizando,
 		marcarDeferida,
+		marcarDeferidaEmLote,
 		sincronizar,
 	} = useGerenciarCandidatos();
 
 	const [menuState, setMenuState] = useState<MenuState>(MENU_FECHADO);
+	const [rowSelectionModel, setRowSelectionModel] =
+		useState<GridRowSelectionModel>(SELECAO_VAZIA);
 	const [menuAvaliadores, setMenuAvaliadores] = useState<{
 		anchorEl: HTMLElement | null;
 		inscrito: InscritoDashboard | null;
@@ -321,6 +343,16 @@ export default function GerenciarCandidatos() {
 		avaliacao: null,
 		codigoSelecionado: "",
 	});
+
+	const idsSelecao = useMemo(
+		() =>
+			idsSelecionados(
+				rowSelectionModel,
+				inscritos.map((i) => i.idInscricao),
+			),
+		[rowSelectionModel, inscritos],
+	);
+	const qtdSelecionados = idsSelecao.length;
 
 	const handleAbrirMenu = (
 		event: React.MouseEvent<HTMLElement>,
@@ -341,6 +373,13 @@ export default function GerenciarCandidatos() {
 		marcarDeferida(menuState.idInscricao, valor);
 		handleFecharMenu();
 	};
+
+	const handleDeferirEmLote = (valor: boolean) => {
+		marcarDeferidaEmLote(idsSelecao, valor);
+		setRowSelectionModel(SELECAO_VAZIA);
+	};
+
+	const handleLimparSelecao = () => setRowSelectionModel(SELECAO_VAZIA);
 
 	const handleAbrirMenuAvaliadores = (
 		event: React.MouseEvent<HTMLElement>,
@@ -612,9 +651,10 @@ export default function GerenciarCandidatos() {
 					labelId="select-edital-label"
 					value={editalSelecionado}
 					label="Selecionar edital"
-					onChange={(e) =>
-						setEditalSelecionado(e.target.value as number | "")
-					}
+					onChange={(e) => {
+						setEditalSelecionado(e.target.value as number | "");
+						setRowSelectionModel(SELECAO_VAZIA);
+					}}
 					disabled={loadingEditais}
 				>
 					<MenuItem value="">
@@ -670,6 +710,7 @@ export default function GerenciarCandidatos() {
 									display: "flex",
 									alignItems: "center",
 									gap: 1,
+									flexWrap: "wrap",
 								}}
 							>
 								<Typography variant="subtitle1">
@@ -681,45 +722,88 @@ export default function GerenciarCandidatos() {
 									color="primary"
 									variant="outlined"
 								/>
+								{qtdSelecionados > 0 && (
+									<Chip
+										label={`${qtdSelecionados} selecionado${qtdSelecionados !== 1 ? "s" : ""}`}
+										size="small"
+										color="secondary"
+										onDelete={handleLimparSelecao}
+									/>
+								)}
 							</Box>
 
-							<Tooltip
-								title={
-									contadorPendentes === 0
-										? "Nenhuma alteração pendente"
-										: `${contadorPendentes} alteraç${contadorPendentes !== 1 ? "ões" : "ão"} pendente${contadorPendentes !== 1 ? "s" : ""}`
-								}
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 1,
+									flexWrap: "wrap",
+								}}
 							>
-								<span>
-									<Badge
-										badgeContent={contadorPendentes}
-										color="warning"
-										max={99}
-									>
+								{qtdSelecionados > 0 && (
+									<>
 										<Button
-											variant="contained"
+											variant="outlined"
 											size="small"
-											startIcon={
-												sincronizando ? (
-													<CircularProgress
-														size={14}
-														color="inherit"
-													/>
-												) : (
-													<SyncIcon />
-												)
-											}
-											onClick={sincronizar}
-											disabled={
-												contadorPendentes === 0 ||
-												sincronizando
+											color="success"
+											startIcon={<GavelIcon />}
+											onClick={() =>
+												handleDeferirEmLote(true)
 											}
 										>
-											Sincronizar
+											Deferir selecionados
 										</Button>
-									</Badge>
-								</span>
-							</Tooltip>
+										<Button
+											variant="outlined"
+											size="small"
+											color="error"
+											startIcon={<GavelIcon />}
+											onClick={() =>
+												handleDeferirEmLote(false)
+											}
+										>
+											Indeferir selecionados
+										</Button>
+									</>
+								)}
+								<Tooltip
+									title={
+										contadorPendentes === 0
+											? "Nenhuma alteração pendente"
+											: `${contadorPendentes} alteraç${contadorPendentes !== 1 ? "ões" : "ão"} pendente${contadorPendentes !== 1 ? "s" : ""}`
+									}
+								>
+									<span>
+										<Badge
+											badgeContent={contadorPendentes}
+											color="warning"
+											max={99}
+										>
+											<Button
+												variant="contained"
+												size="small"
+												startIcon={
+													sincronizando ? (
+														<CircularProgress
+															size={14}
+															color="inherit"
+														/>
+													) : (
+														<SyncIcon />
+													)
+												}
+												onClick={sincronizar}
+												disabled={
+													contadorPendentes === 0 ||
+													sincronizando
+												}
+											>
+												Sincronizar
+											</Button>
+										</Badge>
+									</span>
+								</Tooltip>
+							</Box>
 						</Box>
 
 						{inscritos.length === 0 ? (
@@ -736,6 +820,13 @@ export default function GerenciarCandidatos() {
 									rows={rows}
 									columns={colunas}
 									pageSize={10}
+									checkboxSelection
+									disableRowSelectionOnClick
+									disableRowSelectionExcludeModel
+									rowSelectionModel={rowSelectionModel}
+									onRowSelectionModelChange={
+										setRowSelectionModel
+									}
 									getRowId={(row) => row.id}
 									getRowHeight={() => "auto"}
 									columnGroupingModel={columnGroupingModel}

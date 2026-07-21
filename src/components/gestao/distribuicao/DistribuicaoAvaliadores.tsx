@@ -1,7 +1,12 @@
 import { useState } from "react";
 import {
 	Box,
+	Button,
 	CircularProgress,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
 	FormControl,
 	InputLabel,
 	MenuItem,
@@ -26,9 +31,19 @@ interface SecaoBancasProps {
 	idEdital: number | "";
 	siglaEtapa: Extract<SiglaEtapaDistribuicao, "ENTREVISTA" | "ANALISE_CURRICULO">;
 	mostrarPeriodo: boolean;
+	maximoDocentes?: number | null;
+	quantidadeExata?: boolean;
+	onTemPendenciasChange?: (temPendencias: boolean) => void;
 }
 
-function SecaoBancas({ idEdital, siglaEtapa, mostrarPeriodo }: SecaoBancasProps) {
+function SecaoBancas({
+	idEdital,
+	siglaEtapa,
+	mostrarPeriodo,
+	maximoDocentes = null,
+	quantidadeExata = false,
+	onTemPendenciasChange,
+}: SecaoBancasProps) {
 	const { candidatos, docentes, loading, erro, salvando, salvarAtribuicoes } =
 		useDistribuicaoBancas(idEdital, siglaEtapa);
 
@@ -44,11 +59,14 @@ function SecaoBancas({ idEdital, siglaEtapa, mostrarPeriodo }: SecaoBancasProps)
 		<MontagemBancas
 			key={`${idEdital}-${siglaEtapa}`}
 			mostrarPeriodo={mostrarPeriodo}
+			maximoDocentes={maximoDocentes}
+			quantidadeExata={quantidadeExata}
 			docentesDisponiveis={docentes}
 			candidatos={candidatos}
 			salvando={salvando}
 			erro={erro}
 			onSalvarAtribuicoes={salvarAtribuicoes}
+			onTemPendenciasChange={onTemPendenciasChange}
 		/>
 	);
 }
@@ -57,6 +75,31 @@ export default function DistribuicaoAvaliadores() {
 	const { editais, editalSelecionado, setEditalSelecionado, loadingEditais } =
 		useEditalVigentePorEtapa("ANTEPROJETO");
 	const [abaAtiva, setAbaAtiva] = useState<SiglaEtapaDistribuicao>("ANTEPROJETO");
+	const [temPendencias, setTemPendencias] = useState(false);
+	const [abaPendente, setAbaPendente] = useState<SiglaEtapaDistribuicao | null>(
+		null,
+	);
+
+	const handleTabChange = (
+		_: React.SyntheticEvent,
+		valor: SiglaEtapaDistribuicao,
+	) => {
+		if (valor === abaAtiva) return;
+		if (temPendencias) {
+			setAbaPendente(valor);
+			return;
+		}
+		setAbaAtiva(valor);
+	};
+
+	const confirmarTrocaAba = () => {
+		if (!abaPendente) return;
+		setTemPendencias(false);
+		setAbaAtiva(abaPendente);
+		setAbaPendente(null);
+	};
+
+	const cancelarTrocaAba = () => setAbaPendente(null);
 
 	return (
 		<Box>
@@ -89,7 +132,7 @@ export default function DistribuicaoAvaliadores() {
 
 			<Tabs
 				value={abaAtiva}
-				onChange={(_, valor) => setAbaAtiva(valor)}
+				onChange={handleTabChange}
 				sx={{ mb: 3, borderBottom: 1, borderColor: "divider" }}
 			>
 				{ABAS.map((aba) => (
@@ -102,20 +145,50 @@ export default function DistribuicaoAvaliadores() {
 					Selecione um edital para continuar.
 				</Typography>
 			) : abaAtiva === "ANTEPROJETO" ? (
-				<SecaoAnteprojeto idEdital={editalSelecionado} />
+				<SecaoAnteprojeto
+					idEdital={editalSelecionado}
+					onTemPendenciasChange={setTemPendencias}
+				/>
 			) : abaAtiva === "ENTREVISTA" ? (
 				<SecaoBancas
 					idEdital={editalSelecionado}
 					siglaEtapa="ENTREVISTA"
 					mostrarPeriodo
+					maximoDocentes={3}
+					quantidadeExata
+					onTemPendenciasChange={setTemPendencias}
 				/>
 			) : (
 				<SecaoBancas
 					idEdital={editalSelecionado}
 					siglaEtapa="ANALISE_CURRICULO"
 					mostrarPeriodo={false}
+					onTemPendenciasChange={setTemPendencias}
 				/>
 			)}
+
+			<Dialog open={Boolean(abaPendente)} onClose={cancelarTrocaAba}>
+				<DialogTitle>Alterações não sincronizadas</DialogTitle>
+				<DialogContent>
+					<Typography>
+						Há atribuições pendentes de sincronização ou bancas criadas sem
+						candidatos atribuídos. Ao trocar de aba, essas alterações serão
+						perdidas. Deseja continuar?
+					</Typography>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={cancelarTrocaAba} color="inherit">
+						Cancelar
+					</Button>
+					<Button
+						onClick={confirmarTrocaAba}
+						variant="contained"
+						color="warning"
+					>
+						Trocar aba
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</Box>
 	);
 }

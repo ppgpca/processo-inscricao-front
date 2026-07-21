@@ -222,6 +222,8 @@ export interface CandidatoAvaliacao {
 	palavrasChave: string[];
 	nota: number;
 	comentario: string | null;
+	/** Início do slot da banca (critério Entrevista), quando houver. */
+	dataBanca?: string | null;
 }
 
 export type SiglaEtapaDistribuicao = Extract<
@@ -259,11 +261,14 @@ export interface CandidatoDistribuicao {
 	projetoPesquisa: string;
 	palavrasChave: string[];
 	docentesAtribuidos: DocenteAtribuido[];
+	/** Início do slot da banca, quando houver. */
+	dataBanca: string | null;
 }
 
 export interface AtribuicaoItem {
 	idInscricao: number;
 	codigosDocentes: string[];
+	dataBanca?: string | null;
 }
 
 export interface ResultadoAtribuicao {
