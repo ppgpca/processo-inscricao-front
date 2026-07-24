@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { editalService } from "../services/edital.service";
-import type { Edital, SiglaEtapa } from "../types";
+import type { Edital, NomeEtapa } from "../types";
 
-export function useEditalVigentePorEtapa(siglaEtapa: SiglaEtapa) {
+export function useEditalVigentePorEtapa(nomeEtapa: NomeEtapa) {
 	const [editais, setEditais] = useState<Edital[]>([]);
 	const [editalSelecionado, setEditalSelecionado] = useState<number | "">("");
 	const [loadingEditais, setLoadingEditais] = useState(true);
@@ -18,7 +18,7 @@ export function useEditalVigentePorEtapa(siglaEtapa: SiglaEtapa) {
 
 				const agora = new Date();
 				const vigente = lista.find((e) => {
-					const etapa = e.etapas?.find((et) => et.sigla === siglaEtapa);
+					const etapa = e.etapas?.find((et) => et.nome === nomeEtapa);
 					if (!etapa?.dataInicio || !etapa?.dataFim) return false;
 					return (
 						new Date(etapa.dataInicio) <= agora &&
@@ -33,7 +33,7 @@ export function useEditalVigentePorEtapa(siglaEtapa: SiglaEtapa) {
 			}
 		};
 		carregar();
-	}, [siglaEtapa]);
+	}, [nomeEtapa]);
 
 	return {
 		editais,

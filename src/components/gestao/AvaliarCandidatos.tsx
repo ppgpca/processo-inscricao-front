@@ -25,21 +25,21 @@ import type {
 	CandidatoAvaliacao,
 	CriterioAvaliacao,
 	NavegacaoEdicaoAvaliacao,
-	SiglaEtapaDistribuicao,
+	NomeEtapaDistribuicao,
 } from "../../types";
 import CustomDataGrid from "../customs/CustomDataGrid";
 import { useAvaliarCandidatos } from "../../hooks/useAvaliarCandidatos";
 import AvaliacaoCriterio from "./AvaliacaoCriterio";
 
 const ABAS: {
-	sigla: SiglaEtapaDistribuicao;
+	nome: NomeEtapaDistribuicao;
 	label: string;
 	nomeCriterio: string;
 }[] = [
-	{ sigla: "ANTEPROJETO", label: "Anteprojeto", nomeCriterio: "Anteprojeto" },
-	{ sigla: "ENTREVISTA", label: "Entrevista", nomeCriterio: "Entrevista" },
+	{ nome: "ANTEPROJETO", label: "Anteprojeto", nomeCriterio: "Anteprojeto" },
+	{ nome: "ENTREVISTA", label: "Entrevista", nomeCriterio: "Entrevista" },
 	{
-		sigla: "ANALISE_CURRICULO",
+		nome: "ANALISE_CURRICULO",
 		label: "Currículo",
 		nomeCriterio: "Currículo",
 	},
@@ -52,14 +52,14 @@ function mascaraCpf(cpf: string): string {
 	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 8)}*-**`;
 }
 
-function siglaPorNomeCriterio(
+function nomePorNomeCriterio(
 	nome: string | undefined,
-): SiglaEtapaDistribuicao {
+): NomeEtapaDistribuicao {
 	const normalizado = nome?.trim().toLowerCase() ?? "";
 	const aba = ABAS.find(
 		(item) => item.nomeCriterio.toLowerCase() === normalizado,
 	);
-	return aba?.sigla ?? "ANTEPROJETO";
+	return aba?.nome ?? "ANTEPROJETO";
 }
 
 /** Formata ISO do slot da banca como dd/mm/yyyy HH:MM. */
@@ -135,9 +135,9 @@ export default function AvaliarCandidatos() {
 	const stateOrigem = location.state as NavegacaoEdicaoAvaliacao | null;
 	const veioDeCandidatos = stateOrigem?.origem === "candidatos";
 
-	const [abaAtiva, setAbaAtiva] = useState<SiglaEtapaDistribuicao>(() =>
+	const [abaAtiva, setAbaAtiva] = useState<NomeEtapaDistribuicao>(() =>
 		veioDeCandidatos && stateOrigem
-			? siglaPorNomeCriterio(stateOrigem.criterio.nome)
+			? nomePorNomeCriterio(stateOrigem.criterio.nome)
 			: "ANTEPROJETO",
 	);
 
@@ -157,7 +157,7 @@ export default function AvaliarCandidatos() {
 	useEffect(() => {
 		if (!veioDeCandidatos || !stateOrigem) return;
 		setEditalSelecionado(stateOrigem.idEdital);
-		setAbaAtiva(siglaPorNomeCriterio(stateOrigem.criterio.nome));
+		setAbaAtiva(nomePorNomeCriterio(stateOrigem.criterio.nome));
 		setCriterioSelecionado(stateOrigem.criterio.id);
 	}, [
 		veioDeCandidatos,
@@ -167,7 +167,7 @@ export default function AvaliarCandidatos() {
 	]);
 
 	useEffect(() => {
-		const aba = ABAS.find((item) => item.sigla === abaAtiva);
+		const aba = ABAS.find((item) => item.nome === abaAtiva);
 		if (!aba || criterios.length === 0) {
 			setCriterioSelecionado("");
 			return;
@@ -555,13 +555,13 @@ export default function AvaliarCandidatos() {
 
 			<Tabs
 				value={abaAtiva}
-				onChange={(_, valor: SiglaEtapaDistribuicao) =>
+				onChange={(_, valor: NomeEtapaDistribuicao) =>
 					setAbaAtiva(valor)
 				}
 				sx={{ mb: 3, borderBottom: 1, borderColor: "divider" }}
 			>
 				{ABAS.map((aba) => (
-					<Tab key={aba.sigla} value={aba.sigla} label={aba.label} />
+					<Tab key={aba.nome} value={aba.nome} label={aba.label} />
 				))}
 			</Tabs>
 

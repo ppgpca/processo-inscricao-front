@@ -26,7 +26,7 @@ export function useAvaliarCandidatos() {
 				const agora = new Date();
 				const emAvaliacao = lista.find((e) => {
 					const etapa = e.etapas?.find(
-						(et) => et.sigla === "ANALISE_CURRICULO",
+						(et) => et.nome === "ANALISE_CURRICULO",
 					);
 					if (!etapa?.dataInicio || !etapa?.dataFim) return false;
 					return (

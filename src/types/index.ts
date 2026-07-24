@@ -33,26 +33,37 @@ export interface InscricaoPalavraChave {
 	palavraChave?: PalavraChave;
 }
 
-export type SiglaEtapa =
+export type NomeEtapa =
 	| "INSCRICAO"
+	| "RECURSO_INSCRICAO"
 	| "HOMOLOGACAO"
 	| "ANALISE_CURRICULO"
 	| "ANTEPROJETO"
+	| "RECURSO_ANTEPROJETO"
 	| "ENTREVISTA"
+	| "RECURSO_ENTREVISTA"
 	| "RESULTADO_PARCIAL"
-	| "RECURSO"
+	| "RECURSO_RESULTADO_PARCIAL"
 	| "RESULTADO_FINAL";
 
-export interface SiglaEtapaOption {
-	sigla: SiglaEtapa;
+export type NomeEtapaRecurso = Extract<
+	NomeEtapa,
+	| "RECURSO_INSCRICAO"
+	| "RECURSO_ANTEPROJETO"
+	| "RECURSO_ENTREVISTA"
+	| "RECURSO_RESULTADO_PARCIAL"
+>;
+
+export interface NomeEtapaOption {
+	nome: NomeEtapa;
 	label: string;
 }
 
 export interface EtapaEdital {
 	id: number;
 	idEdital: number;
-	sigla: SiglaEtapa;
-	nome: string;
+	nome: NomeEtapa;
+	descricao: string;
 	ordem: number;
 	dataInicio: string | null;
 	dataFim: string | null;
@@ -227,8 +238,8 @@ export interface CandidatoAvaliacao {
 	dataBanca?: string | null;
 }
 
-export type SiglaEtapaDistribuicao = Extract<
-	SiglaEtapa,
+export type NomeEtapaDistribuicao = Extract<
+	NomeEtapa,
 	"ANTEPROJETO" | "ENTREVISTA" | "ANALISE_CURRICULO"
 >;
 
@@ -283,6 +294,30 @@ export interface NotaCriterio {
 	codigoDocente: string;
 	nota: number | null;
 	comentario: string | null;
+}
+
+export type StatusEtapaRecurso = "passada" | "ativa" | "futura";
+
+export interface Recurso {
+	id: number;
+	texto: string;
+	idEtapaEdital: number;
+	idInscricao: number;
+	deferido: boolean | null;
+	comentario: string | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface EtapaRecursoConsulta {
+	etapa: EtapaEdital;
+	status: StatusEtapaRecurso;
+	recurso: Recurso | null;
+}
+
+export interface RecursoGestaoRow extends Recurso {
+	candidatoNome: string;
+	candidatoCpf: string;
 }
 
 export type ThemeMode = "light" | "dark";

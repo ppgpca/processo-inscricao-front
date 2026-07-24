@@ -16,7 +16,9 @@ import Dashboard from "./components/Dashboard";
 import AvaliarCandidatos from "./components/gestao/AvaliarCandidatos";
 import GerenciarCandidatos from "./components/gestao/GerenciarCandidatos";
 import GerenciarEtapas from "./components/gestao/GerenciarEtapas";
+import GerenciarRecursos from "./components/gestao/GerenciarRecursos";
 import DistribuicaoAvaliadores from "./components/gestao/distribuicao/DistribuicaoAvaliadores";
+import ConsultaRecursos from "./components/recurso/ConsultaRecursos";
 
 interface DrawerContextValue {
 	drawerOpen: boolean;
@@ -114,6 +116,14 @@ function AppRoutes() {
 					</PublicLayout>
 				}
 			/>
+			<Route
+				path="/recursos"
+				element={
+					<PublicLayout>
+						<ConsultaRecursos />
+					</PublicLayout>
+				}
+			/>
 			<Route path="/login" element={<Login />} />
 			<Route
 				path="/gestao"
@@ -172,6 +182,23 @@ function AppRoutes() {
 								]}
 							>
 								<GerenciarEtapas />
+							</PermissionContext>
+						</GestaoLayout>
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path="/gestao/recursos"
+				element={
+					<ProtectedRoute>
+						<GestaoLayout>
+							<PermissionContext
+								grupos={[
+									Permissoes.GRUPOS.ADMIN,
+									Permissoes.GRUPOS.COORDENADOR,
+								]}
+							>
+								<GerenciarRecursos />
 							</PermissionContext>
 						</GestaoLayout>
 					</ProtectedRoute>

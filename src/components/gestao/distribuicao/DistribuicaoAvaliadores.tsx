@@ -17,19 +17,19 @@ import {
 } from "@mui/material";
 import { useEditalVigentePorEtapa } from "../../../hooks/useEditalVigentePorEtapa";
 import { useDistribuicaoBancas } from "../../../hooks/useDistribuicaoBancas";
-import type { SiglaEtapaDistribuicao } from "../../../types";
+import type { NomeEtapaDistribuicao } from "../../../types";
 import SecaoAnteprojeto from "./SecaoAnteprojeto";
 import MontagemBancas from "./MontagemBancas";
 
-const ABAS: { sigla: SiglaEtapaDistribuicao; label: string }[] = [
-	{ sigla: "ANTEPROJETO", label: "Anteprojeto" },
-	{ sigla: "ENTREVISTA", label: "Entrevista" },
-	{ sigla: "ANALISE_CURRICULO", label: "Currículo" },
+const ABAS: { nome: NomeEtapaDistribuicao; label: string }[] = [
+	{ nome: "ANTEPROJETO", label: "Anteprojeto" },
+	{ nome: "ENTREVISTA", label: "Entrevista" },
+	{ nome: "ANALISE_CURRICULO", label: "Currículo" },
 ];
 
 interface SecaoBancasProps {
 	idEdital: number | "";
-	siglaEtapa: Extract<SiglaEtapaDistribuicao, "ENTREVISTA" | "ANALISE_CURRICULO">;
+	nomeEtapa: Extract<NomeEtapaDistribuicao, "ENTREVISTA" | "ANALISE_CURRICULO">;
 	mostrarPeriodo: boolean;
 	maximoDocentes?: number | null;
 	quantidadeExata?: boolean;
@@ -38,14 +38,14 @@ interface SecaoBancasProps {
 
 function SecaoBancas({
 	idEdital,
-	siglaEtapa,
+	nomeEtapa,
 	mostrarPeriodo,
 	maximoDocentes = null,
 	quantidadeExata = false,
 	onTemPendenciasChange,
 }: SecaoBancasProps) {
 	const { candidatos, docentes, loading, erro, salvando, salvarAtribuicoes } =
-		useDistribuicaoBancas(idEdital, siglaEtapa);
+		useDistribuicaoBancas(idEdital, nomeEtapa);
 
 	if (loading) {
 		return (
@@ -57,7 +57,7 @@ function SecaoBancas({
 
 	return (
 		<MontagemBancas
-			key={`${idEdital}-${siglaEtapa}`}
+			key={`${idEdital}-${nomeEtapa}`}
 			mostrarPeriodo={mostrarPeriodo}
 			maximoDocentes={maximoDocentes}
 			quantidadeExata={quantidadeExata}
@@ -74,15 +74,15 @@ function SecaoBancas({
 export default function DistribuicaoAvaliadores() {
 	const { editais, editalSelecionado, setEditalSelecionado, loadingEditais } =
 		useEditalVigentePorEtapa("ANTEPROJETO");
-	const [abaAtiva, setAbaAtiva] = useState<SiglaEtapaDistribuicao>("ANTEPROJETO");
+	const [abaAtiva, setAbaAtiva] = useState<NomeEtapaDistribuicao>("ANTEPROJETO");
 	const [temPendencias, setTemPendencias] = useState(false);
-	const [abaPendente, setAbaPendente] = useState<SiglaEtapaDistribuicao | null>(
+	const [abaPendente, setAbaPendente] = useState<NomeEtapaDistribuicao | null>(
 		null,
 	);
 
 	const handleTabChange = (
 		_: React.SyntheticEvent,
-		valor: SiglaEtapaDistribuicao,
+		valor: NomeEtapaDistribuicao,
 	) => {
 		if (valor === abaAtiva) return;
 		if (temPendencias) {
@@ -136,7 +136,7 @@ export default function DistribuicaoAvaliadores() {
 				sx={{ mb: 3, borderBottom: 1, borderColor: "divider" }}
 			>
 				{ABAS.map((aba) => (
-					<Tab key={aba.sigla} value={aba.sigla} label={aba.label} />
+					<Tab key={aba.nome} value={aba.nome} label={aba.label} />
 				))}
 			</Tabs>
 
@@ -152,7 +152,7 @@ export default function DistribuicaoAvaliadores() {
 			) : abaAtiva === "ENTREVISTA" ? (
 				<SecaoBancas
 					idEdital={editalSelecionado}
-					siglaEtapa="ENTREVISTA"
+					nomeEtapa="ENTREVISTA"
 					mostrarPeriodo
 					maximoDocentes={3}
 					quantidadeExata
@@ -161,7 +161,7 @@ export default function DistribuicaoAvaliadores() {
 			) : (
 				<SecaoBancas
 					idEdital={editalSelecionado}
-					siglaEtapa="ANALISE_CURRICULO"
+					nomeEtapa="ANALISE_CURRICULO"
 					mostrarPeriodo={false}
 					onTemPendenciasChange={setTemPendencias}
 				/>
@@ -180,12 +180,8 @@ export default function DistribuicaoAvaliadores() {
 					<Button onClick={cancelarTrocaAba} color="inherit">
 						Cancelar
 					</Button>
-					<Button
-						onClick={confirmarTrocaAba}
-						variant="contained"
-						color="warning"
-					>
-						Trocar aba
+					<Button onClick={confirmarTrocaAba} variant="contained" color="warning">
+						Descartar e trocar
 					</Button>
 				</DialogActions>
 			</Dialog>

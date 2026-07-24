@@ -4,12 +4,12 @@ import type {
 	AtribuicaoItem,
 	CandidatoDistribuicao,
 	DocenteDistribuicao,
-	SiglaEtapaDistribuicao,
+	NomeEtapaDistribuicao,
 } from "../types";
 
 export function useDistribuicaoBancas(
 	idEdital: number | "",
-	siglaEtapa: SiglaEtapaDistribuicao,
+	nomeEtapa: NomeEtapaDistribuicao,
 ) {
 	const [candidatos, setCandidatos] = useState<CandidatoDistribuicao[]>([]);
 	const [docentes, setDocentes] = useState<DocenteDistribuicao[]>([]);
@@ -28,8 +28,8 @@ export function useDistribuicaoBancas(
 			setErro(null);
 			try {
 				const [listaCandidatos, listaDocentes] = await Promise.all([
-					distribuicaoService.findCandidatos(idEdital, siglaEtapa),
-					distribuicaoService.findDocentes(idEdital, siglaEtapa),
+					distribuicaoService.findCandidatos(idEdital, nomeEtapa),
+					distribuicaoService.findDocentes(idEdital, nomeEtapa),
 				]);
 				setCandidatos(listaCandidatos);
 				setDocentes(listaDocentes);
@@ -39,7 +39,7 @@ export function useDistribuicaoBancas(
 				if (!opcoes?.silencioso) setLoading(false);
 			}
 		},
-		[idEdital, siglaEtapa],
+		[idEdital, nomeEtapa],
 	);
 
 	useEffect(() => {
@@ -53,7 +53,7 @@ export function useDistribuicaoBancas(
 		try {
 			const resultado = await distribuicaoService.atribuir(
 				idEdital,
-				siglaEtapa,
+				nomeEtapa,
 				itens,
 			);
 			await recarregar({ silencioso: true });

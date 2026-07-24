@@ -28,7 +28,7 @@ import { useTheme } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { GridToolbarQuickFilter } from "@mui/x-data-grid";
 import { useEffect, useMemo, useState } from "react";
-import type { AppMessage, EtapaEdital, SiglaEtapaOption } from "../../types";
+import type { AppMessage, EtapaEdital, NomeEtapaOption } from "../../types";
 import {
 	etapaEditalService,
 	type CreateEtapaEditalDto,
@@ -39,8 +39,8 @@ import { formatarData } from "../../controllers/edital-controller";
 import CustomDataGrid from "../customs/CustomDataGrid";
 
 interface FormState {
-	sigla: string;
 	nome: string;
+	descricao: string;
 	ordem: string;
 	dataInicio: string;
 	dataFim: string;
@@ -49,13 +49,13 @@ interface FormState {
 type StatusEtapa = "concluida" | "ativa" | "futura";
 
 interface EtapaRow extends EtapaEdital {
-	siglaLabel: string;
+	nomeLabel: string;
 	status: StatusEtapa;
 }
 
 const FORM_VAZIO: FormState = {
-	sigla: "",
 	nome: "",
+	descricao: "",
 	ordem: "1",
 	dataInicio: "",
 	dataFim: "",
@@ -134,7 +134,7 @@ export default function GerenciarEtapas() {
 	const [editais, setEditais] = useState<Edital[]>([]);
 	const [editalSelecionado, setEditalSelecionado] = useState<number | "">("");
 	const [etapas, setEtapas] = useState<EtapaEdital[]>([]);
-	const [siglas, setSiglas] = useState<SiglaEtapaOption[]>([]);
+	const [nomes, setNomes] = useState<NomeEtapaOption[]>([]);
 	const [loadingEditais, setLoadingEditais] = useState(true);
 	const [loading, setLoading] = useState(false);
 	const [salvando, setSalvando] = useState(false);
@@ -151,12 +151,12 @@ export default function GerenciarEtapas() {
 	useEffect(() => {
 		const carregar = async () => {
 			try {
-				const [listaEditais, listaSiglas] = await Promise.all([
+				const [listaEditais, listaNomes] = await Promise.all([
 					editalService.findAll(),
-					etapaEditalService.findSiglas(),
+					etapaEditalService.findNomes(),
 				]);
 				setEditais(listaEditais);
-				setSiglas(listaSiglas);
+				setNomes(listaNomes);
 			} catch {
 				setMessage({
 					text: "Erro ao carregar editais.",
@@ -193,8 +193,8 @@ export default function GerenciarEtapas() {
 		carregar();
 	}, [editalSelecionado]);
 
-	const labelSigla = (sigla: string) =>
-		siglas.find((s) => s.sigla === sigla)?.label ?? sigla;
+	const labelNome = (nome: string) =>
+		nomes.find((s) => s.nome === nome)?.label ?? nome;
 
 	const abrirCriar = () => {
 		setEtapaEditando(null);
@@ -207,8 +207,8 @@ export default function GerenciarEtapas() {
 	const abrirEditar = (etapa: EtapaEdital) => {
 		setEtapaEditando(etapa);
 		setForm({
-			sigla: etapa.sigla,
 			nome: etapa.nome,
+			descricao: etapa.descricao,
 			ordem: String(etapa.ordem),
 			dataInicio: toInputDate(etapa.dataInicio),
 			dataFim: toInputDate(etapa.dataFim),
@@ -223,13 +223,13 @@ export default function GerenciarEtapas() {
 	};
 
 	const salvar = async () => {
-		if (!editalSelecionado || !form.sigla || !form.nome || !form.ordem)
+		if (!editalSelecionado || !form.nome || !form.descricao || !form.ordem)
 			return;
 		setSalvando(true);
 		try {
 			const dto: CreateEtapaEditalDto = {
-				sigla: form.sigla,
 				nome: form.nome,
+				descricao: form.descricao,
 				ordem: Number(form.ordem),
 				dataInicio: toIsoFromInput(form.dataInicio),
 				dataFim: toIsoFromInput(form.dataFim),
@@ -296,11 +296,11 @@ export default function GerenciarEtapas() {
 		() =>
 			etapas.map((etapa) => ({
 				...etapa,
-				siglaLabel: labelSigla(etapa.sigla),
+				nomeLabel: labelNome(etapa.nome),
 				status: obterStatusEtapa(etapa, agora),
 			})),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[etapas, siglas],
+		[etapas, nomes],
 	);
 
 	const colunas = useMemo<GridColDef[]>(
@@ -312,7 +312,7 @@ export default function GerenciarEtapas() {
 				type: "number",
 			},
 			{
-				field: "siglaLabel",
+				field: "nomeLabel",
 				headerName: "Tipo",
 				width: 200,
 				renderCell: (params) =>
@@ -327,8 +327,8 @@ export default function GerenciarEtapas() {
 					),
 			},
 			{
-				field: "nome",
-				headerName: "Nome",
+				field: "descricao",
+				headerName: "Descrição",
 				flex: 1,
 				minWidth: 180,
 				renderCell: (params) =>
@@ -430,7 +430,7 @@ export default function GerenciarEtapas() {
 	);
 
 	const formValido =
-		form.sigla && form.nome.trim() && Number(form.ordem) >= 1;
+		form.nome && form.descricao.trim() && Number(form.ordem) >= 1;
 
 	return (
 		<Box>
@@ -567,27 +567,27 @@ export default function GerenciarEtapas() {
 						<FormControl fullWidth size="small">
 							<InputLabel>Tipo</InputLabel>
 							<Select
-								value={form.sigla}
+								value={form.nome}
 								label="Tipo"
 								onChange={(e) =>
 									setForm((prev) => {
-										const siglaSelecionada = siglas.find(
-											(s) => s.sigla === e.target.value,
+										const nomeSelecionado = nomes.find(
+											(s) => s.nome === e.target.value,
 										);
 										return {
 											...prev,
-											sigla: e.target.value,
-											nome:
-												prev.nome === "" &&
-												siglaSelecionada
-													? siglaSelecionada.label
-													: prev.nome,
+											nome: e.target.value,
+											descricao:
+												prev.descricao === "" &&
+												nomeSelecionado
+													? nomeSelecionado.label
+													: prev.descricao,
 										};
 									})
 								}
 							>
-								{siglas.map((s) => (
-									<MenuItem key={s.sigla} value={s.sigla}>
+								{nomes.map((s) => (
+									<MenuItem key={s.nome} value={s.nome}>
 										{s.label}
 									</MenuItem>
 								))}
@@ -595,17 +595,17 @@ export default function GerenciarEtapas() {
 						</FormControl>
 
 						<TextField
-							label="Nome de exibição"
+							label="Descrição"
 							size="small"
 							fullWidth
-							value={form.nome}
+							value={form.descricao}
 							onChange={(e) =>
 								setForm((prev) => ({
 									...prev,
-									nome: e.target.value,
+									descricao: e.target.value,
 								}))
 							}
-							helperText="Pode personalizar o nome exibido aos candidatos"
+							helperText="Pode personalizar a descrição exibida aos candidatos"
 						/>
 
 						<TextField
@@ -686,7 +686,7 @@ export default function GerenciarEtapas() {
 				<DialogContent>
 					<Typography>
 						Deseja remover a etapa{" "}
-						<strong>{confirmarRemocao?.nome}</strong>? Esta ação não
+						<strong>{confirmarRemocao?.descricao}</strong>? Esta ação não
 						pode ser desfeita.
 					</Typography>
 				</DialogContent>

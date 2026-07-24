@@ -20,6 +20,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import GavelIcon from "@mui/icons-material/Gavel";
 import GroupIcon from "@mui/icons-material/Group";
 import MenuIcon from "@mui/icons-material/Menu";
+import RateReviewIcon from "@mui/icons-material/RateReview";
 import { useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { Permissoes } from "../enums/permissoes";
@@ -158,6 +159,25 @@ export default function Navbar() {
 								<AssignmentIndIcon />
 							</ListItemIcon>
 							<ListItemText primary="Distribuição de Avaliadores" />
+						</ListItemButton>
+					</ListItem>
+				</PermissionContext>
+
+				<PermissionContext
+					grupos={[
+						Permissoes.GRUPOS.ADMIN,
+						Permissoes.GRUPOS.COORDENADOR,
+					]}
+					showError={false}
+				>
+					<ListItem disablePadding>
+						<ListItemButton
+							onClick={() => navegar("/gestao/recursos")}
+						>
+							<ListItemIcon>
+								<RateReviewIcon />
+							</ListItemIcon>
+							<ListItemText primary="Recursos" />
 						</ListItemButton>
 					</ListItem>
 				</PermissionContext>

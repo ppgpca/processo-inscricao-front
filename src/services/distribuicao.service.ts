@@ -3,36 +3,36 @@ import type {
 	AtribuicaoItem,
 	CandidatoDistribuicao,
 	DocenteDistribuicao,
+	NomeEtapaDistribuicao,
 	ResultadoAtribuicao,
-	SiglaEtapaDistribuicao,
 } from "../types";
 
 export const distribuicaoService = {
 	async findCandidatos(
 		idEdital: number,
-		etapaSigla: SiglaEtapaDistribuicao,
+		etapaNome: NomeEtapaDistribuicao,
 	): Promise<CandidatoDistribuicao[]> {
 		return (await axiosInstance.get(
-			`/distribuicao/${idEdital}/${etapaSigla}/candidatos`,
+			`/distribuicao/${idEdital}/${etapaNome}/candidatos`,
 		)) as CandidatoDistribuicao[];
 	},
 
 	async findDocentes(
 		idEdital: number,
-		etapaSigla: SiglaEtapaDistribuicao,
+		etapaNome: NomeEtapaDistribuicao,
 	): Promise<DocenteDistribuicao[]> {
 		return (await axiosInstance.get(
-			`/distribuicao/${idEdital}/${etapaSigla}/docentes`,
+			`/distribuicao/${idEdital}/${etapaNome}/docentes`,
 		)) as DocenteDistribuicao[];
 	},
 
 	async atribuir(
 		idEdital: number,
-		etapaSigla: SiglaEtapaDistribuicao,
+		etapaNome: NomeEtapaDistribuicao,
 		itens: AtribuicaoItem[],
 	): Promise<ResultadoAtribuicao> {
 		return (await axiosInstance.put(
-			`/distribuicao/${idEdital}/${etapaSigla}/atribuicoes`,
+			`/distribuicao/${idEdital}/${etapaNome}/atribuicoes`,
 			{ itens },
 		)) as ResultadoAtribuicao;
 	},

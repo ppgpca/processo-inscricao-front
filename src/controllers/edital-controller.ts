@@ -21,7 +21,7 @@ export function obterDataInicioInscricao(
 	edital: Edital | null,
 ): string | null {
 	return (
-		edital?.etapas?.find((e) => e.sigla === "INSCRICAO")?.dataInicio ??
+		edital?.etapas?.find((e) => e.nome === "INSCRICAO")?.dataInicio ??
 		null
 	);
 }
@@ -31,7 +31,7 @@ export function obterDataInicioInscricao(
  */
 export function obterDataFimInscricao(edital: Edital | null): string | null {
 	return (
-		edital?.etapas?.find((e) => e.sigla === "INSCRICAO")?.dataFim ?? null
+		edital?.etapas?.find((e) => e.nome === "INSCRICAO")?.dataFim ?? null
 	);
 }
 

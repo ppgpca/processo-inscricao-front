@@ -1,18 +1,18 @@
 import axiosPublico from "./axios";
 import axiosAutenticado from "../auth/axios";
-import type { EtapaEdital, SiglaEtapaOption } from "../types";
+import type { EtapaEdital, NomeEtapaOption } from "../types";
 
 export interface CreateEtapaEditalDto {
-	sigla: string;
 	nome: string;
+	descricao: string;
 	ordem: number;
 	dataInicio?: string | null;
 	dataFim?: string | null;
 }
 
 export interface UpdateEtapaEditalDto {
-	sigla?: string;
 	nome?: string;
+	descricao?: string;
 	ordem?: number;
 	dataInicio?: string | null;
 	dataFim?: string | null;
@@ -26,9 +26,9 @@ export const etapaEditalService = {
 		return res.data;
 	},
 
-	async findSiglas(): Promise<SiglaEtapaOption[]> {
-		const res = await axiosPublico.get<SiglaEtapaOption[]>(
-			"/etapas/siglas",
+	async findNomes(): Promise<NomeEtapaOption[]> {
+		const res = await axiosPublico.get<NomeEtapaOption[]>(
+			"/etapas/nomes",
 		);
 		return res.data;
 	},

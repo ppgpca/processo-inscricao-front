@@ -62,7 +62,7 @@ export default function ProcessoTimeline({ etapas }: ProcessoTimelineProps) {
 
 				{etapaAtiva && (
 					<Chip
-						label={etapaAtiva.nome}
+						label={etapaAtiva.descricao}
 						color="primary"
 						size="small"
 						icon={<TripOriginIcon />}
@@ -148,7 +148,7 @@ export default function ProcessoTimeline({ etapas }: ProcessoTimelineProps) {
 													: "text.primary",
 										}}
 									>
-										{etapa.nome}
+										{etapa.descricao}
 									</Typography>
 
 									{(etapa.dataInicio || etapa.dataFim) && (
