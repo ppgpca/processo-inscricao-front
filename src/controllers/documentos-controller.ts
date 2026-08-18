@@ -46,8 +46,15 @@ export function todosObrigatoriosEnviados(
 	documentos: Documento[],
 ): boolean {
 	return tiposDocumento
-		.filter((t) => t.obrigatorio && t.ativo)
+		.filter((t) => t.obrigatorio && t.ativo && !isTipoDocumentoRecurso(t))
 		.every((t) => !!obterDocumentoAtual(documentos, t.id));
+}
+
+/**
+ * Tipos de documento de recurso (não entram na etapa de inscrição).
+ */
+export function isTipoDocumentoRecurso(tipo: TipoDocumentoEdital): boolean {
+	return !!tipo.recurso;
 }
 
 /**
@@ -56,7 +63,9 @@ export function todosObrigatoriosEnviados(
 export function ordenarTiposDocumentoAtivos(
 	tipos: TipoDocumentoEdital[],
 ): TipoDocumentoEdital[] {
-	return tipos.filter((t) => t.ativo).sort((a, b) => a.ordem - b.ordem);
+	return tipos
+		.filter((t) => t.ativo && !isTipoDocumentoRecurso(t))
+		.sort((a, b) => a.ordem - b.ordem);
 }
 
 /**
@@ -98,6 +107,7 @@ const documentosController = {
 	validarArquivo,
 	obterDocumentoAtual,
 	todosObrigatoriosEnviados,
+	isTipoDocumentoRecurso,
 	ordenarTiposDocumentoAtivos,
 	extrairNomeArquivoDownload,
 	obterMensagemErroUpload,

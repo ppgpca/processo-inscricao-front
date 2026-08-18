@@ -76,6 +76,8 @@ export interface TipoDocumentoEdital {
 	obrigatorio: boolean;
 	ativo: boolean;
 	ordem: number;
+	recurso?: boolean;
+	padraoNome?: string;
 }
 
 export interface Edital {
@@ -298,6 +300,25 @@ export interface NotaCriterio {
 
 export type StatusEtapaRecurso = "passada" | "ativa" | "futura";
 
+export interface DocumentoRecurso {
+	idTipoDocumentoEdital: number;
+	padraoNome: string;
+	label: string;
+	versao: number;
+	nomeArquivoOriginal: string;
+	nomeArquivo: string | null;
+	mimeType: string;
+	tamanhoBytes: number;
+	enviadoEm: string;
+}
+
+export interface SlotDocumentoRecurso {
+	padraoNome: string;
+	label: string;
+	idTipoDocumentoEdital: number;
+	documento: DocumentoRecurso | null;
+}
+
 export interface Recurso {
 	id: number;
 	texto: string;
@@ -307,12 +328,14 @@ export interface Recurso {
 	comentario: string | null;
 	createdAt: string;
 	updatedAt: string;
+	documentos: DocumentoRecurso[];
 }
 
 export interface EtapaRecursoConsulta {
 	etapa: EtapaEdital;
 	status: StatusEtapaRecurso;
 	recurso: Recurso | null;
+	slotsDocumento: SlotDocumentoRecurso[];
 }
 
 export interface RecursoGestaoRow extends Recurso {
