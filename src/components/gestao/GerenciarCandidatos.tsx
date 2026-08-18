@@ -108,10 +108,13 @@ function BarraBusca() {
 	return (
 		<Box sx={{ p: 1 }}>
 			<GridToolbarQuickFilter
-				fullWidth
-				variant="outlined"
-				size="small"
-				placeholder="Buscar candidato..."
+				slotProps={{
+					root: {
+						fullWidth: true,
+						size: "small",
+						placeholder: "Buscar candidato...",
+					},
+				}}
 			/>
 		</Box>
 	);

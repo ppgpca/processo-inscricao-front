@@ -76,10 +76,13 @@ function BarraBusca() {
 	return (
 		<Box sx={{ p: 1 }}>
 			<GridToolbarQuickFilter
-				fullWidth
-				variant="outlined"
-				size="small"
-				placeholder="Buscar etapa..."
+				slotProps={{
+					root: {
+						fullWidth: true,
+						size: "small",
+						placeholder: "Buscar etapa...",
+					},
+				}}
 			/>
 		</Box>
 	);
@@ -612,7 +615,7 @@ export default function GerenciarEtapas() {
 							label="Ordem"
 							size="small"
 							type="number"
-							inputProps={{ min: 1 }}
+							slotProps={{ htmlInput: { min: 1 } }}
 							value={form.ordem}
 							onChange={(e) =>
 								setForm((prev) => ({
@@ -628,7 +631,7 @@ export default function GerenciarEtapas() {
 								label="Data de início"
 								type="date"
 								size="small"
-								InputLabelProps={{ shrink: true }}
+								slotProps={{ inputLabel: { shrink: true } }}
 								value={form.dataInicio}
 								onChange={(e) =>
 									setForm((prev) => ({
@@ -642,7 +645,7 @@ export default function GerenciarEtapas() {
 								label="Data de fim"
 								type="date"
 								size="small"
-								InputLabelProps={{ shrink: true }}
+								slotProps={{ inputLabel: { shrink: true } }}
 								value={form.dataFim}
 								onChange={(e) =>
 									setForm((prev) => ({

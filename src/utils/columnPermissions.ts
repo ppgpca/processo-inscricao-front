@@ -3,9 +3,9 @@ import { Permissoes } from "../enums/permissoes";
 
 type HasPermissionFn = (permissions: number[]) => boolean;
 
-interface ColumnWithHide extends GridColDef {
+type ColumnWithHide = GridColDef & {
 	hide?: boolean | ((hasPermission: HasPermissionFn) => boolean);
-}
+};
 
 export const createColumnWithPermission = (
 	columnConfig: GridColDef,
@@ -77,5 +77,5 @@ export const filterColumnsByPermission = (
 		}
 
 		return !column.hide;
-	});
+	}) as GridColDef[];
 };

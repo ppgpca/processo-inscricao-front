@@ -101,7 +101,7 @@ const NotaCell = memo(function NotaCell({
 						? "Mínimo: 0"
 						: undefined
 			}
-			inputProps={{ min: 0, max: notaMaxima, step: 0.1 }}
+			slotProps={{ htmlInput: { min: 0, max: notaMaxima, step: 0.1 } }}
 			sx={{ width: size === "medium" ? 200 : 140 }}
 		/>
 	);

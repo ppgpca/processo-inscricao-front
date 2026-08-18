@@ -17,12 +17,12 @@ interface Props {
 
 function formatarData(valor: string) {
 	if (!valor) return valor;
-	const [ano, mes, dia] = String(valor).split("-");
+	const [, mes, dia] = String(valor).split("-");
 	return `${dia}/${mes}`;
 }
 
-function formatarDataCompleta(valor: string) {
-	if (!valor) return valor;
+function formatarDataCompleta(valor: unknown) {
+	if (valor == null || valor === "") return "";
 	const [ano, mes, dia] = String(valor).split("-");
 	return `${dia}/${mes}/${ano}`;
 }

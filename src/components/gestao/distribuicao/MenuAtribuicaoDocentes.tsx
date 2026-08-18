@@ -186,9 +186,9 @@ export default function MenuAtribuicaoDocentes({
 									primary={
 										<Stack
 											direction="row"
-											alignItems="center"
 											spacing={0.75}
 											component="span"
+											sx={{ alignItems: "center" }}
 										>
 											<span>{docente.nome}</span>
 											{mensagemChoque && (

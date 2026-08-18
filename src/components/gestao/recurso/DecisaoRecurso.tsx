@@ -187,7 +187,7 @@ export default function DecisaoRecurso({
 									}}
 								>
 									<Box>
-										<Typography variant="body2" fontWeight={500}>
+										<Typography variant="body2" sx={{ fontWeight: 500 }}>
 											{documento.label}
 										</Typography>
 										<Typography variant="body2">

@@ -181,8 +181,10 @@ export default function EtapaProjetoPesquisa({
 										vertical: "top",
 										horizontal: "left",
 									},
-									PaperProps: {
-										style: { maxHeight: 280 },
+									slotProps: {
+										paper: {
+											style: { maxHeight: 280 },
+										},
 									},
 								}}
 								renderValue={() => (
