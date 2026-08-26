@@ -17,7 +17,10 @@ export function obterIdEtapaPorOrdem(
 }
 import { isDadosPessoaisValidos } from "./dados-pessoais-controller";
 import { isDadosFormacaoValidos } from "./formacao-controller";
-import { isProjetoPesquisaValido } from "./projeto-pesquisa-controller";
+import {
+	isProjetoPesquisaValido,
+	obterCotasParaPayload,
+} from "./projeto-pesquisa-controller";
 
 export const STEPS = [
 	"Identificação",
@@ -111,9 +114,7 @@ export function prepararPayloadEtapa2(
 			? Number(projetoPesquisa.idLinhaPesquisa)
 			: undefined,
 		projetoPesquisa: projetoPesquisa.projetoPesquisa || undefined,
-		deficiente: projetoPesquisa.deficiente,
-		indigena: projetoPesquisa.indigena,
-		pretoPardo: projetoPesquisa.pretoPardo,
+		...obterCotasParaPayload(projetoPesquisa),
 		idsPalavrasChave: projetoPesquisa.idsPalavrasChave,
 		...(idEtapaInscricao !== undefined && { idEtapaAtual: idEtapaInscricao }),
 	};

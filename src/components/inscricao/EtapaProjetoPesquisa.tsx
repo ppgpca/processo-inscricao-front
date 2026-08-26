@@ -13,13 +13,20 @@ import {
 	InputLabel,
 	MenuItem,
 	OutlinedInput,
+	Radio,
+	RadioGroup,
 	Select,
 	TextField,
 	Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { ChangeEvent } from "react";
-import type { LinhaPesquisa, PalavraChave, ProjetoPesquisa } from "../../types";
+import type {
+	LinhaPesquisa,
+	ModalidadeConcorrencia,
+	PalavraChave,
+	ProjetoPesquisa,
+} from "../../types";
 import { linhaPesquisaService } from "../../services/linha-pesquisa.service";
 import { palavraChaveService } from "../../services/palavra-chave.service";
 
@@ -67,6 +74,21 @@ export default function EtapaProjetoPesquisa({
 		}
 	};
 
+	const handleModalidadeChange = (value: ModalidadeConcorrencia) => {
+		if (value === "ampla") {
+			onChange({
+				...dados,
+				modalidadeConcorrencia: "ampla",
+				deficiente: false,
+				indigena: false,
+				pretoPardo: false,
+			});
+			return;
+		}
+
+		onChange({ ...dados, modalidadeConcorrencia: "cota" });
+	};
+
 	const palavrasSelecionadas = palavrasChave.filter((p) =>
 		dados.idsPalavrasChave.includes(p.id),
 	);
@@ -81,8 +103,8 @@ export default function EtapaProjetoPesquisa({
 				Etapa 2: Linha de Pesquisa e Projeto
 			</Typography>
 			<Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-				Informe a linha de pesquisa, o título do seu projeto e as cotas
-				para as quais deseja concorrer.
+				Informe a linha de pesquisa, o título do seu projeto e a
+				modalidade de concorrência.
 			</Typography>
 
 			<Grid container spacing={3}>
@@ -245,46 +267,94 @@ export default function EtapaProjetoPesquisa({
 				</Grid>
 
 				<Grid size={12}>
-					<Alert severity="info" sx={{ mb: 2 }}>
-						Marque abaixo caso deseje concorrer a vagas reservadas
-						conforme o Edital. A comprovação deverá ser apresentada
-						mediante documentação.
-					</Alert>
-					<FormControl component="fieldset">
+					<FormControl component="fieldset" required>
 						<FormLabel component="legend">
-							Cotas / Reserva de Vagas
+							Modalidade de concorrência *
 						</FormLabel>
-						<FormGroup>
+						<RadioGroup
+							value={dados.modalidadeConcorrencia}
+							onChange={(e) =>
+								handleModalidadeChange(
+									e.target.value as ModalidadeConcorrencia,
+								)
+							}
+						>
 							<FormControlLabel
-								control={
-									<Checkbox
-										checked={dados.deficiente}
-										onChange={handleChange("deficiente")}
-									/>
-								}
-								label="Pessoa com deficiência (PcD)"
+								value="ampla"
+								control={<Radio />}
+								label="Ampla concorrência"
 							/>
 							<FormControlLabel
-								control={
-									<Checkbox
-										checked={dados.indigena}
-										onChange={handleChange("indigena")}
-									/>
-								}
-								label="Pessoa indígena"
+								value="cota"
+								control={<Radio />}
+								label="Concorrer por cota / reserva de vagas"
 							/>
-							<FormControlLabel
-								control={
-									<Checkbox
-										checked={dados.pretoPardo}
-										onChange={handleChange("pretoPardo")}
-									/>
-								}
-								label="Pessoa preta ou parda"
-							/>
-						</FormGroup>
+						</RadioGroup>
+						<FormHelperText>
+							Selecione se deseja concorrer em ampla concorrência
+							ou por cota.
+						</FormHelperText>
 					</FormControl>
 				</Grid>
+
+				{dados.modalidadeConcorrencia === "cota" && (
+					<Grid size={12}>
+						<Alert severity="info" sx={{ mb: 2 }}>
+							Marque abaixo a(s) cota(s) para a(s) qual(is) deseja
+							concorrer, conforme o Edital. A comprovação deverá
+							ser apresentada mediante documentação.
+						</Alert>
+						<FormControl
+							component="fieldset"
+							required
+							error={
+								!dados.deficiente &&
+								!dados.indigena &&
+								!dados.pretoPardo
+							}
+						>
+							<FormLabel component="legend">
+								Cotas / Reserva de Vagas *
+							</FormLabel>
+							<FormGroup>
+								<FormControlLabel
+									control={
+										<Checkbox
+											checked={dados.deficiente}
+											onChange={handleChange(
+												"deficiente",
+											)}
+										/>
+									}
+									label="Pessoa com deficiência (PcD)"
+								/>
+								<FormControlLabel
+									control={
+										<Checkbox
+											checked={dados.indigena}
+											onChange={handleChange("indigena")}
+										/>
+									}
+									label="Pessoa indígena"
+								/>
+								<FormControlLabel
+									control={
+										<Checkbox
+											checked={dados.pretoPardo}
+											onChange={handleChange(
+												"pretoPardo",
+											)}
+										/>
+									}
+									label="Pessoa preta ou parda"
+								/>
+							</FormGroup>
+							<FormHelperText>
+								Selecione ao menos uma cota.
+							</FormHelperText>
+						</FormControl>
+					</Grid>
+				)}
 			</Grid>
 		</Box>
 	);

@@ -136,9 +136,12 @@ export interface Candidato extends DadosPessoais {
 	cpf: string;
 }
 
+export type ModalidadeConcorrencia = "ampla" | "cota";
+
 export interface ProjetoPesquisa {
 	idLinhaPesquisa: number | string;
 	projetoPesquisa: string;
+	modalidadeConcorrencia: ModalidadeConcorrencia | "";
 	deficiente: boolean;
 	indigena: boolean;
 	pretoPardo: boolean;
