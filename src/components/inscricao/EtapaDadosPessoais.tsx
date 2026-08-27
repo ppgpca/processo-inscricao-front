@@ -93,14 +93,15 @@ export default function EtapaDadosPessoais({
 					/>
 				</Grid>
 
-				<Grid size={{ xs: 12, sm: 6 }}>
-					<TextField
-						fullWidth
-						label="RG"
-						value={dados.rg}
-						onChange={handleChange("rg")}
-					/>
-				</Grid>
+			<Grid size={{ xs: 12, sm: 6 }}>
+				<TextField
+					fullWidth
+					label="Documento de Identificação"
+					value={dados.rg}
+					onChange={handleChange("rg")}
+					placeholder="RG, Passaporte, CNH, RNE, etc."
+				/>
+			</Grid>
 
 				<Grid size={{ xs: 12, sm: 6 }}>
 					<TextField
