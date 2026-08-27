@@ -72,6 +72,12 @@ export default function CronogramaProcesso() {
 					ed = await editalService.findProximo().catch(() => null);
 				}
 				if (!ed) {
+					const todos = await editalService.findAll().catch(() => []);
+					ed = todos.length > 0
+						? todos.reduce((a, b) => (b.id > a.id ? b : a))
+						: null;
+				}
+				if (!ed) {
 					setSemEdital(true);
 					return;
 				}
