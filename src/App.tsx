@@ -10,6 +10,7 @@ import { Permissoes } from "./enums/permissoes";
 
 import ThemeSwitch from "./components/ThemeSwitch";
 import Navbar from "./components/Navbar";
+import CronogramaProcesso from "./components/CronogramaProcesso";
 import InscricaoStepper from "./components/InscricaoStepper";
 import Login from "./components/login/Login";
 import Dashboard from "./components/Dashboard";
@@ -95,6 +96,29 @@ function AppRoutes() {
 		<Routes>
 			<Route
 				path="/"
+				element={
+					<PublicLayout>
+						<Typography
+							variant="h5"
+							component="h1"
+							gutterBottom
+							sx={{ fontWeight: 600 }}
+						>
+							Processo Seletivo — PPGPCA
+						</Typography>
+						<Typography
+							variant="body2"
+							color="text.secondary"
+							sx={{ mb: 3 }}
+						>
+							Universidade Federal da Fronteira Sul — UFFS
+						</Typography>
+						<CronogramaProcesso />
+					</PublicLayout>
+				}
+			/>
+			<Route
+				path="/inscricoes"
 				element={
 					<PublicLayout>
 						<Typography
