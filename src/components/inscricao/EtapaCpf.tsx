@@ -10,6 +10,11 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogTitle,
+	FormControl,
+	FormControlLabel,
+	FormLabel,
+	Radio,
+	RadioGroup,
 	TextField,
 	Typography,
 } from "@mui/material";
@@ -45,6 +50,9 @@ export default function EtapaCpf({
 	onEditarInscricao,
 	onIniciarNova,
 }: EtapaCpfProps) {
+	const [tipoDocumento, setTipoDocumento] = useState<"cpf" | "passaporte">(
+		"cpf",
+	);
 	const [cpf, setCpf] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [erro, setErro] = useState("");
@@ -58,13 +66,31 @@ export default function EtapaCpf({
 	const [inscricaoHistoricoEncontrada, setInscricaoHistoricoEncontrada] =
 		useState<Inscricao | null>(null);
 
-	const cpfLimpo = limparCpf(cpf);
+	const documentoInformado =
+		tipoDocumento === "cpf" ? limparCpf(cpf) : cpf.trim();
+	const documentoPronto =
+		tipoDocumento === "cpf"
+			? documentoInformado.length === 11
+			: documentoInformado.length > 0;
+
+	const handleTipoDocumentoChange = (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => {
+		setTipoDocumento(e.target.value as "cpf" | "passaporte");
+		setCpf("");
+		setErro("");
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		const validacao = validarCpfDigitos(cpfLimpo);
-		if (!validacao.valido) {
-			setErro(validacao.erro ?? "");
+		if (tipoDocumento === "cpf") {
+			const validacao = validarCpfDigitos(documentoInformado);
+			if (!validacao.valido) {
+				setErro(validacao.erro ?? "");
+				return;
+			}
+		} else if (!documentoInformado) {
+			setErro("Informe o número do passaporte.");
 			return;
 		}
 		setErro("");
@@ -74,7 +100,7 @@ export default function EtapaCpf({
 				inscricaoExistente,
 				candidatoExistente,
 				inscricaoHistorico,
-			} = await onCpfSubmit(cpfLimpo);
+			} = await onCpfSubmit(documentoInformado);
 			setCandidatoEncontrado(candidatoExistente);
 			setInscricaoHistoricoEncontrada(inscricaoHistorico);
 			if (inscricaoExistente) {
@@ -84,7 +110,11 @@ export default function EtapaCpf({
 				onIniciarNova(null, candidatoExistente, inscricaoHistorico);
 			}
 		} catch {
-			setErro("Erro ao verificar CPF. Tente novamente.");
+			setErro(
+				tipoDocumento === "cpf"
+					? "Erro ao verificar CPF. Tente novamente."
+					: "Erro ao verificar passaporte. Tente novamente.",
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -147,7 +177,8 @@ export default function EtapaCpf({
 				Etapa 1: Identificação
 			</Typography>
 			<Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-				Informe seu CPF para iniciar ou continuar a inscrição.
+				Informe seu CPF ou passaporte (caso estrangeiro) para iniciar ou
+				continuar a inscrição.
 			</Typography>
 
 			<Box
@@ -155,24 +186,60 @@ export default function EtapaCpf({
 				onSubmit={handleSubmit}
 				sx={{ maxWidth: 400 }}
 			>
-				<TextField
-					fullWidth
-					label="CPF"
-					value={cpf}
-					onChange={(e) => setCpf(formatarCpf(e.target.value))}
-					placeholder="000.000.000-00"
-					slotProps={{ htmlInput: { maxLength: 14 } }}
-					error={!!erro}
-					helperText={erro}
-					sx={{ mb: 3 }}
-					autoFocus
-				/>
+				<FormControl component="fieldset" sx={{ mb: 3 }}>
+					<FormLabel component="legend">
+						Qual documento você vai informar?
+					</FormLabel>
+					<RadioGroup
+						row
+						value={tipoDocumento}
+						onChange={handleTipoDocumentoChange}
+					>
+						<FormControlLabel
+							value="cpf"
+							control={<Radio />}
+							label="CPF"
+						/>
+						<FormControlLabel
+							value="passaporte"
+							control={<Radio />}
+							label="Passaporte (estrangeiro)"
+						/>
+					</RadioGroup>
+				</FormControl>
+
+				{tipoDocumento === "cpf" ? (
+					<TextField
+						fullWidth
+						label="CPF"
+						value={cpf}
+						onChange={(e) => setCpf(formatarCpf(e.target.value))}
+						placeholder="000.000.000-00"
+						slotProps={{ htmlInput: { maxLength: 14 } }}
+						error={!!erro}
+						helperText={erro}
+						sx={{ mb: 3 }}
+						autoFocus
+					/>
+				) : (
+					<TextField
+						fullWidth
+						label="Passaporte"
+						value={cpf}
+						onChange={(e) => setCpf(e.target.value)}
+						placeholder="Número do passaporte"
+						error={!!erro}
+						helperText={erro}
+						sx={{ mb: 3 }}
+						autoFocus
+					/>
+				)}
 
 				<Button
 					type="submit"
 					variant="contained"
 					color="primary"
-					disabled={loading || cpfLimpo.length !== 11}
+					disabled={loading || !documentoPronto}
 					startIcon={
 						loading ? <CircularProgress size={16} /> : undefined
 					}
@@ -271,9 +338,9 @@ export default function EtapaCpf({
 				</DialogTitle>
 				<DialogContent>
 					<DialogContentText>
-						Encontramos uma inscrição em andamento para este CPF no
-						edital vigente. Deseja continuar de onde parou ou
-						iniciar uma nova?
+						Encontramos uma inscrição em andamento para este
+						documento no edital vigente. Deseja continuar de onde
+						parou ou iniciar uma nova?
 					</DialogContentText>
 					{inscricaoEncontrada && (
 						<Alert severity="info" sx={{ mt: 2 }}>
