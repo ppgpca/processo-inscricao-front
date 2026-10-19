@@ -32,6 +32,45 @@ export function validarCpfDigitos(cpf: string): {
 	return { valido: true, erro: null };
 }
 
+function calcularDigitoVerificadorCpf(digits: string, tamanho: number): number {
+	let soma = 0;
+	for (let i = 0; i < tamanho; i++) {
+		soma += Number(digits[i]) * (tamanho + 1 - i);
+	}
+	const resto = (soma * 10) % 11;
+	return resto === 10 ? 0 : resto;
+}
+
+/**
+ * Valida o CPF completo: 11 dígitos e dígitos verificadores.
+ */
+export function validarCpf(cpf: string): {
+	valido: boolean;
+	erro: string | null;
+} {
+	const quantidade = validarCpfDigitos(cpf);
+	if (!quantidade.valido) return quantidade;
+
+	const digits = limparCpf(cpf);
+	if (/^(\d)\1{10}$/.test(digits)) {
+		return {
+			valido: false,
+			erro: "CPF inválido. Verifique o número informado.",
+		};
+	}
+
+	const digito1 = calcularDigitoVerificadorCpf(digits, 9);
+	const digito2 = calcularDigitoVerificadorCpf(digits, 10);
+	if (digito1 !== Number(digits[9]) || digito2 !== Number(digits[10])) {
+		return {
+			valido: false,
+			erro: "CPF inválido. Verifique o número informado.",
+		};
+	}
+
+	return { valido: true, erro: null };
+}
+
 /**
  * Verifica se a inscrição está finalizada (enviada ou etapa >= 5)
  */
@@ -81,6 +120,7 @@ const cpfController = {
 	formatarCpf,
 	limparCpf,
 	validarCpfDigitos,
+	validarCpf,
 	isInscricaoFinalizada,
 	obterLabelEtapa,
 	validarConfirmacaoNumeroInscricao,

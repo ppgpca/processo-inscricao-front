@@ -23,7 +23,7 @@ import type { Candidato, Inscricao } from "../../types";
 import {
 	formatarCpf,
 	limparCpf,
-	validarCpfDigitos,
+	validarCpf,
 	isInscricaoFinalizada,
 	obterLabelEtapa,
 	validarConfirmacaoNumeroInscricao,
@@ -84,9 +84,12 @@ export default function EtapaCpf({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (tipoDocumento === "cpf") {
-			const validacao = validarCpfDigitos(documentoInformado);
+			const validacao = validarCpf(documentoInformado);
 			if (!validacao.valido) {
-				setErro(validacao.erro ?? "");
+				setErro(
+					validacao.erro ??
+						"CPF inválido. Verifique o número informado.",
+				);
 				return;
 			}
 		} else if (!documentoInformado) {
@@ -213,7 +216,10 @@ export default function EtapaCpf({
 						fullWidth
 						label="CPF"
 						value={cpf}
-						onChange={(e) => setCpf(formatarCpf(e.target.value))}
+						onChange={(e) => {
+							setCpf(formatarCpf(e.target.value));
+							setErro("");
+						}}
 						placeholder="000.000.000-00"
 						slotProps={{ htmlInput: { maxLength: 14 } }}
 						error={!!erro}
