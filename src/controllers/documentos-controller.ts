@@ -11,16 +11,24 @@ export const ALLOWED_MIME_TYPES = [
 
 export const ALLOWED_EXTENSIONS_LABEL = "PDF, JPG, PNG ou WEBP";
 
+export const PDF_MIME_TYPES = ["application/pdf"];
+
+export const PDF_EXTENSIONS_LABEL = "PDF";
+
 /**
  * Valida o arquivo selecionado para upload
  * Retorna string de erro ou null se válido
  */
-export function validarArquivo(file: File): string | null {
+export function validarArquivo(
+	file: File,
+	mimeTypes: readonly string[] = ALLOWED_MIME_TYPES,
+	extensoesLabel: string = ALLOWED_EXTENSIONS_LABEL,
+): string | null {
 	if (file.size > MAX_FILE_SIZE) {
 		return "O arquivo excede o tamanho máximo de 10 MB.";
 	}
-	if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-		return `Tipo de arquivo não permitido: ${file.type}. Envie ${ALLOWED_EXTENSIONS_LABEL}.`;
+	if (!mimeTypes.includes(file.type)) {
+		return `Tipo de arquivo não permitido: ${file.type}. Envie ${extensoesLabel}.`;
 	}
 	return null;
 }
@@ -104,6 +112,8 @@ const documentosController = {
 	MAX_FILE_SIZE,
 	ALLOWED_MIME_TYPES,
 	ALLOWED_EXTENSIONS_LABEL,
+	PDF_MIME_TYPES,
+	PDF_EXTENSIONS_LABEL,
 	validarArquivo,
 	obterDocumentoAtual,
 	todosObrigatoriosEnviados,

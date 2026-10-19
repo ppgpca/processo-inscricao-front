@@ -23,6 +23,8 @@ import type { Documento, TipoDocumentoEdital } from "../../types";
 import { documentoService } from "../../services/documento.service";
 import {
 	validarArquivo,
+	PDF_MIME_TYPES,
+	PDF_EXTENSIONS_LABEL,
 	obterDocumentoAtual,
 	todosObrigatoriosEnviados,
 	ordenarTiposDocumentoAtivos,
@@ -97,7 +99,11 @@ export default function EtapaDocumentos({
 	);
 
 	const handleUpload = async (idTipo: number, file: File) => {
-		const erroArquivo = validarArquivo(file);
+		const erroArquivo = validarArquivo(
+			file,
+			PDF_MIME_TYPES,
+			PDF_EXTENSIONS_LABEL,
+		);
 		if (erroArquivo) {
 			setErro(erroArquivo);
 			return;
@@ -147,8 +153,7 @@ export default function EtapaDocumentos({
 			</Typography>
 			<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
 				Faça o upload dos documentos exigidos. Documentos obrigatórios
-				estão marcados com *. Formatos aceitos: PDF, JPG, PNG (máx. 10
-				MB).
+				estão marcados com *. Formato aceito: PDF (máx. 10 MB).
 			</Typography>
 
 			{allObrigatoriosEnviados && (
@@ -309,7 +314,7 @@ export default function EtapaDocumentos({
 									<input
 										type="file"
 										id={`upload-${tipo.id}`}
-										accept=".pdf,.jpg,.jpeg,.png,.webp"
+										accept=".pdf,application/pdf"
 										style={{ display: "none" }}
 										ref={(el) => {
 											inputRefs.current[tipo.id] = el;
