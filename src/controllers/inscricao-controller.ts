@@ -161,6 +161,7 @@ export function prepararPayloadFinalizacao(
 	return {
 		etapa: 5,
 		dataEnvio: new Date().toISOString(),
+		finalizada: true,
 		...(idEtapaHomologacao !== undefined && {
 			idEtapaAtual: idEtapaHomologacao,
 		}),

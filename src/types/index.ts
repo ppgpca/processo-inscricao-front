@@ -164,6 +164,7 @@ export interface Inscricao {
 	status?: string;
 	dataEnvio?: string;
 	inscricoesPalavraChave?: InscricaoPalavraChave[];
+	finalizada?: boolean;
 }
 
 export interface InscricaoPorDia {
