@@ -51,4 +51,14 @@ export const docenteService = {
 			},
 		})) as { idCriterioAvaliacao: number; nota: number | null }[];
 	},
+
+	async baixarAnteprojeto(idInscricao: number): Promise<Blob> {
+		return (await axiosInstance.get(
+			`/docentes/me/candidatos/${idInscricao}/anteprojeto/download`,
+			{
+				responseType: "blob",
+				timeout: 60000,
+			},
+		)) as Blob;
+	},
 };

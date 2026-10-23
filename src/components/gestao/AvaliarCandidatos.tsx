@@ -11,11 +11,13 @@ import {
 	InputLabel,
 	MenuItem,
 	Select,
+	Snackbar,
 	Tab,
 	Tabs,
 	Tooltip,
 	Typography,
 } from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
 import { useTheme } from "@mui/material/styles";
 import { GridToolbarQuickFilter } from "@mui/x-data-grid";
@@ -30,6 +32,7 @@ import type {
 import CustomDataGrid from "../customs/CustomDataGrid";
 import { mascaraCpf } from "../../controllers/cpf-controller";
 import { useAvaliarCandidatos } from "../../hooks/useAvaliarCandidatos";
+import { docenteService } from "../../services/docente.service";
 import AvaliacaoCriterio from "./AvaliacaoCriterio";
 
 const ABAS: {
@@ -198,7 +201,36 @@ export default function AvaliarCandidatos() {
 		setAvaliacaoAtiva(null);
 	};
 
+	const [erroDownload, setErroDownload] = useState<string | null>(null);
+	const [downloadingId, setDownloadingId] = useState<number | null>(null);
+
+	const handleBaixarAnteprojeto = useCallback(
+		async (idInscricao: number) => {
+			setDownloadingId(idInscricao);
+			try {
+				const blob = await docenteService.baixarAnteprojeto(idInscricao);
+				const objectUrl = URL.createObjectURL(blob);
+				const link = document.createElement("a");
+				link.href = objectUrl;
+				link.download = `anteprojeto_${idInscricao}.pdf`;
+				document.body.appendChild(link);
+				link.click();
+				link.remove();
+				URL.revokeObjectURL(objectUrl);
+			} catch {
+				setErroDownload(
+					"Não foi possível baixar o anteprojeto. Tente novamente.",
+				);
+			} finally {
+				setDownloadingId(null);
+			}
+		},
+		[],
+	);
+
 	const criterioEntrevista = abaAtiva === "ENTREVISTA";
+
+	const anteprojetoAtivo = abaAtiva === "ANTEPROJETO";
 
 	const colunas = useMemo<GridColDef[]>(
 		() => [
@@ -300,15 +332,50 @@ export default function AvaliarCandidatos() {
 						} satisfies GridColDef,
 					]
 				: []),
-			{
-				field: "acoes",
-				headerName: "",
-				width: 56,
-				sortable: false,
-				filterable: false,
-				align: "center",
-				headerAlign: "center",
-				renderCell: (params) => (
+		{
+			field: "acoes",
+			headerName: "",
+			width: anteprojetoAtivo ? 100 : 56,
+			sortable: false,
+			filterable: false,
+			align: "center",
+			headerAlign: "center",
+			renderCell: (params) => (
+				<Box sx={{ display: "flex", gap: 0.5 }}>
+					{anteprojetoAtivo && (
+						<Tooltip title="Baixar anteprojeto">
+							<span>
+								<IconButton
+									size="small"
+									color="inherit"
+									disabled={
+										downloadingId ===
+										(params.row as CandidatoAvaliacao)
+											.idInscricao
+									}
+									onClick={(e) => {
+										e.stopPropagation();
+										void handleBaixarAnteprojeto(
+											(
+												params.row as CandidatoAvaliacao
+											).idInscricao,
+										);
+									}}
+								>
+									{downloadingId ===
+									(params.row as CandidatoAvaliacao)
+										.idInscricao ? (
+										<CircularProgress
+											size={16}
+											color="inherit"
+										/>
+									) : (
+										<DownloadIcon fontSize="small" />
+									)}
+								</IconButton>
+							</span>
+						</Tooltip>
+					)}
 					<Tooltip title="Avaliar">
 						<IconButton
 							size="small"
@@ -323,11 +390,12 @@ export default function AvaliarCandidatos() {
 							<EditIcon fontSize="small" />
 						</IconButton>
 					</Tooltip>
-				),
-			},
-		],
-		[criterioEntrevista, handleRowClick],
-	);
+				</Box>
+			),
+		},
+	],
+	[anteprojetoAtivo, criterioEntrevista, downloadingId, handleBaixarAnteprojeto, handleRowClick],
+);
 
 	const rows = useMemo(() => {
 		const lista = candidatos.map((c: CandidatoAvaliacao) => ({
@@ -518,6 +586,21 @@ export default function AvaliarCandidatos() {
 
 	return (
 		<Box>
+			<Snackbar
+				open={!!erroDownload}
+				autoHideDuration={5000}
+				onClose={() => setErroDownload(null)}
+				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+			>
+				<Alert
+					severity="error"
+					onClose={() => setErroDownload(null)}
+					sx={{ width: "100%" }}
+				>
+					{erroDownload}
+				</Alert>
+			</Snackbar>
+
 			<Typography variant="h5" sx={{ mb: 3 }}>
 				Avaliar Candidatos
 			</Typography>
