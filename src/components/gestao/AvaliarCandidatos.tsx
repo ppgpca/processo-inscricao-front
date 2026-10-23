@@ -17,7 +17,7 @@ import {
 	Tooltip,
 	Typography,
 } from "@mui/material";
-import DownloadIcon from "@mui/icons-material/Download";
+// import DownloadIcon from "@mui/icons-material/Download"; // TODO: reativar com o botão de download
 import EditIcon from "@mui/icons-material/Edit";
 import { useTheme } from "@mui/material/styles";
 import { GridToolbarQuickFilter } from "@mui/x-data-grid";
@@ -30,9 +30,9 @@ import type {
 	NomeEtapaDistribuicao,
 } from "../../types";
 import CustomDataGrid from "../customs/CustomDataGrid";
-import { mascaraCpf, identificacaoParaDownload } from "../../controllers/cpf-controller";
+import { mascaraCpf /*, identificacaoParaDownload */ } from "../../controllers/cpf-controller"; // TODO: reativar identificacaoParaDownload com o botão de download
 import { useAvaliarCandidatos } from "../../hooks/useAvaliarCandidatos";
-import { docenteService } from "../../services/docente.service";
+// import { docenteService } from "../../services/docente.service"; // TODO: reativar com o botão de download
 import AvaliacaoCriterio from "./AvaliacaoCriterio";
 
 const ABAS: {
@@ -202,38 +202,39 @@ export default function AvaliarCandidatos() {
 	};
 
 	const [erroDownload, setErroDownload] = useState<string | null>(null);
-	const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
-	const handleBaixarAnteprojeto = useCallback(
-		async (idInscricao: number, cpf: string) => {
-			setDownloadingId(idInscricao);
-			try {
-				const identificacao = identificacaoParaDownload(cpf);
-				const fallback = `${identificacao}_anteprojeto_${idInscricao}.pdf`;
-				const { blob, nomeArquivo } =
-					await docenteService.baixarAnteprojeto(idInscricao, fallback);
-				const objectUrl = URL.createObjectURL(blob);
-				const link = document.createElement("a");
-				link.href = objectUrl;
-				link.download = nomeArquivo;
-				document.body.appendChild(link);
-				link.click();
-				link.remove();
-				URL.revokeObjectURL(objectUrl);
-			} catch {
-				setErroDownload(
-					"Não foi possível baixar o anteprojeto. Tente novamente.",
-				);
-			} finally {
-				setDownloadingId(null);
-			}
-		},
-		[],
-	);
+	// TODO: reativar junto com o botão de download do anteprojeto
+	// const [downloadingId, setDownloadingId] = useState<number | null>(null);
+	// const handleBaixarAnteprojeto = useCallback(
+	// 	async (idInscricao: number, cpf: string) => {
+	// 		setDownloadingId(idInscricao);
+	// 		try {
+	// 			const identificacao = identificacaoParaDownload(cpf);
+	// 			const fallback = `${identificacao}_anteprojeto_${idInscricao}.pdf`;
+	// 			const { blob, nomeArquivo } =
+	// 				await docenteService.baixarAnteprojeto(idInscricao, fallback);
+	// 			const objectUrl = URL.createObjectURL(blob);
+	// 			const link = document.createElement("a");
+	// 			link.href = objectUrl;
+	// 			link.download = nomeArquivo;
+	// 			document.body.appendChild(link);
+	// 			link.click();
+	// 			link.remove();
+	// 			URL.revokeObjectURL(objectUrl);
+	// 		} catch {
+	// 			setErroDownload(
+	// 				"Não foi possível baixar o anteprojeto. Tente novamente.",
+	// 			);
+	// 		} finally {
+	// 			setDownloadingId(null);
+	// 		}
+	// 	},
+	// 	[],
+	// );
 
 	const criterioEntrevista = abaAtiva === "ENTREVISTA";
 
-	const anteprojetoAtivo = abaAtiva === "ANTEPROJETO";
+	// const anteprojetoAtivo = abaAtiva === "ANTEPROJETO"; // TODO: reativar com o botão de download
 
 	const colunas = useMemo<GridColDef[]>(
 		() => [
