@@ -1,18 +1,12 @@
 import { useTheme } from "@mui/material/styles";
 import { Box, Card, CardContent, Chip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
+import { mascaraCpf } from "../../controllers/cpf-controller";
 import type { InscritoDashboard } from "../../types";
 import CustomDataGrid from "../customs/CustomDataGrid";
 
 interface Props {
 	dados: InscritoDashboard[];
-}
-
-function mascaraCpf(cpf: string): string {
-	if (!cpf) return "";
-	const limpo = cpf.replace(/\D/g, "");
-	if (limpo.length !== 11) return cpf;
-	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 8)}*-**`;
 }
 
 const colunas: GridColDef[] = [

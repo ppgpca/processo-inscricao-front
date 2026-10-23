@@ -34,6 +34,7 @@ import SyncIcon from "@mui/icons-material/Sync";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import type { GridColDef } from "@mui/x-data-grid";
 import { GridToolbarQuickFilter } from "@mui/x-data-grid";
+import { mascaraCpf } from "../../../controllers/cpf-controller";
 import CustomDataGrid from "../../customs/CustomDataGrid";
 import { customColors } from "../../../theme/customColors";
 import type {
@@ -63,13 +64,6 @@ const LABEL_PERIODO: Record<Periodo, string> = {
 	TARDE: "Tarde",
 	NOITE: "Noite",
 };
-
-function mascaraCpf(cpf: string): string {
-	if (!cpf) return "";
-	const limpo = cpf.replace(/\D/g, "");
-	if (limpo.length !== 11) return cpf;
-	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 8)}*-**`;
-}
 
 interface Banca {
 	id: string;

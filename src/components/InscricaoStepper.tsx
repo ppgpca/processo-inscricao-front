@@ -239,7 +239,7 @@ export default function InscricaoStepper() {
 						Sua inscrição foi registrada com o número{" "}
 						<strong>{inscricao.id}</strong>.
 					</Typography>
-					<Alert severity="info" sx={{ textAlign: "left", mb: 3 }}>
+					<Alert severity="info" sx={{ textAlign: "left", mb: 2 }}>
 						Guarde o número da sua inscrição. Você pode acompanhar o
 						resultado pelo{" "}
 						<Link
@@ -253,6 +253,17 @@ export default function InscricaoStepper() {
 							}}
 						>
 							edital nº {edital?.numero}
+						</Link>
+						.
+					</Alert>
+					<Alert severity="success" sx={{ textAlign: "left", mb: 3 }}>
+						Você pode visualizar e baixar os documentos enviados a
+						qualquer momento em{" "}
+						<Link
+							href="/documentos"
+							sx={{ fontWeight: 700 }}
+						>
+							Documentos da Inscrição
 						</Link>
 						.
 					</Alert>
@@ -377,13 +388,14 @@ export default function InscricaoStepper() {
 					/>
 				)}
 
-				{activeStep === 4 && inscricao && (
-					<EtapaDocumentos
-						idInscricao={inscricao.id}
-						tiposDocumento={tiposDocumento}
-						onDocumentosAtualizados={setDocumentos}
-					/>
-				)}
+			{activeStep === 4 && inscricao && (
+				<EtapaDocumentos
+					idInscricao={inscricao.id}
+					tiposDocumento={tiposDocumento}
+					onDocumentosAtualizados={setDocumentos}
+					finalizada={inscricao.finalizada}
+				/>
+			)}
 
 				{activeStep > 0 && activeStep < STEPS.length && (
 					<Box

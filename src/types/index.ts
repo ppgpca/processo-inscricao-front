@@ -98,6 +98,26 @@ export interface Documento {
 	atual: boolean;
 }
 
+export interface DocumentoCandidato {
+	idTipoDocumentoEdital: number;
+	nomeTipo: string;
+	versao: number;
+	atual: boolean;
+	nomeArquivoOriginal: string;
+	mimeType: string;
+	tamanhoBytes: number;
+	enviadoEm: string;
+}
+
+export interface ConsultaDocumentosResposta {
+	id: number;
+	idEdital: number;
+	linhaPesquisa: string | null;
+	finalizada: boolean;
+	deferida: boolean | null;
+	documentos: DocumentoCandidato[];
+}
+
 export interface Graduacao {
 	curso: string;
 	instituicao: string;

@@ -1,5 +1,5 @@
 import axiosInstance from "./axios";
-import type { Documento } from "../types";
+import type { ConsultaDocumentosResposta, Documento } from "../types";
 
 export const documentoService = {
 	async findByInscricao(idInscricao: number): Promise<Documento[]> {
@@ -35,5 +35,33 @@ export const documentoService = {
 	getDownloadUrl(idInscricao: number, idTipoDocumentoEdital: number): string {
 		const base = axiosInstance.defaults.baseURL ?? "";
 		return `${base}/documentos/inscricao/${idInscricao}/tipo/${idTipoDocumentoEdital}/download`;
+	},
+
+	async consultar(
+		cpf: string,
+		idInscricao: number,
+	): Promise<ConsultaDocumentosResposta> {
+		const res = await axiosInstance.get<ConsultaDocumentosResposta>(
+			"/documentos/consulta",
+			{ params: { cpf, idInscricao } },
+		);
+		return res.data;
+	},
+
+	async baixarConsulta(
+		cpf: string,
+		idInscricao: number,
+		idTipo: number,
+		versao: number,
+		inline = false,
+	): Promise<Blob> {
+		const res = await axiosInstance.get<Blob>(
+			"/documentos/consulta/download",
+			{
+				params: { cpf, idInscricao, idTipo, versao, inline },
+				responseType: "blob",
+			},
+		);
+		return res.data;
 	},
 };

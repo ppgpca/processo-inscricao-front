@@ -20,6 +20,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import SyncIcon from "@mui/icons-material/Sync";
 import type { GridColDef } from "@mui/x-data-grid";
 import { GridToolbarQuickFilter } from "@mui/x-data-grid";
+import { mascaraCpf } from "../../../controllers/cpf-controller";
 import CustomDataGrid from "../../customs/CustomDataGrid";
 import { useDistribuicaoAnteprojeto } from "../../../hooks/useDistribuicaoAnteprojeto";
 import type {
@@ -30,13 +31,6 @@ import type {
 import MenuAtribuicaoDocentes, {
 	type ResultadoAplicarDocentes,
 } from "./MenuAtribuicaoDocentes";
-
-function mascaraCpf(cpf: string): string {
-	if (!cpf) return "";
-	const limpo = cpf.replace(/\D/g, "");
-	if (limpo.length !== 11) return cpf;
-	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 8)}*-**`;
-}
 
 const dataGridBgSx = (bgColor: string) => ({
 	backgroundColor: bgColor,

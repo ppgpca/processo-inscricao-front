@@ -36,6 +36,7 @@ import type {
 	NavegacaoEdicaoAvaliacao,
 } from "../../types";
 import CustomDataGrid from "../customs/CustomDataGrid";
+import { mascaraCpf } from "../../controllers/cpf-controller";
 import { useGerenciarCandidatos } from "../../hooks/useGerenciarCandidatos";
 
 const SELECAO_VAZIA: GridRowSelectionModel = {
@@ -66,13 +67,6 @@ const MENU_FECHADO: MenuState = {
 };
 
 const ALTURA_LINHA_AVALIACAO = 32;
-
-function mascaraCpf(cpf: string): string {
-	if (!cpf) return "";
-	const limpo = cpf.replace(/\D/g, "");
-	if (limpo.length !== 11) return cpf;
-	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 8)}*-**`;
-}
 
 function formatarData(dataStr: string): string {
 	if (!dataStr) return "";

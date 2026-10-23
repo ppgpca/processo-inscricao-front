@@ -19,6 +19,33 @@ export function limparCpf(cpf: string): string {
 }
 
 /**
+ * Exibição do passaporte no formato do edital publicado.
+ * Descarta o primeiro caractere, as letras restantes e um único zero
+ * à esquerda. Os cinco primeiros dígitos saem como XXX.XX.
+ */
+function mascaraPassaporte(valor: string): string {
+	let resto = valor.slice(1).replace(/\D/g, "");
+	if (resto.startsWith("0")) resto = resto.slice(1);
+	if (resto.length < 5) return valor;
+	const cinco = resto.slice(0, 5);
+	return `${cinco.slice(0, 3)}.${cinco.slice(3)}`;
+}
+
+/**
+ * Máscara de visualização do documento.
+ * CPF com 11 dígitos: ***.456.78*-**
+ * Demais valores (passaporte): formato do edital publicado.
+ */
+export function mascaraCpf(valor: string): string {
+	if (!valor) return "";
+	const digitos = limparCpf(valor);
+	if (digitos.length === 11) {
+		return `***.${digitos.slice(3, 6)}.${digitos.slice(6, 8)}*-**`;
+	}
+	return mascaraPassaporte(valor);
+}
+
+/**
  * Valida se o CPF possui exatamente 11 dígitos
  */
 export function validarCpfDigitos(cpf: string): {
@@ -119,6 +146,7 @@ export function obterTextoStatusInscricao(
 const cpfController = {
 	formatarCpf,
 	limparCpf,
+	mascaraCpf,
 	validarCpfDigitos,
 	validarCpf,
 	isInscricaoFinalizada,

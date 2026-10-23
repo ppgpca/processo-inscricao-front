@@ -17,15 +17,9 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import type { DocumentoRecurso, RecursoGestaoRow } from "../../../types";
+import { mascaraCpf } from "../../../controllers/cpf-controller";
 import { formatarTamanhoArquivo } from "../../../controllers/documentos-controller";
 import { recursoService } from "../../../services/recurso.service";
-
-function mascaraCpf(cpf: string): string {
-	if (!cpf) return "";
-	const limpo = cpf.replace(/\D/g, "");
-	if (limpo.length !== 11) return cpf;
-	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 8)}*-**`;
-}
 
 interface Props {
 	recurso: RecursoGestaoRow;

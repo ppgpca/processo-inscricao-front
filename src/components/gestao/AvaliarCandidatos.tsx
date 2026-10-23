@@ -28,6 +28,7 @@ import type {
 	NomeEtapaDistribuicao,
 } from "../../types";
 import CustomDataGrid from "../customs/CustomDataGrid";
+import { mascaraCpf } from "../../controllers/cpf-controller";
 import { useAvaliarCandidatos } from "../../hooks/useAvaliarCandidatos";
 import AvaliacaoCriterio from "./AvaliacaoCriterio";
 
@@ -44,13 +45,6 @@ const ABAS: {
 		nomeCriterio: "Currículo",
 	},
 ];
-
-function mascaraCpf(cpf: string): string {
-	if (!cpf) return "";
-	const limpo = cpf.replace(/\D/g, "");
-	if (limpo.length !== 11) return cpf;
-	return `***.${limpo.slice(3, 6)}.${limpo.slice(6, 8)}*-**`;
-}
 
 function nomePorNomeCriterio(
 	nome: string | undefined,

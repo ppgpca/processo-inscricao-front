@@ -35,6 +35,7 @@ import type {
 	NomeEtapaRecurso,
 	RecursoGestaoRow,
 } from "../../types";
+import { mascaraCpf } from "../../controllers/cpf-controller";
 import { editalService } from "../../services/edital.service";
 import { recursoService } from "../../services/recurso.service";
 import CustomDataGrid from "../customs/CustomDataGrid";
@@ -200,7 +201,7 @@ export default function GerenciarRecursos() {
 						<Box>
 							<Typography variant="body2">{row.candidatoNome}</Typography>
 							<Typography variant="caption" color="text.secondary">
-								{row.candidatoCpf}
+								{mascaraCpf(row.candidatoCpf)}
 							</Typography>
 						</Box>
 					);

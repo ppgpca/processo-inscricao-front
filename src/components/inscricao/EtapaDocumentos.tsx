@@ -37,12 +37,14 @@ interface EtapaDocumentosProps {
 	idInscricao: number;
 	tiposDocumento: TipoDocumentoEdital[];
 	onDocumentosAtualizados?: (docs: Documento[]) => void;
+	finalizada?: boolean;
 }
 
 export default function EtapaDocumentos({
 	idInscricao,
 	tiposDocumento,
 	onDocumentosAtualizados,
+	finalizada = false,
 }: EtapaDocumentosProps) {
 	const [documentos, setDocumentos] = useState<Documento[]>([]);
 	const [uploading, setUploading] = useState<number | null>(null);
@@ -156,16 +158,23 @@ export default function EtapaDocumentos({
 				estão marcados com *. Formato aceito: PDF (máx. 10 MB).
 			</Typography>
 
-			{allObrigatoriosEnviados && (
-				<Alert
-					severity="success"
-					sx={{ mb: 2 }}
-					icon={<CheckCircleOutlinedIcon />}
-				>
-					Todos os documentos obrigatórios foram enviados. Você pode
-					finalizar a inscrição.
-				</Alert>
-			)}
+		{finalizada && (
+			<Alert severity="info" sx={{ mb: 2 }}>
+				Esta inscrição está finalizada. Não é possível enviar ou remover
+				documentos.
+			</Alert>
+		)}
+
+		{!finalizada && allObrigatoriosEnviados && (
+			<Alert
+				severity="success"
+				sx={{ mb: 2 }}
+				icon={<CheckCircleOutlinedIcon />}
+			>
+				Todos os documentos obrigatórios foram enviados. Você pode
+				finalizar a inscrição.
+			</Alert>
+		)}
 
 			<List disablePadding>
 				{ordenarTiposDocumentoAtivos(tiposDocumento).map(
@@ -204,23 +213,25 @@ export default function EtapaDocumentos({
 															<DownloadIcon />
 														</IconButton>
 													</Tooltip>
-													<Tooltip title="Remover documento">
-														<IconButton
-															edge="end"
-															onClick={() =>
-																handleRemover(
-																	tipo.id,
-																)
-															}
-															disabled={
-																isUploading
-															}
-															color="error"
-															size="small"
-														>
-															<DeleteOutlinedIcon />
-														</IconButton>
-													</Tooltip>
+													{!finalizada && (
+														<Tooltip title="Remover documento">
+															<IconButton
+																edge="end"
+																onClick={() =>
+																	handleRemover(
+																		tipo.id,
+																	)
+																}
+																disabled={
+																	isUploading
+																}
+																color="error"
+																size="small"
+															>
+																<DeleteOutlinedIcon />
+															</IconButton>
+														</Tooltip>
+													)}
 												</>
 											)}
 										</ListItemSecondaryAction>
@@ -310,6 +321,7 @@ export default function EtapaDocumentos({
 
 								<Divider />
 
+							{!finalizada && (
 								<Box sx={{ px: 2, py: 1 }}>
 									<input
 										type="file"
@@ -356,6 +368,7 @@ export default function EtapaDocumentos({
 										)}
 									</Box>
 								</Box>
+							)}
 							</Paper>
 						);
 					},

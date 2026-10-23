@@ -20,6 +20,7 @@ import GerenciarEtapas from "./components/gestao/GerenciarEtapas";
 import GerenciarRecursos from "./components/gestao/GerenciarRecursos";
 import DistribuicaoAvaliadores from "./components/gestao/distribuicao/DistribuicaoAvaliadores";
 import ConsultaRecursos from "./components/recurso/ConsultaRecursos";
+import ConsultaDocumentos from "./components/documento/ConsultaDocumentos";
 
 interface DrawerContextValue {
 	drawerOpen: boolean;
@@ -145,6 +146,14 @@ function AppRoutes() {
 				element={
 					<PublicLayout>
 						<ConsultaRecursos />
+					</PublicLayout>
+				}
+			/>
+			<Route
+				path="/documentos"
+				element={
+					<PublicLayout>
+						<ConsultaDocumentos />
 					</PublicLayout>
 				}
 			/>
