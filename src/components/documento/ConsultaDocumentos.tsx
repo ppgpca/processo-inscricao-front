@@ -198,7 +198,7 @@ function GrupoDocumento({
 										mb: 0.5,
 									}}
 								>
-									<Typography variant="body1" fontWeight={500}>
+									<Typography variant="body1" sx={{ fontWeight: 500 }}>
 										{nomeTipo}
 									</Typography>
 									<Chip
@@ -399,7 +399,7 @@ export default function ConsultaDocumentos() {
 						onChange={handleCpfChange}
 						error={!!erroCpf}
 						helperText={erroCpf}
-						inputProps={{ maxLength: 14 }}
+						slotProps={{ htmlInput: { maxLength: 14 } }}
 						size="small"
 						sx={{ flex: "1 1 180px" }}
 						required
@@ -413,7 +413,7 @@ export default function ConsultaDocumentos() {
 						}}
 						error={!!erroInscricao}
 						helperText={erroInscricao}
-						inputProps={{ inputMode: "numeric" }}
+						slotProps={{ htmlInput: { inputMode: "numeric" } }}
 						size="small"
 						sx={{ flex: "1 1 200px" }}
 						required
