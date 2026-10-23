@@ -338,48 +338,50 @@ export default function AvaliarCandidatos() {
 		{
 			field: "acoes",
 			headerName: "",
-			width: anteprojetoAtivo ? 100 : 56,
+			width: 56,
 			sortable: false,
 			filterable: false,
 			align: "center",
 			headerAlign: "center",
 			renderCell: (params) => (
 				<Box sx={{ display: "flex", gap: 0.5 }}>
-					{anteprojetoAtivo && (
-						<Tooltip title="Baixar anteprojeto">
-							<span>
-								<IconButton
-									size="small"
-									color="inherit"
-									disabled={
-										downloadingId ===
-										(params.row as CandidatoAvaliacao)
-											.idInscricao
-									}
-									onClick={(e) => {
-										e.stopPropagation();
-										const row =
-											params.row as CandidatoAvaliacao;
-										void handleBaixarAnteprojeto(
-											row.idInscricao,
-											row.cpf,
-										);
-									}}
-								>
-									{downloadingId ===
+					{/* TODO: botão de download do anteprojeto — temporariamente oculto
+				{anteprojetoAtivo && (
+					<Tooltip title="Baixar anteprojeto">
+						<span>
+							<IconButton
+								size="small"
+								color="inherit"
+								disabled={
+									downloadingId ===
 									(params.row as CandidatoAvaliacao)
-										.idInscricao ? (
-										<CircularProgress
-											size={16}
-											color="inherit"
-										/>
-									) : (
-										<DownloadIcon fontSize="small" />
-									)}
-								</IconButton>
-							</span>
-						</Tooltip>
-					)}
+										.idInscricao
+								}
+								onClick={(e) => {
+									e.stopPropagation();
+									const row =
+										params.row as CandidatoAvaliacao;
+									void handleBaixarAnteprojeto(
+										row.idInscricao,
+										row.cpf,
+									);
+								}}
+							>
+								{downloadingId ===
+								(params.row as CandidatoAvaliacao)
+									.idInscricao ? (
+									<CircularProgress
+										size={16}
+										color="inherit"
+									/>
+								) : (
+									<DownloadIcon fontSize="small" />
+								)}
+							</IconButton>
+						</span>
+					</Tooltip>
+				)}
+				*/}
 					<Tooltip title="Avaliar">
 						<IconButton
 							size="small"
@@ -398,7 +400,7 @@ export default function AvaliarCandidatos() {
 			),
 		},
 	],
-	[anteprojetoAtivo, criterioEntrevista, downloadingId, handleBaixarAnteprojeto, handleRowClick],
+	[criterioEntrevista, handleRowClick],
 );
 
 	const rows = useMemo(() => {
