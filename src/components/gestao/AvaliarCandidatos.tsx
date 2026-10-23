@@ -30,7 +30,7 @@ import type {
 	NomeEtapaDistribuicao,
 } from "../../types";
 import CustomDataGrid from "../customs/CustomDataGrid";
-import { mascaraCpf } from "../../controllers/cpf-controller";
+import { mascaraCpf, identificacaoParaDownload } from "../../controllers/cpf-controller";
 import { useAvaliarCandidatos } from "../../hooks/useAvaliarCandidatos";
 import { docenteService } from "../../services/docente.service";
 import AvaliacaoCriterio from "./AvaliacaoCriterio";
@@ -205,14 +205,17 @@ export default function AvaliarCandidatos() {
 	const [downloadingId, setDownloadingId] = useState<number | null>(null);
 
 	const handleBaixarAnteprojeto = useCallback(
-		async (idInscricao: number) => {
+		async (idInscricao: number, cpf: string) => {
 			setDownloadingId(idInscricao);
 			try {
-				const blob = await docenteService.baixarAnteprojeto(idInscricao);
+				const identificacao = identificacaoParaDownload(cpf);
+				const fallback = `${identificacao}_anteprojeto_${idInscricao}.pdf`;
+				const { blob, nomeArquivo } =
+					await docenteService.baixarAnteprojeto(idInscricao, fallback);
 				const objectUrl = URL.createObjectURL(blob);
 				const link = document.createElement("a");
 				link.href = objectUrl;
-				link.download = `anteprojeto_${idInscricao}.pdf`;
+				link.download = nomeArquivo;
 				document.body.appendChild(link);
 				link.click();
 				link.remove();
@@ -355,10 +358,11 @@ export default function AvaliarCandidatos() {
 									}
 									onClick={(e) => {
 										e.stopPropagation();
+										const row =
+											params.row as CandidatoAvaliacao;
 										void handleBaixarAnteprojeto(
-											(
-												params.row as CandidatoAvaliacao
-											).idInscricao,
+											row.idInscricao,
+											row.cpf,
 										);
 									}}
 								>

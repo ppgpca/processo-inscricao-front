@@ -91,4 +91,20 @@ axiosInstance.interceptors.response.use(
 	handleResponseError,
 );
 
+/**
+ * Instância para downloads que precisam acessar headers de resposta
+ * (ex.: Content-Disposition). Compartilha os interceptors de request
+ * (token + refresh automático + redirect) mas retorna o AxiosResponse
+ * completo em vez de apenas response.data.
+ */
+export const axiosDownload = axios.create({
+	baseURL: API_URL,
+	timeout: 60000,
+});
+axiosDownload.interceptors.request.use(onFulfilledRequest, handleRequestError);
+axiosDownload.interceptors.response.use(
+	(response) => response,
+	handleResponseError,
+);
+
 export default axiosInstance;

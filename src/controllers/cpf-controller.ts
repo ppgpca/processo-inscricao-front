@@ -19,6 +19,26 @@ export function limparCpf(cpf: string): string {
 }
 
 /**
+ * Extrai os 5 dígitos de identificação para uso em nomes de arquivo.
+ * CPF (11 dígitos): posições 3–7 → ".XXX.XX." (espelho de identificacaoCandidato no backend).
+ * Passaporte: descarta 1º char, remove letras, remove zero inicial, toma 5 dígitos → "XXX.XX".
+ */
+export function identificacaoParaDownload(cpf: string): string {
+	const digitos = cpf.replace(/\D/g, "");
+	if (digitos.length === 11) {
+		const cinco = digitos.slice(3, 8);
+		if (!/^\d{5}$/.test(cinco)) return cpf;
+		return `.${cinco.slice(0, 3)}.${cinco.slice(3)}.`;
+	}
+	// Passaporte
+	let resto = cpf.slice(1).replace(/\D/g, "");
+	if (resto.startsWith("0")) resto = resto.slice(1);
+	if (resto.length < 5) return cpf;
+	const cinco = resto.slice(0, 5);
+	return `${cinco.slice(0, 3)}.${cinco.slice(3)}`;
+}
+
+/**
  * Exibição do passaporte no formato do edital publicado.
  * Descarta o primeiro caractere, as letras restantes e um único zero
  * à esquerda. Os cinco primeiros dígitos saem como XXX.XX.

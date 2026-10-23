@@ -1,4 +1,5 @@
-import axiosInstance from "../auth/axios";
+import axiosInstance, { axiosDownload } from "../auth/axios";
+import { extrairNomeArquivoDownload } from "../controllers/documentos-controller";
 import type { CandidatoAvaliacao, CriterioAvaliacao, Edital } from "../types";
 
 export const docenteService = {
@@ -52,13 +53,19 @@ export const docenteService = {
 		})) as { idCriterioAvaliacao: number; nota: number | null }[];
 	},
 
-	async baixarAnteprojeto(idInscricao: number): Promise<Blob> {
-		return (await axiosInstance.get(
+	async baixarAnteprojeto(
+		idInscricao: number,
+		fallbackNome: string,
+	): Promise<{ blob: Blob; nomeArquivo: string }> {
+		// axiosDownload: mesmos interceptors de request (token + refresh + redirect)
+		// mas retorna AxiosResponse completo para que possamos ler os headers.
+		const response = await axiosDownload.get<Blob>(
 			`/docentes/me/candidatos/${idInscricao}/anteprojeto/download`,
-			{
-				responseType: "blob",
-				timeout: 60000,
-			},
-		)) as Blob;
+			{ responseType: "blob" },
+		);
+		const disposition =
+			(response.headers["content-disposition"] as string | undefined) ?? "";
+		const nomeArquivo = extrairNomeArquivoDownload(disposition, fallbackNome);
+		return { blob: response.data, nomeArquivo };
 	},
 };
