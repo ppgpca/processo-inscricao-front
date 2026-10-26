@@ -14,7 +14,7 @@ export const docenteService = {
 	},
 
 	async salvarNotas(
-		notas: { idInscricao: number; idCriterioAvaliacao: number; nota: number }[],
+		notas: { idInscricao: number; idCriterioAvaliacao: number; nota: number; comentario?: string | null; expertiseAssunto?: number | null }[],
 		codigoDocente?: string,
 	): Promise<void> {
 		await axiosInstance.put("/docentes/me/notas", {
@@ -43,14 +43,14 @@ export const docenteService = {
 		idInscricao: number,
 		idCriterio: number,
 		codigoDocente?: string,
-	): Promise<{ idCriterioAvaliacao: number; nota: number | null }[]> {
+	): Promise<{ idCriterioAvaliacao: number; nota: number | null; comentario: string | null; expertiseAssunto: number | null }[]> {
 		return (await axiosInstance.get("/docentes/me/notas", {
 			params: {
 				idInscricao,
 				idCriterio,
 				...(codigoDocente ? { codigoDocente } : {}),
 			},
-		})) as { idCriterioAvaliacao: number; nota: number | null }[];
+		})) as { idCriterioAvaliacao: number; nota: number | null; comentario: string | null; expertiseAssunto: number | null }[];
 	},
 
 	async baixarAnteprojeto(

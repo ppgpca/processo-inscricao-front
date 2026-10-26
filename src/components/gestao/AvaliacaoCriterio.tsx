@@ -8,7 +8,12 @@ import {
 	Chip,
 	CircularProgress,
 	Divider,
+	FormControl,
+	FormHelperText,
+	InputLabel,
 	LinearProgress,
+	MenuItem,
+	Select,
 	Snackbar,
 	TextField,
 	Typography,
@@ -129,6 +134,8 @@ export default function AvaliacaoCriterio({
 	const [loading, setLoading] = useState(true);
 	const [erro, setErro] = useState<string | null>(null);
 	const [notasCarregadas, setNotasCarregadas] = useState(false);
+	const [observacao, setObservacao] = useState("");
+	const [expertiseAssunto, setExpertiseAssunto] = useState<number | null>(null);
 
 	// Ref para notas válidas sem causar re-render no DataGrid
 	const notasRef = useRef<Record<number, number>>({});
@@ -136,6 +143,9 @@ export default function AvaliacaoCriterio({
 		{},
 	);
 	const [somatorio, setSomatorio] = useState(0);
+
+	// Ref para observações dos subcritérios
+	const observacoesSubCriteriosRef = useRef<Record<number, string>>({});
 
 	// Rastreio de erros de validação por célula
 	const errorsRef = useRef<Record<number, boolean>>({});
@@ -154,6 +164,9 @@ export default function AvaliacaoCriterio({
 			setLoading(true);
 			setNotasCarregadas(false);
 			setErro(null);
+			setObservacao("");
+			setExpertiseAssunto(null);
+			observacoesSubCriteriosRef.current = {};
 			try {
 				const [subs, notasGravadas] = await Promise.all([
 					docenteService.findSubCriteriosByPai(criterio.id),
@@ -168,13 +181,25 @@ export default function AvaliacaoCriterio({
 					? notasGravadas
 					: [];
 				const notasMap: Record<number, number> = {};
+				const observacoesMap: Record<number, string> = {};
 				for (const n of listaNotas) {
 					if (n.nota !== null && n.nota !== undefined) {
 						notasMap[Number(n.idCriterioAvaliacao)] = Number(
 							n.nota,
 						);
 					}
+					if (n.comentario) {
+						observacoesMap[Number(n.idCriterioAvaliacao)] = n.comentario;
+					}
 				}
+				observacoesSubCriteriosRef.current = observacoesMap;
+
+				// Carregar observação e expertise do assunto do critério pai (criterio.id)
+				const notaPai = listaNotas.find(
+					(n) => Number(n.idCriterioAvaliacao) === criterio.id
+				);
+				setObservacao(notaPai?.comentario ?? "");
+				setExpertiseAssunto(notaPai?.expertiseAssunto ?? null);
 
 				if (subs.length === 0) {
 					// Critério folha: usa o próprio critério como única nota
@@ -239,7 +264,11 @@ export default function AvaliacaoCriterio({
 				idInscricao: number;
 				idCriterioAvaliacao: number;
 				nota: number;
+				comentario?: string | null;
+				expertiseAssunto?: number | null;
 			}[];
+
+			const comentarioNormalizado = observacao.trim() || null;
 
 			if (isLeaf) {
 				// Critério folha: salva apenas a nota do próprio critério
@@ -248,16 +277,28 @@ export default function AvaliacaoCriterio({
 						idInscricao: candidato.idInscricao,
 						idCriterioAvaliacao: criterio.id,
 						nota: notasRef.current[criterio.id] ?? 0,
+						comentario: comentarioNormalizado,
+						expertiseAssunto: expertiseAssunto,
 					},
 				];
 			} else {
 				// Critério com filhos: salva notas individuais + somatório no pai
 				const notasSubCriterios = Object.entries(notasRef.current).map(
-					([idCriterioAvaliacao, nota]) => ({
-						idInscricao: candidato.idInscricao,
-						idCriterioAvaliacao: Number(idCriterioAvaliacao),
-						nota,
-					}),
+					([idCriterioAvaliacao, nota]) => {
+						const id = Number(idCriterioAvaliacao);
+						const comentarioSub = observacoesSubCriteriosRef.current[id];
+						const comentarioSubNormalizado =
+							typeof comentarioSub === 'string' && comentarioSub.trim()
+								? comentarioSub.trim()
+								: null;
+
+						return {
+							idInscricao: candidato.idInscricao,
+							idCriterioAvaliacao: id,
+							nota,
+							comentario: comentarioSubNormalizado,
+						};
+					},
 				);
 				const notaTotal = Object.values(notasRef.current).reduce(
 					(a, b) => a + b,
@@ -269,6 +310,8 @@ export default function AvaliacaoCriterio({
 						idInscricao: candidato.idInscricao,
 						idCriterioAvaliacao: criterio.id,
 						nota: notaTotal,
+						comentario: comentarioNormalizado,
+						expertiseAssunto: expertiseAssunto,
 					},
 				];
 			}
@@ -329,6 +372,38 @@ export default function AvaliacaoCriterio({
 					/>
 				),
 			},
+			{
+				field: "observacao",
+				headerName: "Observações",
+				flex: 1,
+				minWidth: 300,
+				editable: false,
+				sortable: false,
+				renderCell: (params) => (
+					<TextField
+						multiline
+						minRows={2}
+						maxRows={4}
+						fullWidth
+						size="small"
+						placeholder="Observações (opcional)"
+						defaultValue={observacoesSubCriteriosRef.current[params.row.id as number] ?? ""}
+						onChange={(e) => {
+							observacoesSubCriteriosRef.current[params.row.id as number] = e.target.value;
+						}}
+						onKeyDown={(e) => {
+							// Impede que o DataGrid capture eventos de teclado
+							e.stopPropagation();
+						}}
+						sx={{ 
+							"& .MuiInputBase-root": { 
+								backgroundColor: "transparent",
+								fontSize: "0.875rem"
+							}
+						}}
+					/>
+				),
+			},
 		],
 		[onNotaChange, onErrorChange],
 	);
@@ -372,7 +447,7 @@ export default function AvaliacaoCriterio({
 							)
 						}
 						onClick={handleSalvar}
-						disabled={hasErrors || salvando}
+						disabled={hasErrors || salvando || expertiseAssunto === null}
 					>
 						{salvando ? "Salvando…" : "Salvar"}
 					</Button>
@@ -458,62 +533,116 @@ export default function AvaliacaoCriterio({
 				</Box>
 			) : isLeaf ? (
 				/* ── Modo folha: campo único de nota ── */
-				<Card
-					sx={{ backgroundColor: theme.palette.background.default }}
-				>
-					<CardContent>
-						{hasErrors && (
-							<Alert severity="warning" sx={{ mb: 2 }}>
-								Corrija o campo antes de salvar.
-							</Alert>
-						)}
+				<>
+					<Card
+						sx={{ backgroundColor: theme.palette.background.default }}
+					>
+						<CardContent>
+							{hasErrors && (
+								<Alert severity="warning" sx={{ mb: 2 }}>
+									Corrija o campo antes de salvar.
+								</Alert>
+							)}
+							{expertiseAssunto === null && (
+								<Alert severity="warning" sx={{ mb: 2 }}>
+									A expertise no assunto é obrigatória.
+								</Alert>
+							)}
 
-						<Box
-							sx={{
-								display: "flex",
-								alignItems: "center",
-								gap: 2,
-								mb: 2,
-							}}
-						>
-							<NotaCell
-								key={`folha-${criterio.id}-${notasIniciais[criterio.id] ?? 0}`}
-								criterioId={criterio.id}
-								notaMaxima={notaMaximaPai}
-								valorInicial={notasIniciais[criterio.id] ?? 0}
-								onNotaChange={onNotaChange}
-								onErrorChange={onErrorChange}
-								size="medium"
-							/>
-							<Typography variant="body1" color="text.secondary">
-								/ {notaMaximaPai}
-							</Typography>
-						</Box>
-
-						<LinearProgress
-							variant="determinate"
-							value={percentual}
-							color={excedeu ? "error" : "primary"}
-							sx={{ height: 8, borderRadius: 4 }}
-						/>
-						{excedeu && (
-							<Typography
-								variant="caption"
-								color="error"
-								sx={{ mt: 0.5, display: "block" }}
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 2,
+									mb: 2,
+								}}
 							>
-								Nota excede o máximo permitido ({notaMaximaPai}
-								).
-							</Typography>
-						)}
-					</CardContent>
-				</Card>
+								<NotaCell
+									key={`folha-${criterio.id}-${notasIniciais[criterio.id] ?? 0}`}
+									criterioId={criterio.id}
+									notaMaxima={notaMaximaPai}
+									valorInicial={notasIniciais[criterio.id] ?? 0}
+									onNotaChange={onNotaChange}
+									onErrorChange={onErrorChange}
+									size="medium"
+								/>
+								<Typography variant="body1" color="text.secondary">
+									/ {notaMaximaPai}
+								</Typography>
+							</Box>
+
+							<LinearProgress
+								variant="determinate"
+								value={percentual}
+								color={excedeu ? "error" : "primary"}
+								sx={{ height: 8, borderRadius: 4 }}
+							/>
+							{excedeu && (
+								<Typography
+									variant="caption"
+									color="error"
+									sx={{ mt: 0.5, display: "block" }}
+								>
+									Nota excede o máximo permitido ({notaMaximaPai}
+									).
+								</Typography>
+							)}
+						</CardContent>
+					</Card>
+
+					{/* Card de observações */}
+					<Card
+						sx={{
+							mt: 2,
+							backgroundColor: theme.palette.background.default,
+						}}
+					>
+						<CardContent>
+							<FormControl fullWidth sx={{ mb: 2 }}>
+								<InputLabel id="expertise-assunto-label">Expertise no Assunto *</InputLabel>
+								<Select
+									labelId="expertise-assunto-label"
+									value={expertiseAssunto ?? ""}
+									onChange={(e) => setExpertiseAssunto(Number(e.target.value))}
+									label="Expertise no Assunto *"
+									required
+								>
+									<MenuItem value={5}>5 - Muito Alto</MenuItem>
+									<MenuItem value={4}>4 - Alto</MenuItem>
+									<MenuItem value={3}>3 - Médio</MenuItem>
+									<MenuItem value={2}>2 - Baixo</MenuItem>
+									<MenuItem value={1}>1 - Muito Baixo</MenuItem>
+								</Select>
+								<FormHelperText>Indique seu nível de expertise neste assunto</FormHelperText>
+							</FormControl>
+
+							<TextField
+								label="Observações"
+								multiline
+								minRows={3}
+								fullWidth
+								value={observacao}
+								onChange={(e) => setObservacao(e.target.value)}
+								slotProps={{
+									htmlInput: { maxLength: 5000 },
+								}}
+								helperText={`${observacao.length}/5000`}
+							/>
+						</CardContent>
+					</Card>
+				</>
+
 			) : (
 				/* ── Modo com filhos: grid + somatório ── */
 				<>
 					{hasErrors && (
 						<Alert severity="warning" sx={{ mb: 2 }}>
 							Corrija os campos com erro antes de salvar.
+						</Alert>
+					)}
+					{expertiseAssunto === null && (
+						<Alert severity="warning" sx={{ mb: 2 }}>
+							A expertise no assunto é obrigatória.
 						</Alert>
 					)}
 
@@ -532,7 +661,7 @@ export default function AvaliacaoCriterio({
 									columns={colunas}
 									pageSize={25}
 									getRowId={(row) => row.id}
-									getRowHeight={() => "auto"}
+									getRowHeight={() => 120}
 									hideFooter={subCriterios.length <= 25}
 									disableVirtualization
 									disableColumnFilter
@@ -542,8 +671,8 @@ export default function AvaliacaoCriterio({
 											theme.palette.background.default,
 										),
 										"& .MuiDataGrid-cell": {
-											alignItems: "center",
-											py: 1,
+											alignItems: "flex-start",
+											py: 1.5,
 										},
 									}}
 								/>
@@ -611,6 +740,47 @@ export default function AvaliacaoCriterio({
 									{notaMaximaPai}).
 								</Typography>
 							)}
+						</CardContent>
+					</Card>
+
+					{/* Card de observações */}
+					<Card
+						sx={{
+							mt: 2,
+							backgroundColor: theme.palette.background.default,
+						}}
+					>
+						<CardContent>
+							<FormControl fullWidth sx={{ mb: 2 }}>
+								<InputLabel id="expertise-assunto-label-filhos">Expertise no Assunto *</InputLabel>
+								<Select
+									labelId="expertise-assunto-label-filhos"
+									value={expertiseAssunto ?? ""}
+									onChange={(e) => setExpertiseAssunto(Number(e.target.value))}
+									label="Expertise no Assunto *"
+									required
+								>
+									<MenuItem value={5}>5 - Muito Alto</MenuItem>
+									<MenuItem value={4}>4 - Alto</MenuItem>
+									<MenuItem value={3}>3 - Médio</MenuItem>
+									<MenuItem value={2}>2 - Baixo</MenuItem>
+									<MenuItem value={1}>1 - Muito Baixo</MenuItem>
+								</Select>
+								<FormHelperText>Indique seu nível de expertise neste assunto</FormHelperText>
+							</FormControl>
+
+							<TextField
+								label="Observações Gerais"
+								multiline
+								minRows={3}
+								fullWidth
+								value={observacao}
+								onChange={(e) => setObservacao(e.target.value)}
+								slotProps={{
+									htmlInput: { maxLength: 5000 },
+								}}
+								helperText={`${observacao.length}/5000`}
+							/>
 						</CardContent>
 					</Card>
 				</>
